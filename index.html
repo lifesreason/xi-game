@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="bright">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>小小棋盘 · 儿童棋类乐园</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#8ad0ff" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="小小棋盘" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2343a7f5'/%3E%3Ccircle cx='24' cy='24' r='10' fill='%23222'/%3E%3Ccircle cx='41' cy='40' r='10' fill='%23fff'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">🎲</div>
+      <div class="brand-txt">
+        <h1>小小棋盘</h1>
+        <p>五子棋 · 围棋 · 跳棋 · 象棋 ｜ 断网也能玩</p>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-view="home">🏠 首页</button>
+      <button class="tab" data-view="play">🎮 对局</button>
+      <button class="tab" data-view="records">🏆 战绩</button>
+      <button class="tab" data-view="settings">⚙️ 设置</button>
+    </nav>
+  </header>
+
+  <main class="main">
+
+    <!-- ================= 首页 ================= -->
+    <section class="view" id="view-home">
+      <div class="hero">
+        <h2>选一个棋盘，开始下棋吧！<span class="wave">👋</span></h2>
+        <p>每一局都会自动保存在这台设备上，没有网络也能继续玩。</p>
+      </div>
+
+      <div class="game-grid" id="game-grid"></div>
+
+      <div class="home-extra">
+        <div class="card" id="continue-card" hidden>
+          <h3>⏳ 未完成的对局</h3>
+          <p class="muted" id="continue-txt"></p>
+          <button class="btn primary" id="btn-continue">继续上次对局</button>
+        </div>
+        <div class="card">
+          <h3>📊 我的战绩</h3>
+          <div id="home-stats" class="stat-row"></div>
+          <button class="btn ghost small" data-goto="records">查看全部记录 →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 对局 ================= -->
+    <section class="view hidden" id="view-play">
+      <div class="play-head">
+        <button class="btn ghost" id="btn-back">← 返回首页</button>
+        <h2 id="play-title">五子棋</h2>
+        <span class="pill" id="play-status">准备开始</span>
+      </div>
+
+      <div class="play-body">
+        <div class="board-panel">
+          <div class="board-host" id="board-host"></div>
+          <div class="board-foot"><span id="turn-tip"></span></div>
+        </div>
+
+        <aside class="side-panel">
+          <div class="card">
+            <h3>对局设置</h3>
+            <label class="field"><span>对手</span>
+              <select id="sel-mode">
+                <option value="pve">🤖 人机对战</option>
+                <option value="pvp">👫 双人对战</option>
+              </select>
+            </label>
+            <label class="field" id="field-level"><span>难度</span>
+              <select id="sel-level">
+                <option value="easy">🐣 简单</option>
+                <option value="normal" selected>🙂 一般</option>
+                <option value="hard">🔥 困难</option>
+              </select>
+            </label>
+            <label class="field" id="field-side"><span>我执</span>
+              <select id="sel-side"><option value="1">先手</option><option value="2">后手</option></select>
+            </label>
+          </div>
+
+          <div class="card">
+            <h3>操作</h3>
+            <div class="btn-col">
+              <button class="btn" id="btn-restart">🔄 重新开始</button>
+              <button class="btn" id="btn-undo">↩️ 悔棋</button>
+              <button class="btn" id="btn-hint">💡 提示一手</button>
+              <button class="btn" id="btn-resign">🏳️ 认输</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>对局信息</h3>
+            <div id="game-info" class="info"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ================= 战绩 ================= -->
+    <section class="view hidden" id="view-records">
+      <div class="view-head">
+        <h2>🏆 我的战绩</h2>
+        <div class="view-actions">
+          <button class="btn ghost small" id="btn-export">导出备份</button>
+          <button class="btn ghost small" id="btn-import">导入备份</button>
+          <button class="btn danger small" id="btn-clear-records">清空记录</button>
+        </div>
+      </div>
+      <div id="records-summary" class="stat-row"></div>
+      <div class="card">
+        <h3>最近对局</h3>
+        <div class="table-wrap"><table class="table" id="records-table">
+          <thead><tr><th>棋类</th><th>结果</th><th>难度</th><th>步数</th><th>用时</th><th>时间</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+        <p class="muted small" id="records-empty">还没有对局记录，快去下棋吧！</p>
+      </div>
+    </section>
+
+    <!-- ================= 设置 ================= -->
+    <section class="view hidden" id="view-settings">
+      <div class="view-head"><h2>⚙️ 设置</h2></div>
+
+      <div class="card">
+        <h3>外观</h3>
+        <label class="field"><span>主题</span>
+          <select id="set-theme">
+            <option value="bright">☀️ 清新明亮</option>
+            <option value="wood">🪵 木质棋盘</option>
+            <option value="night">🌙 夜间护眼</option>
+          </select>
+        </label>
+        <label class="field switch">
+          <span>音效</span>
+          <input type="checkbox" id="set-sound" />
+          <i></i>
+        </label>
+        <label class="field switch">
+          <span>显示坐标 / 编号</span>
+          <input type="checkbox" id="set-coords" />
+          <i></i>
+        </label>
+      </div>
+
+      <div class="card">
+        <h3>单机默认难度</h3>
+        <div id="level-presets" class="preset-grid"></div>
+      </div>
+
+      <div class="card">
+        <h3>数据与离线</h3>
+        <p class="muted small" id="offline-state">离线状态检测中…</p>
+        <div class="btn-row">
+          <button class="btn ghost small" id="btn-export2">导出全部数据</button>
+          <button class="btn ghost small" id="btn-import2">导入数据</button>
+          <button class="btn danger small" id="btn-clear-all">清空全部数据</button>
+        </div>
+        <p class="muted small">所有数据都保存在本机浏览器（localStorage），不会上传。首次打开网页后，即使断网或关掉网络也能正常进入。</p>
+      </div>
+
+      <div class="card">
+        <h3>玩法小贴士</h3>
+        <ul class="tips" id="tips-list"></ul>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="foot">小小棋盘 · 本地离线版 v1.0 ｜ 数据只存在你自己的设备上</footer>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div class="modal hidden" id="result-modal">
+  <div class="modal-box">
+    <div class="modal-emoji" id="result-emoji">🎉</div>
+    <h3 id="result-title">你赢了！</h3>
+    <p class="muted" id="result-sub"></p>
+    <div class="btn-row center">
+      <button class="btn primary" id="btn-again">再来一局</button>
+      <button class="btn ghost" id="btn-result-home">返回首页</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept="application/json" hidden />
+
+<script src="js/store.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/boardkit.js"></script>
+<script src="js/games/gomoku.js"></script>
+<script src="js/games/go.js"></script>
+<script src="js/games/checkers.js"></script>
+<script src="js/games/xiangqi.js"></script>
+<script src="js/games/sudoku.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

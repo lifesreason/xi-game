@@ -1,0 +1,301 @@
+/* ============ 小小棋盘 · 儿童棋类乐园 ============ */
+:root{
+  --bg1:#e8f6ff; --bg2:#fdf6e7;
+  --card:#ffffff; --card-2:#f7fbff;
+  --ink:#2b3a4a; --ink-2:#6b7d90; --line:#e3ecf5;
+  --primary:#43a7f5; --primary-d:#2b8ce0;
+  --good:#39b878; --warn:#ffb02e; --bad:#ff6b6b;
+  --r:18px; --shadow:0 6px 20px rgba(60,110,160,.12);
+  --board:#f6dcae; --board-line:#8a5a2b;
+}
+[data-theme="wood"]{
+  --bg1:#f4e6cf; --bg2:#efe0c6;
+  --card:#fffaf1; --card-2:#f8efdd;
+  --ink:#4a3728; --ink-2:#8a705a; --line:#e6d5b8;
+  --primary:#c1793a; --primary-d:#a3612b;
+  --board:#e0b878; --board-line:#6b4423;
+}
+[data-theme="night"]{
+  --bg1:#1c2536; --bg2:#232f44;
+  --card:#28344a; --card-2:#2f3d56;
+  --ink:#e8eef7; --ink-2:#9fb0c7; --line:#37455e;
+  --primary:#5aa9e6; --primary-d:#3f8fcb;
+  --shadow:0 6px 20px rgba(0,0,0,.28);
+  --board:#2f3d56; --board-line:#7f93ad;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0; font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color:var(--ink);
+  background:linear-gradient(160deg,var(--bg1) 0%,var(--bg2) 100%);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;
+}
+.app{max-width:1180px;margin:0 auto;padding:14px 16px 40px;min-height:100%;display:flex;flex-direction:column;
+  padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));
+  padding-top:max(14px,env(safe-area-inset-top))}
+body{overscroll-behavior-y:contain}
+
+/* ---------- 顶栏 ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:30px;
+  background:linear-gradient(145deg,#ffd86b,#ff9f6b);box-shadow:var(--shadow)}
+.brand-txt h1{margin:0;font-size:22px;letter-spacing:1px}
+.brand-txt p{margin:2px 0 0;font-size:12px;color:var(--ink-2)}
+.tabs{display:flex;gap:6px;background:var(--card);padding:6px;border-radius:14px;box-shadow:var(--shadow);flex-wrap:wrap}
+.tab{border:0;background:transparent;color:var(--ink-2);font-size:14px;font-weight:600;
+  padding:9px 14px;border-radius:10px;cursor:pointer;transition:.18s;font-family:inherit}
+.tab:hover{background:var(--card-2);color:var(--ink)}
+.tab.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(67,167,245,.35)}
+
+.main{flex:1}
+.view{animation:fade .28s ease}
+.view.hidden{display:none}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---------- 通用卡片 / 按钮 ---------- */
+.card{background:var(--card);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h3{margin:0 0 12px;font-size:16px}
+.muted{color:var(--ink-2)}
+.small{font-size:12.5px}
+.hero{margin:6px 0 18px}
+.hero h2{margin:0 0 6px;font-size:24px}
+.hero p{margin:0;color:var(--ink-2);font-size:14px}
+.wave{display:inline-block;animation:wv 2.2s infinite}
+@keyframes wv{0%,60%,100%{transform:rotate(0)}70%{transform:rotate(18deg)}80%{transform:rotate(-12deg)}}
+
+.btn{font-family:inherit;font-size:14px;font-weight:600;border:1px solid var(--line);
+  background:var(--card-2);color:var(--ink);padding:10px 14px;border-radius:12px;cursor:pointer;
+  transition:.16s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primary-d)}
+.btn.ghost{background:transparent}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn.small{padding:7px 11px;font-size:13px}
+.btn-col{display:flex;flex-direction:column;gap:8px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn-row.center{justify-content:center}
+
+/* ---------- 首页 ---------- */
+.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px;margin-bottom:16px}
+.game-card{position:relative;background:var(--card);border-radius:22px;padding:18px;cursor:pointer;
+  box-shadow:var(--shadow);border:2px solid transparent;transition:.2s;overflow:hidden;text-align:left;
+  display:flex;flex-direction:column;gap:8px;font-family:inherit;color:inherit}
+.game-card:hover{transform:translateY(-4px);border-color:var(--primary)}
+.game-card .gc-emoji{font-size:38px;line-height:1}
+.game-card .gc-name{font-size:19px;font-weight:800}
+.game-card .gc-desc{font-size:12.5px;color:var(--ink-2);line-height:1.6;min-height:40px}
+.game-card .gc-tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;padding:3px 8px;border-radius:999px;background:var(--card-2);color:var(--ink-2);border:1px solid var(--line)}
+.game-card .gc-go{margin-top:2px;font-size:13px;font-weight:700;color:var(--primary)}
+.game-card::after{content:"";position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;background:var(--card-2);z-index:0}
+.game-card>*{position:relative;z-index:1}
+
+.home-extra{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:720px){.home-extra{grid-template-columns:1fr}}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap}
+.stat{flex:1;min-width:84px;background:var(--card-2);border-radius:14px;padding:10px 12px;text-align:center}
+.stat b{display:block;font-size:21px}
+.stat span{font-size:12px;color:var(--ink-2)}
+.stat.w b{color:var(--good)} .stat.l b{color:var(--bad)} .stat.d b{color:var(--warn)}
+
+/* ---------- 对局页 ---------- */
+.play-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.play-head h2{margin:0;font-size:20px;flex:1}
+.pill{background:var(--card);padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700;box-shadow:var(--shadow)}
+.pill.think{background:var(--warn);color:#3a2a00}
+.play-body{display:grid;grid-template-columns:1fr 272px;gap:14px;align-items:start}
+@media(max-width:860px){.play-body{grid-template-columns:1fr}}
+.board-panel{background:var(--card);border-radius:var(--r);padding:12px;box-shadow:var(--shadow)}
+.board-host{height:clamp(320px,64vh,620px);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.board-canvas{border-radius:12px;touch-action:manipulation;box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.board-foot{text-align:center;color:var(--ink-2);font-size:13px;padding-top:8px;min-height:20px}
+.side-panel{display:flex;flex-direction:column}
+.field{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:14px}
+.field>span{color:var(--ink-2);font-size:13px}
+.field select{font-family:inherit;font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);
+  background:var(--card-2);color:var(--ink);min-width:120px}
+.field.switch{position:relative}
+.field.switch input{opacity:0;position:absolute;right:0}
+.field.switch i{width:44px;height:24px;border-radius:99px;background:var(--line);position:relative;transition:.2s;cursor:pointer}
+.field.switch i::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+.field.switch input:checked + i{background:var(--primary)}
+.field.switch input:checked + i::after{transform:translateX(20px)}
+.info{font-size:13px;color:var(--ink-2);line-height:1.9}
+.info b{color:var(--ink)}
+
+/* ---------- 战绩 / 设置 ---------- */
+.view-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.view-head h2{margin:0;font-size:20px}
+.view-actions{display:flex;gap:8px;flex-wrap:wrap}
+.table-wrap{overflow-x:auto}
+.table{width:100%;border-collapse:collapse;font-size:13.5px}
+.table th,.table td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.table th{color:var(--ink-2);font-weight:600;font-size:12.5px}
+.table td .del{cursor:pointer;color:var(--bad);font-weight:700}
+.preset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.preset{background:var(--card-2);border-radius:14px;padding:12px}
+.preset .pn{font-weight:700;margin-bottom:8px;font-size:14px}
+.preset select{width:100%;font-family:inherit;font-size:13px;padding:7px 9px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.tips{margin:0;padding-left:20px;font-size:13.5px;color:var(--ink-2);line-height:2}
+
+.foot{text-align:center;color:var(--ink-2);font-size:12px;padding:22px 0 4px}
+
+/* ---------- toast / modal ---------- */
+.toast{position:fixed;left:50%;bottom:32px;transform:translate(-50%,20px);background:rgba(35,45,60,.94);color:#fff;
+  padding:11px 20px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:80vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:rgba(20,30,45,.5);display:grid;place-items:center;z-index:100;backdrop-filter:blur(3px)}
+.modal.hidden{display:none}
+.modal-box{background:var(--card);border-radius:24px;padding:28px 30px;text-align:center;max-width:330px;width:86%;
+  box-shadow:0 20px 50px rgba(0,0,0,.25);animation:pop .3s cubic-bezier(.2,1.4,.5,1)}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-emoji{font-size:52px;line-height:1}
+.modal-box h3{margin:10px 0 4px;font-size:22px}
+.modal-box p{margin:0 0 18px;font-size:13.5px}
+
+/* ---------- 数独数字键盘 ---------- */
+.sdk-pad{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.sdk-tools{display:flex;gap:8px}
+.sdk-tools .btn{flex:1}
+.sdk-notes.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.sdk-digits{display:grid;grid-template-columns:repeat(var(--n,9),1fr);gap:6px}
+.sdk-digit{font-family:inherit;border:1px solid var(--line);background:var(--card-2);color:var(--ink);
+  border-radius:10px;padding:3px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0;cursor:pointer;transition:.15s;min-height:48px;-webkit-tap-highlight-color:transparent}
+.sdk-digit b{font-size:19px;line-height:1.15}
+.sdk-digit span{font-size:10px;color:var(--ink-2);line-height:1.2}
+.sdk-digit:active{transform:scale(.94)}
+.sdk-digit.done{opacity:.32}
+
+/* ============================================================
+   移动端 / iPad 适配
+   ============================================================ */
+
+/* ---------- 触屏设备通用：更大点击热区、去 hover 位移 ---------- */
+@media (pointer:coarse){
+  .tab{min-height:44px}
+  .btn{min-height:44px}
+  .btn.small{min-height:38px}
+  .field select{min-height:42px}
+  .game-card:hover{transform:none;border-color:transparent}
+  .game-card:active{transform:scale(.97);border-color:var(--primary)}
+  .btn:hover{transform:none}
+  .btn:active{transform:scale(.96)}
+  .tab:hover{background:transparent}
+  .tab:active{background:var(--card-2)}
+}
+.game-card,.tab,.btn,.board-canvas,.pill{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+select,.field,.info,.tips{-webkit-user-select:text;user-select:text}
+select,button,input{touch-action:manipulation}
+.board-canvas{touch-action:manipulation}
+
+/* iOS Safari 下 fixed 背景会卡顿，触屏设备改用滚动背景 */
+@media (pointer:coarse){body{background-attachment:scroll}}
+
+/* 安全区：iPhone 底部小黑条 / 刘海 */
+.toast{bottom:calc(32px + env(safe-area-inset-bottom))}
+
+/* ---------- 手机（≤640px） ---------- */
+@media (max-width:640px){
+  .app{padding:10px 12px calc(24px + env(safe-area-inset-bottom))}
+  .topbar{gap:8px;margin-bottom:10px}
+  .logo{width:44px;height:44px;font-size:24px;border-radius:13px}
+  .brand-txt h1{font-size:18px}
+  .brand-txt p{font-size:11px}
+  /* 导航占满一行，四等分 */
+  .tabs{width:100%;padding:5px;gap:2px}
+  .tab{flex:1;padding:10px 4px;font-size:13px;white-space:nowrap}
+
+  .hero{margin:2px 0 12px}
+  .hero h2{font-size:19px}
+  .hero p{font-size:12.5px}
+
+  /* 游戏卡片：两列紧凑布局，收起长描述 */
+  .game-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .game-card{padding:13px;border-radius:18px;gap:6px}
+  .game-card .gc-emoji{font-size:30px}
+  .game-card .gc-name{font-size:16px}
+  .game-card .gc-desc{display:none}
+  .game-card .gc-tags .tag{font-size:10px;padding:2px 7px}
+  .game-card::after{right:-24px;top:-24px;width:70px;height:70px}
+  .card{padding:13px 14px}
+
+  /* 对局页：头部紧凑、棋盘吃满宽度 */
+  .play-head{gap:8px;margin-bottom:10px}
+  .play-head h2{font-size:16px}
+  .play-head .btn{padding:8px 10px;font-size:13px}
+  .pill{font-size:12px;padding:6px 11px}
+  .board-panel{padding:8px;border-radius:14px}
+  .board-host{height:min(94vw - 32px,58vh);height:min(calc(94vw - 32px),58svh)}
+  /* 侧栏操作按钮：2×2 网格更省高度 */
+  .side-panel .btn-col{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .foot{font-size:11px;padding:16px 0 4px}
+  .toast{font-size:13px;padding:10px 16px;bottom:calc(20px + env(safe-area-inset-bottom))}
+  .modal-box{padding:22px 20px}
+  .modal-emoji{font-size:44px}
+  .modal-box h3{font-size:19px}
+
+  /* 战绩表：字号微缩、内边距收紧 */
+  .table th,.table td{padding:8px 7px;font-size:12.5px}
+  .view-actions .btn{flex:1}
+}
+
+/* 极窄屏（≤350px）：卡片退回单列，保证不挤 */
+@media (max-width:350px){
+  .game-grid{grid-template-columns:1fr}
+  .game-card .gc-desc{display:block}
+}
+
+/* ---------- 手机横屏：压缩顶栏，棋盘吃满高度 ---------- */
+@media (max-width:900px) and (max-height:500px) and (orientation:landscape){
+  .brand-txt p{display:none}
+  .logo{width:38px;height:38px;font-size:20px}
+  .brand-txt h1{font-size:16px}
+  .topbar{margin-bottom:8px}
+  .hero{display:none}
+  .play-head{margin-bottom:8px}
+  .play-body{grid-template-columns:1fr 232px}
+  #board-host{height:72vh;height:72svh}
+  .side-panel .btn-col{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .foot{display:none}
+}
+
+/* ---------- iPad 竖屏（641px~1024px） ---------- */
+@media (min-width:641px) and (max-width:1024px){
+  .app{padding:18px 22px calc(30px + env(safe-area-inset-bottom))}
+  /* 平板上卡片加大间距，两到三列自然分布 */
+  .game-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+  .game-card{padding:20px}
+  .game-card .gc-emoji{font-size:42px}
+}
+
+/* ---------- iPad / 桌面（≥768px）：字号与棋盘整体升一档 ---------- */
+@media (min-width:768px){
+  .hero h2{font-size:28px}
+  .hero p{font-size:15px}
+  .play-head h2{font-size:22px}
+  .pill{font-size:14px;padding:8px 16px}
+  .board-host{height:clamp(340px,66vh,660px)}
+  .board-panel{padding:16px}
+  .card{padding:18px 20px}
+  .modal-box{max-width:400px}
+  .brand-txt h1{font-size:24px}
+  .tab{font-size:15px;padding:10px 18px}
+}
+
+/* ---------- ≥1024px（iPad 横屏 / 桌面）：对局页侧栏加宽、棋盘放大 ---------- */
+@media (min-width:1024px){
+  .play-body{grid-template-columns:1fr 300px}
+  .game-grid{grid-template-columns:repeat(4,1fr)}
+  .board-host{height:clamp(380px,76vh,760px)}
+}
+@media (min-width:641px) and (max-width:1023px){
+  .game-grid{grid-template-columns:repeat(2,1fr)}
+}

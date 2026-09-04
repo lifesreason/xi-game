@@ -1,0 +1,23 @@
+# Cloudflare Pages 自定义响应头
+# Service Worker 必须不缓存，否则更新无法触达已访问过的用户
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# 入口页不缓存，保证发布后立即生效
+/index.html
+  Cache-Control: no-cache
+
+/manifest.webmanifest
+  Cache-Control: no-cache
+
+# 静态资源可稍长缓存（内容变更时靠 sw.js 版本号兜底）
+/css/*
+  Cache-Control: public, max-age=86400
+/js/*
+  Cache-Control: public, max-age=86400
+
+# 安全响应头
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
