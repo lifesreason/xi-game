@@ -1,5 +1,5 @@
 /* 离线缓存：安装时把全部静态资源写入缓存，之后断网也能打开 */
-var CACHE = 'kidboard-v3';
+var CACHE = 'kidboard-v6';
 var ASSETS = [
   './',
   './index.html',
@@ -13,6 +13,10 @@ var ASSETS = [
   './js/games/checkers.js',
   './js/games/xiangqi.js',
   './js/games/sudoku.js',
+  './js/games/slide.js',
+  './js/games/memory.js',
+  './js/games/game24.js',
+  './js/games/mathcamp.js',
   './js/app.js'
 ];
 

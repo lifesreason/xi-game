@@ -3,6 +3,12 @@
 (function (global) {
   var BK = global.BoardKit;
 
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
   var SIZES = {
     '4': { n: 4, bw: 2, bh: 2, label: '4×4 入门' },
     '6': { n: 6, bw: 3, bh: 2, label: '6×6 进阶' },
@@ -184,10 +190,95 @@
     return { type: 'reveal', cell: pick, digit: sol[pick], msg: '这一步需要综合排除多个技巧，先帮你填上 ' + sol[pick] + '，观察一下它为什么只能在这！' };
   }
 
+  /* ---------------- 数独学堂 ---------------- */
+  /* 第 1 课用固定盘面（已验证唯一解），后续课程动态生成 */
+  var L1_SOL = [1, 2, 3, 4, 3, 4, 1, 2, 2, 1, 4, 3, 4, 3, 2, 1];
+  var LESSONS = [
+    {
+      key: 'rules', emoji: '🧭', title: '认识数独', size: '4',
+      desc: '先搞懂行、列、宫三条规则',
+      intro: '数独规则：每一行、每一列、每个宫（粗框格）里，数字都不能重复。跟着提示把缺的数补上吧！',
+      scripted: [
+        { cell: 2, d: 3, hl: [0, 1, 2, 3], msg: '规则一 · 行：第一行已经有 1、2、4，还缺一个 3。点第一行的空格，填上 3！' },
+        { cell: 9, d: 1, hl: [1, 5, 9, 13], msg: '规则二 · 列：第二列已经有 2、4、3，还缺一个 1。找到它，填进去！' },
+        { cell: 15, d: 1, hl: [10, 11, 14, 15], msg: '规则三 · 宫：右下角的宫（粗框）里已经有 2、3、4，只缺 1。把它填上！' }
+      ],
+      done: '太棒了！行、列、宫都不重复——你已经学会数独的规则啦！'
+    },
+    { key: 'single', emoji: '🔍', title: '唯一余数法', size: '4', tech: 'single',
+      desc: '一格只剩一个候选数时，答案就是它',
+      intro: '看一格所在的行、列、宫：如果其他数字都出现过了，这格只能填剩下的那个。这就是「唯一余数法」！' },
+    { key: 'hidden', emoji: '🕵️', title: '隐藏唯一法', size: '4', tech: 'hidden',
+      desc: '一个数在某宫/行/列只有一个落脚点',
+      intro: '换个角度：盯住一个数字，看它在某个宫（或行、列）里是不是只有一个位置能放——「隐藏唯一法」！' },
+    { key: 'mix', emoji: '🏆', title: '小小挑战', size: '6', tech: 'both',
+      desc: '6×6 实战，两种方法轮着用',
+      intro: '毕业考！这盘 6×6 要把两种方法结合起来用。每一步我都会告诉你该想什么。' }
+  ];
+
+  /* 裸唯一：某空格候选只剩一个 */
+  function findSingleCell(ctx, cur) {
+    var used = makeUsed(ctx), i, d;
+    for (i = 0; i < cur.length; i++) if (cur[i]) setCell(ctx, used, cur, i, cur[i], true);
+    for (i = 0; i < cur.length; i++) {
+      if (cur[i]) continue;
+      var m = candMask(ctx, used, i);
+      if (popcount(m) === 1) {
+        for (d = 1; d <= ctx.n; d++) if (m & (1 << d)) {
+          return { cell: i, digit: d, hl: peersOf(ctx, i),
+            msg: '唯一余数法：这一格所在的行、列、宫已经出现过其他所有数字，只能填 ' + d + '！' };
+        }
+      }
+    }
+    return null;
+  }
+
+  function peersOf(ctx, i) {
+    var n = ctx.n, r = (i / n) | 0, c = i % n, b = ctx.cellBlock[i], out = [], j, k;
+    for (j = 0; j < n; j++) { out.push(r * n + j); out.push(j * n + c); }
+    for (k = 0; k < n * n; k++) if (ctx.cellBlock[k] === b) out.push(k);
+    return out;
+  }
+
+  /* 隐藏唯一：某单元里数字 d 只剩一个位置（且该格不止一个候选，才是"隐藏"的） */
+  function findHiddenCell(ctx, cur) {
+    var n = ctx.n, used = makeUsed(ctx), i, d;
+    for (i = 0; i < cur.length; i++) if (cur[i]) setCell(ctx, used, cur, i, cur[i], true);
+    var units = [], r, c2, b, k;
+    for (r = 0; r < n; r++) { var row = []; for (c2 = 0; c2 < n; c2++) row.push(r * n + c2); units.push({ kind: '行', idx: r, cells: row }); }
+    for (c2 = 0; c2 < n; c2++) { var col = []; for (r = 0; r < n; r++) col.push(r * n + c2); units.push({ kind: '列', idx: c2, cells: col }); }
+    var nb = (n / ctx.bw) * (n / ctx.bh);
+    for (b = 0; b < nb; b++) {
+      var blk = [];
+      for (i = 0; i < n * n; i++) if (ctx.cellBlock[i] === b) blk.push(i);
+      units.push({ kind: '宫', idx: b, cells: blk });
+    }
+    for (k = 0; k < units.length; k++) {
+      var u = units[k], present = {}, spots = {};
+      u.cells.forEach(function (ci) {
+        if (cur[ci]) present[cur[ci]] = true;
+        else {
+          var m2 = candMask(ctx, used, ci);
+          for (d = 1; d <= n; d++) if (m2 & (1 << d)) (spots[d] = spots[d] || []).push(ci);
+        }
+      });
+      for (d = 1; d <= n; d++) {
+        if (present[d] || !spots[d] || spots[d].length !== 1) continue;
+        var cell = spots[d][0];
+        if (popcount(candMask(ctx, used, cell)) < 2) continue; /* 单候选格交给唯一余数法讲 */
+        return { cell: cell, digit: d, hl: u.cells,
+          msg: '隐藏唯一法：在' + unitName(ctx, u.kind === '行' ? 'row' : u.kind === '列' ? 'col' : 'block', u.idx) + '里，数字 ' + d + ' 只能放在这一格！' };
+      }
+    }
+    return null;
+  }
+
   /* ---------------- 游戏实例 ---------------- */
   function mount(host, api) {
     var S = null, bk = null, pad = null, timer = null;
     var root = host;
+    var T = null, banner = null, overlay = null; /* 学堂状态 */
+    var PRAISE = ['太棒了，就是这样！', '完全正确！', '厉害，继续！', '答对啦，你越来越强了！'];
 
     function sizeOf() { return S ? SIZES[S.sizeKey] : SIZES['4']; }
 
@@ -237,6 +328,7 @@
     }
 
     function place(i, d) {
+      if (T) { tutPlace(i, d); return; }
       if (S.over || !d || S.given[i]) return;
       if (S.cur[i] === d) { erase(i); return; }
       snapshot();
@@ -253,6 +345,7 @@
     }
 
     function erase(i) {
+      if (T) { tutErase(i); return; }
       if (S.over || S.given[i] || !S.cur[i]) return;
       snapshot();
       S.cur[i] = 0; S.filled--;
@@ -262,6 +355,7 @@
     }
 
     function toggleNote(i, d) {
+      if (T) { api.toast('学堂里不用记笔记，跟着提示填就好'); return; }
       if (S.over || S.given[i] || S.cur[i]) return;
       snapshot();
       S.notes[i] ^= (1 << d);
@@ -290,6 +384,7 @@
     function sizeLabel() { return SIZES[S.sizeKey].label; }
 
     function update() {
+      if (T) { tutUpdate(); return; }
       if (!S) return;
       var left = S.n * S.n - S.filled;
       api.status(S.over ? '完成！用时 ' + S.sec + ' 秒' : '剩余 ' + left + ' 格 · ' + fmtTime(elapsed()));
@@ -309,6 +404,7 @@
 
     /* ---------------- 绘制 ---------------- */
     function draw(ctx2d, W, H, C) {
+      if (T) return drawTutor(ctx2d, W, H, C);
       if (!S) return;
       var n = S.n, cell = W / n, i;
       /* 选中格 / 同数高亮 */
@@ -376,7 +472,8 @@
         refreshTools();
         api.toast(S.notesMode ? '笔记模式：点数字会记成候选小字' : '已退出笔记模式');
       }, 'sdk-notes'],
-      ['🧽 擦除', function () { if (S.sel >= 0) erase(S.sel); }, ''],
+      ['🧽 擦除', function () { var i = curSel(); if (i >= 0) erase(i); }, ''],
+      ['📖 学堂', function () { Sfx.click(); openLessonList(); }, 'sdk-tutor-btn'],
       ['👀 检查', function () { checkNow(); }, '']].forEach(function (t) {
         var b = document.createElement('button');
         b.type = 'button'; b.className = 'btn ' + t[2]; b.textContent = t[0];
@@ -395,8 +492,9 @@
           b2.innerHTML = '<b>' + d + '</b><span>' + left[d] + '</span>';
           b2.dataset.d = d;
           b2.onclick = function () {
-            if (S.sel < 0) { api.toast('先在棋盘上选一格'); return; }
-            if (S.notesMode) toggleNote(S.sel, d); else place(S.sel, d);
+            var sv = curSel();
+            if (sv < 0) { api.toast('先在棋盘上选一格'); return; }
+            place(sv, d);
             refreshTools();
           };
           digits.appendChild(b2);
@@ -408,6 +506,8 @@
     }
 
     function countIn(arr, d) { var c = 0; for (var i = 0; i < arr.length; i++) if (arr[i] === d) c++; return c; }
+
+    function curSel() { return T ? T.sel : (S ? S.sel : -1); }
 
     function refreshTools() {
       if (!pad || !S) return;
@@ -430,40 +530,254 @@
       else api.toast('到目前为止都正确，继续加油！');
     }
 
+    /* ---------------- 数独学堂运行时 ---------------- */
+    function startLesson(li) {
+      var L = LESSONS[li];
+      var p;
+      if (L.scripted) {
+        var given = L1_SOL.slice();
+        L.scripted.forEach(function (s) { given[s.cell] = 0; });
+        p = { given: given, sol: L1_SOL };
+      } else {
+        p = generate(L.size, 'easy');
+      }
+      var paused = 0;
+      if (S && !S.over) { paused = elapsed(); stopTimer(); }
+      T = {
+        li: li, L: L, sizeKey: L.size, n: SIZES[L.size].n, ctx: makeCtx(L.size),
+        given: p.given, sol: p.sol, cur: p.given.slice(),
+        sel: -1, step: 0, errs: 0, hl: [], target: -1, expect: 0,
+        msg: L.intro, paused: paused
+      };
+      buildBanner();
+      tutAdvance();
+      api.toast('进入学堂：' + L.title);
+    }
+
+    function tutAdvance() {
+      var L = T.L;
+      var full = true, i;
+      for (i = 0; i < T.cur.length; i++) if (!T.cur[i]) { full = false; break; }
+      if (full || (L.scripted && T.step >= L.scripted.length)) { tutFinish(); return; }
+      if (L.scripted) {
+        var sc = L.scripted[T.step];
+        T.target = sc.cell; T.hl = sc.hl.slice(); T.msg = sc.msg; T.expect = sc.d;
+      } else {
+        var f = null;
+        if (L.tech === 'single') f = findSingleCell(T.ctx, T.cur);
+        else if (L.tech === 'hidden') f = findHiddenCell(T.ctx, T.cur) || findSingleCell(T.ctx, T.cur);
+        else f = findSingleCell(T.ctx, T.cur) || findHiddenCell(T.ctx, T.cur);
+        if (!f) {
+          var empt = [];
+          for (i = 0; i < T.cur.length; i++) if (!T.cur[i]) empt.push(i);
+          var pick = empt[0];
+          f = { cell: pick, digit: T.sol[pick], hl: peersOf(T.ctx, pick),
+            msg: '这格要用综合排除：把这一行、列、宫里出现过的数都划掉，剩下的就是答案——填 ' + T.sol[pick] + '！' };
+        }
+        T.target = f.cell; T.hl = f.hl; T.msg = f.msg; T.expect = f.digit;
+      }
+      T.sel = T.target;
+      refreshBanner();
+      api.changed();
+      bk.redraw();
+    }
+
+    function tutPlace(cell, d) {
+      if (T.given[cell]) { api.toast('这是题目给出的数字，不能改哦'); return; }
+      if (T.cur[cell] === d) return;
+      if (d === T.sol[cell]) {
+        T.cur[cell] = d;
+        Sfx.click();
+        api.toast(PRAISE[(Math.random() * PRAISE.length) | 0]);
+        T.step++;
+        tutAdvance();
+      } else {
+        T.errs++;
+        Sfx.click();
+        api.toast('嗯…再想一想：' + T.msg);
+      }
+    }
+
+    function tutErase(cell) {
+      if (T.given[cell] || !T.cur[cell]) return;
+      T.cur[cell] = 0;
+      Sfx.click();
+      bk.redraw();
+    }
+
+    function tutSkip() {
+      if (T.cur[T.target]) { tutAdvance(); return; }
+      T.cur[T.target] = T.expect;
+      T.step++;
+      api.toast('没关系，看：' + T.msg);
+      tutAdvance();
+    }
+
+    function tutFinish() {
+      T.target = -1; T.hl = []; T.msg = T.L.done ||
+        '🎉 课程完成！一共 ' + T.step + ' 步' + (T.errs ? '，答错 ' + T.errs + ' 次（没关系，错错更聪明）' : '，一次都没错，太厉害了！');
+      T.sel = -1;
+      refreshBanner(true);
+      Sfx.win();
+      api.changed();
+      bk.redraw();
+    }
+
+    function endLesson() {
+      var paused = T ? T.paused : 0;
+      if (banner) { banner.remove(); banner = null; }
+      T = null;
+      if (S && !S.over) { S.t0 = Date.now() - paused * 1000; startTimer(); }
+      update();
+    }
+
+    function cleanupT() {
+      if (banner) { banner.remove(); banner = null; }
+      T = null;
+    }
+
+    function buildBanner() {
+      if (banner) banner.remove();
+      banner = document.createElement('div');
+      banner.className = 'sdk-tutor';
+      root.parentNode.insertBefore(banner, root.nextSibling);
+      refreshBanner();
+    }
+
+    function refreshBanner(finished) {
+      if (!banner || !T) return;
+      var L = T.L;
+      var total = L.scripted ? L.scripted.length : T.cur.filter(function (v) { return !v; }).length + (finished ? 0 : T.step);
+      var html =
+        '<div class="st-head"><span class="st-title">📖 第 ' + (T.li + 1) + ' 课 · ' + esc(L.title) + '</span>' +
+        '<button type="button" class="btn small st-exit">退出学堂</button></div>' +
+        '<div class="st-msg">' + esc(T.msg) + '</div>';
+      if (!finished) {
+        html += '<div class="st-foot"><span class="st-prog">第 ' + (T.step + 1) + ' 步' + (total ? ' / 约 ' + total + ' 步' : '') + ' · 答错 ' + T.errs + ' 次</span>' +
+          '<button type="button" class="btn small st-skip">看答案</button></div>';
+      } else {
+        html += '<div class="st-foot"><button type="button" class="btn small primary st-again">再学一课</button>' +
+          '<button type="button" class="btn small st-done">回到练习</button></div>';
+      }
+      banner.innerHTML = html;
+      banner.querySelector('.st-exit').onclick = function () { Sfx.click(); endLesson(); };
+      var sk = banner.querySelector('.st-skip');
+      if (sk) sk.onclick = function () { Sfx.click(); tutSkip(); };
+      var ag = banner.querySelector('.st-again');
+      if (ag) ag.onclick = function () { Sfx.click(); banner.remove(); banner = null; T = null; openLessonList(); };
+      var dn = banner.querySelector('.st-done');
+      if (dn) dn.onclick = function () { Sfx.click(); endLesson(); };
+    }
+
+    function openLessonList() {
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'sdk-lesson-mask';
+        document.body.appendChild(overlay);
+      }
+      var html = '<div class="sdk-lesson"><div class="sl-head"><b>📖 数独学堂</b>' +
+        '<button type="button" class="btn small sl-close">✕</button></div>' +
+        '<p class="muted small">像小老师一样，一步步带你从零基础到独立解题。</p>';
+      LESSONS.forEach(function (L, i) {
+        html += '<button type="button" class="sl-item" data-li="' + i + '">' +
+          '<span class="sl-emoji">' + L.emoji + '</span>' +
+          '<span class="sl-txt"><b>第 ' + (i + 1) + ' 课 · ' + esc(L.title) + '</b>' +
+          '<i>' + esc(L.desc) + ' · ' + SIZES[L.size].label + '</i></span>' +
+          '<span class="sl-go">开始 →</span></button>';
+      });
+      overlay.innerHTML = html + '</div>';
+      overlay.classList.remove('hidden');
+      overlay.querySelector('.sl-close').onclick = function () { Sfx.click(); overlay.classList.add('hidden'); };
+      Array.prototype.forEach.call(overlay.querySelectorAll('.sl-item'), function (b) {
+        b.onclick = function () {
+          Sfx.click();
+          overlay.classList.add('hidden');
+          startLesson(Number(b.dataset.li));
+        };
+      });
+    }
+
+    function drawTutor(g, W, H, C) {
+      var n = T.n, cell = W / n, i;
+      for (i = 0; i < n * n; i++) {
+        var r = (i / n) | 0, c = i % n, x = c * cell, y = r * cell;
+        if (T.hl.indexOf(i) >= 0 && i !== T.target && i !== T.sel) {
+          g.fillStyle = 'rgba(255,176,46,.15)'; g.fillRect(x, y, cell, cell);
+        }
+        if (i === T.sel) { g.fillStyle = 'rgba(66,150,235,.20)'; g.fillRect(x, y, cell, cell); }
+      }
+      if (T.target >= 0) {
+        var tr = (T.target / n) | 0, tc = T.target % n;
+        g.lineWidth = Math.max(2.5, cell * 0.07);
+        g.strokeStyle = '#ff9800';
+        g.strokeRect(tc * cell + 2, tr * cell + 2, cell - 4, cell - 4);
+      }
+      for (i = 0; i < n * n; i++) {
+        var v = T.cur[i];
+        if (!v) continue;
+        var cx = (i % n) * cell + cell / 2, cy = ((i / n) | 0) * cell + cell / 2;
+        g.fillStyle = T.given[i] ? C.text : C.blue;
+        g.font = '700 ' + Math.round(cell * (T.given[i] ? 0.56 : 0.52)) + 'px "PingFang SC","Microsoft YaHei",sans-serif';
+        g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(String(v), cx, cy + cell * 0.02);
+      }
+      for (i = 0; i <= n; i++) {
+        var block = (i % T.ctx.bw === 0) || (i % T.ctx.bh === 0);
+        g.lineWidth = block ? Math.max(2, cell * 0.075) : 0.8;
+        g.strokeStyle = C.grid;
+        g.beginPath();
+        g.moveTo(i * cell, 0); g.lineTo(i * cell, H);
+        g.moveTo(0, i * cell); g.lineTo(W, i * cell);
+        g.stroke();
+      }
+    }
+
+    function tutUpdate() {
+      api.status('📖 学堂 · ' + T.L.title);
+      api.info('<b>' + T.L.emoji + ' ' + T.L.title + '</b><br>' + esc(T.msg) +
+        '<br><span class="muted small">跟着橙色框走，点错也没关系，我会一直陪着你。</span>');
+      api.changed();
+      bk.redraw();
+    }
+
     /* ---------------- 对外接口 ---------------- */
     bk = BK.create(root, {
       aspect: 1,
       draw: draw,
       click: function (x, y, W) {
-        if (!S || S.over) return;
-        var cell = W / S.n, c = (x / cell) | 0, r = (y / cell) | 0;
-        if (c < 0 || r < 0 || c >= S.n || r >= S.n) return;
-        S.sel = r * S.n + c;
+        var st = T || S;
+        if (!st || st.over) return;
+        var cell = W / st.n, c = (x / cell) | 0, r = (y / cell) | 0;
+        if (c < 0 || r < 0 || c >= st.n || r >= st.n) return;
+        st.sel = r * st.n + c;
         Sfx.click();
         bk.redraw();
       }
     });
 
     function onKey(e) {
-      if (!S || S.over) return;
-      var n = S.n;
+      var st = T || S;
+      if (!st || st.over) return;
+      var n = st.n;
       if (e.key >= '1' && e.key <= String(n)) {
         var d = Number(e.key);
-        if (S.sel < 0) return;
-        if (S.notesMode) toggleNote(S.sel, d); else place(S.sel, d);
+        var sv = curSel();
+        if (sv < 0) return;
+        if (!T && S.notesMode) toggleNote(sv, d); else place(sv, d);
         refreshTools();
       } else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') {
-        if (S.sel >= 0) { erase(S.sel); refreshTools(); }
-      } else if (e.key.indexOf('Arrow') === 0 && S.sel >= 0) {
-        var r = (S.sel / n) | 0, c = S.sel % n;
+        if (curSel() >= 0) { erase(curSel()); refreshTools(); }
+      } else if (e.key.indexOf('Arrow') === 0 && curSel() >= 0) {
+        var r = (curSel() / n) | 0, c = curSel() % n;
         if (e.key === 'ArrowUp') r = Math.max(0, r - 1);
         if (e.key === 'ArrowDown') r = Math.min(n - 1, r + 1);
         if (e.key === 'ArrowLeft') c = Math.max(0, c - 1);
         if (e.key === 'ArrowRight') c = Math.min(n - 1, c + 1);
-        S.sel = r * n + c;
+        st.sel = r * n + c;
         bk.redraw();
         e.preventDefault();
       } else if (e.key.toLowerCase() === 'n') {
+        if (T) { api.toast('学堂里不用记笔记哦'); return; }
         S.notesMode = !S.notesMode; refreshTools();
       }
     }
@@ -473,6 +787,7 @@
 
     return {
       restart: function (o) {
+        cleanupT();
         var sizeKey = (o && SIZES[String(o.side)]) ? String(o.side) : (S ? S.sizeKey : '4');
         var level = (o && o.level) || 'normal';
         S = null;
@@ -483,6 +798,7 @@
       setLevel: function (lv) { if (S) S.level = lv; },
       restore: function (data) {
         try {
+          cleanupT();
           if (!data || !SIZES[String(data.size)] || !data.given || data.given.length !== SIZES[String(data.size)].n * SIZES[String(data.size)].n) return false;
           var ctx = makeCtx(String(data.size));
           S = {
@@ -513,6 +829,7 @@
         };
       },
       undo: function () {
+        if (T) { api.toast('学堂进行中，先点「退出学堂」'); return; }
         if (!S || S.over || !S.hist.length) return;
         var s = S.hist.pop();
         S.cur = s.cur; S.notes = s.notes;
@@ -522,6 +839,7 @@
         update();
       },
       hint: function () {
+        if (T) { api.toast('学堂里有逐步讲解，不用提示按钮哦'); return; }
         if (!S || S.over) return;
         var h = findHint(S.ctx, S.cur, S.given, S.sol);
         if (!h) return;
@@ -531,6 +849,7 @@
         bk.redraw();
       },
       resign: function () {
+        if (T) { api.toast('学堂进行中，先点「退出学堂」'); return; }
         if (!S || S.over) return;
         S.over = true; S.sec = elapsed(); stopTimer();
         for (var i = 0; i < S.cur.length; i++) S.cur[i] = S.sol[i];
@@ -541,7 +860,9 @@
       redraw: function () { if (bk) bk.redraw(); },
       destroy: function () {
         stopTimer();
+        cleanupT();
         global.removeEventListener('keydown', onKey);
+        if (overlay) { overlay.remove(); overlay = null; }
         if (pad) { pad.remove(); pad = null; }
         if (bk) { try { bk.destroy(); } catch (e) {} bk = null; }
       }

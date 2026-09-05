@@ -1,6 +1,6 @@
 /* 应用外壳：视图路由、对局控制、战绩、设置、离线缓存 */
 (function (global) {
-  var GAMES = ['gomoku', 'go', 'checkers', 'xiangqi', 'sudoku'];
+  var GAMES = ['gomoku', 'go', 'checkers', 'xiangqi', 'sudoku', 'slide', 'memory', 'game24', 'mathcamp'];
   var LEVEL_NAME = { easy: '简单', normal: '一般', hard: '困难' };
   var RESULT_NAME = { win: '胜', lose: '负', draw: '和' };
   var STORE_KEY = 'kidboard.v1.save.';
@@ -182,7 +182,7 @@
       sel.value = String(settings.side);
     }
     els.selMode.parentNode.style.display = g.single ? 'none' : '';
-    $('field-level').style.display = (g.single || settings.mode === 'pve') ? '' : 'none';
+    $('field-level').style.display = g.noLevel ? 'none' : ((g.single || settings.mode === 'pve') ? '' : 'none');
     $('field-side').style.display = (g.single || settings.mode === 'pve') ? '' : 'none';
     els.selLevel.value = settings.levels[id] || 'normal';
   }
@@ -282,6 +282,7 @@
     box.innerHTML = '';
     GAMES.forEach(function (id) {
       var g = global.Games[id];
+      if (g.noLevel) return; /* 益智小游戏没有难度档，跳过预设卡片 */
       var d = el('div', 'preset');
       var name = el('div', 'pn', g.emoji + ' ' + g.name);
       var sel = el('select');
@@ -466,7 +467,12 @@
 
   function refreshSettingsPresets() {
     var sels = $('level-presets').querySelectorAll('select');
-    GAMES.forEach(function (id, i) { if (sels[i]) sels[i].value = settings.levels[id] || 'normal'; });
+    var k = 0;
+    GAMES.forEach(function (id) {
+      if (global.Games[id].noLevel) return;
+      if (sels[k]) sels[k].value = settings.levels[id] || 'normal';
+      k++;
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

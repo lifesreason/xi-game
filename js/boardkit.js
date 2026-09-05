@@ -41,6 +41,7 @@
       canvas: canvas, ctx: ctx,
       get w() { return W; }, get h() { return H; },
       redraw: function () {
+        if (!W) return; /* 首次 resize 前尺寸为 0，绘制无意义还可能出负半径 */
         var C = colors();
         ctx.clearRect(0, 0, W, H);
         if (opts.draw) opts.draw(ctx, W, H, C);
@@ -48,9 +49,15 @@
     };
 
     function resize() {
-      var cw = host.clientWidth || 320;
-      var ch = host.clientHeight || 320;
       var ar = opts.aspect || 1;
+      var cw = host.clientWidth || 320;
+      /* 容器高度按「可用宽度 × 宽高比」自适应，让竖长棋盘（象棋/跳棋）也能吃满宽度；
+         上限 75% 视口高，保证控制按钮不被挤出屏幕。CSS 里的固定高度仅作无 JS 兜底 */
+      var idealH = Math.round(cw * ar);
+      var capH = Math.round((global.innerHeight || 800) * 0.75);
+      var wantH = Math.max(200, Math.min(idealH, capH));
+      if (Math.abs(host.clientHeight - wantH) > 1) host.style.height = wantH + 'px';
+      var ch = host.clientHeight || 320;
       var w, h;
       if (cw * ar <= ch) { w = cw; h = cw * ar; } else { h = ch; w = ch / ar; }
       w = Math.max(200, Math.floor(w)); h = Math.max(160, Math.floor(h));
@@ -76,11 +83,11 @@
     if (global.ResizeObserver) {
       ro = new ResizeObserver(function () { resize(); });
       ro.observe(host);
-    } else {
-      global.addEventListener('resize', resize);
     }
+    /* 视口高度变化（软键盘、旋转、浏览器工具栏收展）也可能改变高度上限 */
+    global.addEventListener('resize', resize);
     setTimeout(resize, 0);
-    api.destroy = function () { if (ro) ro.disconnect(); else global.removeEventListener('resize', resize); };
+    api.destroy = function () { if (ro) ro.disconnect(); global.removeEventListener('resize', resize); };
     api.resize = resize;
     return api;
   }
