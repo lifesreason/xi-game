@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="小小棋盘" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2343a7f5'/%3E%3Ccircle cx='24' cy='24' r='10' fill='%23222'/%3E%3Ccircle cx='41' cy='40' r='10' fill='%23fff'/%3E%3C/svg%3E" />
-<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/style.css?v=v39" />
 </head>
 <body>
 <div class="app">
@@ -21,7 +21,7 @@
       <div class="logo">🎲</div>
       <div class="brand-txt">
         <h1>小小棋盘</h1>
-        <p>五子棋 · 围棋 · 跳棋 · 象棋 ｜ 断网也能玩</p>
+        <p>五子棋 · 围棋 · 跳棋 · 象棋 · 数织 · 密码 ｜ 断网也能玩</p>
       </div>
     </div>
     <nav class="tabs" id="tabs">
@@ -40,6 +40,23 @@
         <h2>选一个棋盘，开始下棋吧！<span class="wave">👋</span></h2>
         <p>每一局都会自动保存在这台设备上，没有网络也能继续玩。</p>
       </div>
+
+      <div class="card home-stars-card">
+        <div class="hsc-left">
+          <span class="hsc-mascot">🦊</span>
+          <div style="flex:1;min-width:0">
+            <div class="hsc-title">脑力小天地 · 挑战正在进行</div>
+            <div class="hsc-sub" id="home-stars-txt">多动脑、快成长，收集智慧之星解开宝藏徽章！</div>
+            <div class="star-track">
+              <div class="star-progress" id="star-progress" style="width:0%"></div>
+            </div>
+            <div class="hsc-sub star-progress-txt" id="star-progress-txt"></div>
+          </div>
+        </div>
+        <div class="hsc-stars"><span class="star-icon">⭐</span> <b id="home-stars-count">0</b> 颗星</div>
+      </div>
+
+      <div class="cat-row" id="cat-row"></div>
 
       <div class="game-grid" id="game-grid"></div>
 
@@ -62,6 +79,7 @@
       <div class="play-head">
         <button class="btn ghost" id="btn-back">← 返回首页</button>
         <h2 id="play-title">五子棋</h2>
+        <button type="button" class="btn small" id="btn-rules">❓ 玩法</button>
         <span class="pill" id="play-status">准备开始</span>
       </div>
 
@@ -69,6 +87,12 @@
         <div class="board-panel">
           <div class="board-host" id="board-host"></div>
           <div class="board-foot"><span id="turn-tip"></span></div>
+          <div class="board-quick-actions" id="board-quick-actions">
+            <button type="button" class="btn small q-btn" id="btn-quick-undo">↩️ 悔棋</button>
+            <button type="button" class="btn small q-btn" id="btn-quick-hint">💡 提示</button>
+            <button type="button" class="btn small q-btn" id="btn-quick-restart">🔄 重开</button>
+            <button type="button" class="btn small q-btn" id="btn-quick-resign">🏳️ 认输</button>
+          </div>
         </div>
 
         <aside class="side-panel">
@@ -122,6 +146,10 @@
       </div>
       <div id="records-summary" class="stat-row"></div>
       <div class="card">
+        <h3>🏅 智慧成就徽章</h3>
+        <div class="badge-grid" id="badge-grid"></div>
+      </div>
+      <div class="card">
         <h3>最近对局</h3>
         <div class="table-wrap"><table class="table" id="records-table">
           <thead><tr><th>棋类</th><th>结果</th><th>难度</th><th>步数</th><th>用时</th><th>时间</th><th></th></tr></thead>
@@ -167,9 +195,10 @@
         <div class="btn-row">
           <button class="btn ghost small" id="btn-export2">导出全部数据</button>
           <button class="btn ghost small" id="btn-import2">导入数据</button>
+          <button class="btn small" id="btn-check-update">🔄 检查更新</button>
           <button class="btn danger small" id="btn-clear-all">清空全部数据</button>
         </div>
-        <p class="muted small">所有数据都保存在本机浏览器（localStorage），不会上传。首次打开网页后，即使断网或关掉网络也能正常进入。</p>
+        <p class="muted small">所有数据都保存在本机浏览器（localStorage），不会上传。首次打开网页后，即使断网或关掉网络也能正常进入；联网时会自动检查并更新到最新版本（进度会先保存）。</p>
       </div>
 
       <div class="card">
@@ -180,7 +209,22 @@
 
   </main>
 
-  <footer class="foot">小小棋盘 · 本地离线版 v1.0 ｜ 数据只存在你自己的设备上</footer>
+  <footer class="foot">小小棋盘 · 本地离线版 v2.0 ｜ 数据只存在你自己的设备上</footer>
+
+  <nav class="bottom-bar" id="bottom-bar">
+    <button type="button" class="b-tab active" data-view="home">
+      <span class="b-icon">🏠</span><span class="b-txt">首页</span>
+    </button>
+    <button type="button" class="b-tab" data-view="play">
+      <span class="b-icon">🎮</span><span class="b-txt">对局</span>
+    </button>
+    <button type="button" class="b-tab" data-view="records">
+      <span class="b-icon">🏆</span><span class="b-txt">战绩</span>
+    </button>
+    <button type="button" class="b-tab" data-view="settings">
+      <span class="b-icon">⚙️</span><span class="b-txt">设置</span>
+    </button>
+  </nav>
 </div>
 
 <div id="toast" class="toast"></div>
@@ -189,6 +233,7 @@
   <div class="modal-box">
     <div class="modal-emoji" id="result-emoji">🎉</div>
     <h3 id="result-title">你赢了！</h3>
+    <div class="result-stars" id="result-stars"></div>
     <p class="muted" id="result-sub"></p>
     <div class="btn-row center">
       <button class="btn primary" id="btn-again">再来一局</button>
@@ -197,20 +242,52 @@
   </div>
 </div>
 
+<div class="modal hidden" id="rules-modal">
+  <div class="modal-box rules-box">
+    <div class="rules-head"><b id="rules-title">玩法说明</b>
+      <button type="button" class="btn small" id="btn-rules-close">✕</button></div>
+    <p class="rules-intro" id="rules-intro"></p>
+    <div class="rules-list" id="rules-body"></div>
+    <div class="rules-guide" id="rules-guide"></div>
+    <p class="rules-tip" id="rules-tip"></p>
+    <div class="btn-row center"><button class="btn primary" id="btn-rules-ok">知道啦，开始！</button></div>
+  </div>
+</div>
+
 <input type="file" id="file-input" accept="application/json" hidden />
 
-<script src="js/store.js"></script>
-<script src="js/sfx.js"></script>
-<script src="js/boardkit.js"></script>
-<script src="js/games/gomoku.js"></script>
-<script src="js/games/go.js"></script>
-<script src="js/games/checkers.js"></script>
-<script src="js/games/xiangqi.js"></script>
-<script src="js/games/sudoku.js"></script>
-<script src="js/games/slide.js"></script>
-<script src="js/games/memory.js"></script>
-<script src="js/games/game24.js"></script>
-<script src="js/games/mathcamp.js"></script>
-<script src="js/app.js"></script>
+<script src="js/store.js?v=v39"></script>
+<script src="js/sfx.js?v=v39"></script>
+<script src="js/fx.js?v=v39"></script>
+<script src="js/boardkit.js?v=v39"></script>
+<script src="js/games/gomoku.js?v=v39"></script>
+<script src="js/games/go.js?v=v39"></script>
+<script src="js/games/checkers.js?v=v39"></script>
+<script src="js/games/xiangqi.js?v=v39"></script>
+<script src="js/games/sudoku.js?v=v39"></script>
+<script src="js/games/slide.js?v=v39"></script>
+<script src="js/games/memory.js?v=v39"></script>
+<script src="js/games/game24.js?v=v39"></script>
+<script src="js/games/mathcamp.js?v=v39"></script>
+<script src="js/games/hanoi.js?v=v39"></script>
+<script src="js/games/lightsout.js?v=v39"></script>
+<script src="js/games/nonogram.js?v=v39"></script>
+<script src="js/games/mastermind.js?v=v39"></script>
+<script src="js/games/pattern.js?v=v39"></script>
+<script src="js/games/shadow.js?v=v39"></script>
+<script src="js/games/mole.js?v=v39"></script>
+<script src="js/games/catch.js?v=v39"></script>
+<script src="js/games/puzzle.js?v=v39"></script>
+<script src="js/games/diff.js?v=v39"></script>
+<script src="js/games/simon.js?v=v39"></script>
+<script src="js/games/slidepic.js?v=v39"></script>
+<script src="js/games/dragpuzzle.js?v=v39"></script>
+<script src="js/games/sokoban.js?v=v39"></script>
+<script src="js/games/pipes.js?v=v39"></script>
+<script src="js/games/mines.js?v=v39"></script>
+<script src="js/games/balance.js?v=v39"></script>
+<script src="js/games/xylo.js?v=v39"></script>
+<script src="js/games/paint.js?v=v39"></script>
+<script src="js/app.js?v=v39"></script>
 </body>
 </html>

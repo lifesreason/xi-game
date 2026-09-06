@@ -1,13 +1,24 @@
 /* 应用外壳：视图路由、对局控制、战绩、设置、离线缓存 */
 (function (global) {
-  var GAMES = ['gomoku', 'go', 'checkers', 'xiangqi', 'sudoku', 'slide', 'memory', 'game24', 'mathcamp'];
+  var GAMES = ['gomoku', 'go', 'checkers', 'xiangqi', 'sudoku', 'slide', 'memory', 'game24', 'mathcamp', 'hanoi', 'lightsout', 'nonogram', 'mastermind', 'pattern', 'shadow', 'mole', 'catch', 'puzzle', 'diff', 'simon', 'slidepic', 'dragpuzzle', 'sokoban', 'pipes', 'mines', 'balance', 'xylo', 'paint'];
+  /* 首页分类筛选：对弈 / 益智 / 数字 / 启蒙 */
+  var CATS = [
+    { key: 'all', label: '全部' },
+    { key: 'board', label: '♟️ 棋类对弈' },
+    { key: 'puzzle', label: '🧩 益智解谜' },
+    { key: 'number', label: '🔢 数字思维' },
+    { key: 'kids', label: '🌱 启蒙乐园' },
+    { key: 'brain', label: '🧠 思维进阶' },
+    { key: 'create', label: '🎨 创意音乐' }
+  ];
+  var catFilter = 'all';
   var LEVEL_NAME = { easy: '简单', normal: '一般', hard: '困难' };
   var RESULT_NAME = { win: '胜', lose: '负', draw: '和' };
   var STORE_KEY = 'kidboard.v1.save.';
 
   var settings = Store.getSettings();
   if (!settings.sizes) settings.sizes = {}; /* 各游戏自定义档位（数独盘面大小等） */
-  var currentId = null, inst = null;
+  var currentId = null, inst = null, currentFinished = false;
   var els = {};
 
   function $(id) { return document.getElementById(id); }
@@ -35,29 +46,82 @@
     ['home', 'play', 'records', 'settings'].forEach(function (v) {
       $('view-' + v).classList.toggle('hidden', v !== name);
     });
-    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
+    Array.prototype.forEach.call(document.querySelectorAll('.tab, .b-tab'), function (t) {
       t.classList.toggle('active', t.dataset.view === name);
     });
     if (name === 'home') renderHome();
     if (name === 'records') renderRecords();
-    if (name === 'play' && inst && inst.redraw) inst.redraw();
+    /* 计时类游戏：离开对局页自动暂停，回来继续 */
+    if (name === 'play') { if (inst && inst.resume) inst.resume(); if (inst && inst.redraw) inst.redraw(); }
+    else if (inst && inst.pause) inst.pause();
     global.scrollTo(0, 0);
   }
 
   /* ---------------- 首页 ---------------- */
   function renderHome() {
+    /* 智慧之星与成长激励 */
+    var stars = Store.getStars();
+    var starsEl = $('home-stars-count');
+    if (starsEl) starsEl.textContent = stars;
+    var starsTxt = $('home-stars-txt');
+    if (starsTxt) {
+      var msg = '多动脑、快成长，收集智慧之星解开宝藏徽章！';
+      if (stars >= 40) msg = '🌟 太厉害了！已经拥有 ' + stars + ' 颗智慧之星，是无可争议的脑力王者！';
+      else if (stars >= 15) msg = '🔥 渐入佳境！智慧之星正在飞速增加，思维越来越敏捷！';
+      else if (stars >= 5) msg = '✨ 很棒的起点！继续探索，每一盘棋都能让你更聪明！';
+      starsTxt.textContent = msg;
+    }
+
+    /* 星星进度条：向下一个里程碑前进 */
+    var prog = $('star-progress'), progTxt = $('star-progress-txt');
+    if (prog && progTxt) {
+      var miles = [5, 15, 40, 80];
+      var next = miles.find(function (m) { return stars < m; });
+      if (next) {
+        var prev = 0;
+        miles.forEach(function (m) { if (stars >= m) prev = m; });
+        prog.style.width = Math.round((stars - prev) / (next - prev) * 100) + '%';
+        progTxt.textContent = '再赢 ' + (next - stars) + ' 星解锁「' + (next >= 40 ? '脑力王者' : next >= 15 ? '渐入佳境' : '很棒的起点') + '」称号';
+      } else {
+        prog.style.width = '100%';
+        progTxt.textContent = '已达成全部称号，你就是脑力王者！';
+      }
+    }
+
     var grid = $('game-grid');
     grid.innerHTML = '';
+
+    /* 分类筛选标签 */
+    var catRow = $('cat-row');
+    if (catRow) {
+      catRow.innerHTML = '';
+      CATS.forEach(function (c) {
+        var chip = el('button', 'cat-chip' + (catFilter === c.key ? ' active' : ''), c.label);
+        chip.type = 'button';
+        chip.onclick = function () {
+          if (catFilter === c.key) return;
+          Sfx.click();
+          catFilter = c.key;
+          renderHome();
+        };
+        catRow.appendChild(chip);
+      });
+    }
+
+    var idx = 0;
     GAMES.forEach(function (id) {
       var g = global.Games[id];
+      if (catFilter !== 'all' && g.cat !== catFilter) return;
       var card = el('button', 'game-card');
       card.type = 'button';
+      card.dataset.cat = g.cat || 'puzzle';
+      card.style.setProperty('--i', idx++);
       card.innerHTML =
         '<div class="gc-emoji">' + g.emoji + '</div>' +
         '<div class="gc-name">' + esc(g.name) + '</div>' +
         '<div class="gc-desc">' + esc(g.desc) + '</div>' +
         '<div class="gc-tags">' + g.tags.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' +
-        '<div class="gc-go">开始游戏 →</div>';
+        '<div class="gc-go">开始游戏 <span class="gc-arrow">→</span></div>';
       card.onclick = function () { Sfx.click(); openGame(id); };
       grid.appendChild(card);
     });
@@ -75,7 +139,7 @@
       $('continue-txt').textContent = sg.name + ' · ' +
         (sg.sideOptions
           ? '盘面 ' + (saved.opts && saved.opts.side) + ' · ' + LEVEL_NAME[saved.opts.level || 'normal']
-          : (saved.opts && saved.opts.mode === 'pvp' ? '双人对战' : '人机 ' + LEVEL_NAME[saved.opts.level])) +
+          : (saved.opts && saved.opts.mode === 'pvp' ? '双人对战' : '人机 ' + LEVEL_NAME[saved.opts.level || 'normal'])) +
         ' · ' + new Date(saved.data.ts || Date.now()).toLocaleString('zh-CN');
       $('btn-continue').onclick = function () { Sfx.click(); openGame(savedId, true); };
     } else cc.hidden = true;
@@ -103,7 +167,11 @@
       info: function (h) { els.info.innerHTML = h; },
       toast: toast,
       busy: function (on) {
-        ['btn-undo', 'btn-hint', 'btn-restart', 'btn-resign'].forEach(function (b) { $(b).disabled = !!on; });
+        ['btn-undo', 'btn-hint', 'btn-restart', 'btn-resign',
+         'btn-quick-undo', 'btn-quick-hint', 'btn-quick-restart', 'btn-quick-resign'].forEach(function (b) {
+          var node = $(b);
+          if (node) node.disabled = !!on;
+        });
         els.status.classList.toggle('think', !!on);
       },
       changed: function () { saveCurrent(); },
@@ -112,7 +180,7 @@
   }
 
   function saveCurrent() {
-    if (!currentId || !inst) return;
+    if (!currentId || !inst || currentFinished) return;
     var d = inst.serialize();
     var moves = (d.h && d.h.length) || (d.history && d.history.length) || 0;
     Store.saveGame(currentId, {
@@ -135,8 +203,16 @@
 
   function openGame(id, keep) {
     currentId = id;
+    currentFinished = false;
+    $('result-modal').classList.add('hidden'); /* 切换游戏时收掉旧结算弹窗 */
     var g = global.Games[id];
     $('play-title').textContent = g.emoji + ' ' + g.name;
+    /* 规则说明：弹窗内容按游戏填充 */
+    $('rules-title').textContent = g.emoji + ' ' + g.name + ' · 玩法说明';
+    $('rules-intro').textContent = g.desc || '';
+    $('rules-body').innerHTML = g.rules || '打开后随意体验，没有固定规则～';
+    $('rules-tip').textContent = g.tip ? '💡 小贴士：' + g.tip : '';
+    $('rules-guide').innerHTML = g.guide || '';
 
     /* 侧栏初始值 */
     els.selMode.value = settings.mode;
@@ -144,10 +220,16 @@
     refreshSideOptions(id);
 
     showView('play');
+    var panelEl = document.querySelector('.board-panel');
+    if (panelEl) { panelEl.classList.remove('panel-in'); void panelEl.offsetWidth; panelEl.classList.add('panel-in'); }
 
     if (inst) { try { inst.destroy(); } catch (e) {} inst = null; }
-    $('board-host').innerHTML = '';
-    inst = g.mount($('board-host'), apiFactory(id));
+    var hostEl = $('board-host');
+    /* DOM 型游戏（口算 / 汉诺塔 / 点灯 / 记忆 / 24 点）彻底重置旧高度，按内容自适应撑高 */
+    hostEl.style.height = '';
+    hostEl.classList.toggle('dom-fit', !!g.dom);
+    hostEl.innerHTML = '';
+    inst = g.mount(hostEl, apiFactory(id));
 
     var restored = false;
     if (keep !== false) {
@@ -159,6 +241,11 @@
     }
     renderExtra(id);
     if (restored) toast('已恢复上次未下完的对局');
+    /* 每款游戏第一次玩时自动展示玩法说明 */
+    if (!Store.get('rules.seen.' + id)) {
+      Store.set('rules.seen.' + id, true);
+      $('rules-modal').classList.remove('hidden');
+    }
   }
 
   function refreshSideOptions(id) {
@@ -200,7 +287,66 @@
   }
 
   function onGameOver(id, result, info) {
+    currentFinished = true;
     Store.addResult(id, result);
+    var newBadges = [];
+    var starsBox = $('result-stars');
+    if (starsBox) starsBox.innerHTML = '';
+
+    if (result === 'win') {
+      if (Store.unlockBadge('first_win')) newBadges.push('first_win');
+      var earned = info && info.perfect ? 4 : 2;
+      Store.addStars(earned);
+
+      /* 累计胜利统计 */
+      var st = Store.getStats(), totalWins = 0;
+      GAMES.forEach(function (gid) { totalWins += (st[gid] && st[gid].win) || 0; });
+      if (totalWins >= 10 && Store.unlockBadge('win_10')) newBadges.push('win_10');
+      if (totalWins >= 30 && Store.unlockBadge('win_30')) newBadges.push('win_30');
+
+      /* 各游戏专属成就 */
+      if (id === 'slide' && Store.unlockBadge('slide_solved')) newBadges.push('slide_solved');
+      if (id === 'memory' && Store.unlockBadge('memory_champ')) newBadges.push('memory_champ');
+      if (id === 'game24' && Store.unlockBadge('game24_pro')) newBadges.push('game24_pro');
+      if (id === 'hanoi' && Store.unlockBadge('hanoi_3')) newBadges.push('hanoi_3');
+      if (id === 'lightsout' && Store.unlockBadge('lights_novice')) newBadges.push('lights_novice');
+      if (id === 'nonogram' && Store.unlockBadge('nonogram_clear')) newBadges.push('nonogram_clear');
+      if (id === 'nonogram' && (info && info.score || '').indexOf('10×10') >= 0 && Store.unlockBadge('nonogram_pro')) newBadges.push('nonogram_pro');
+      if (id === 'mastermind' && Store.unlockBadge('mastermind_crack')) newBadges.push('mastermind_crack');
+      if (id === 'mastermind' && (info && info.moves || 99) <= 4 && Store.unlockBadge('mastermind_fast')) newBadges.push('mastermind_fast');
+      if (id === 'pattern' && info && info.perfect && Store.unlockBadge('pattern_brain')) newBadges.push('pattern_brain');
+      if (id === 'shadow' && info && info.perfect && Store.unlockBadge('shadow_eagle')) newBadges.push('shadow_eagle');
+      if (id === 'mole' && result === 'win' && Store.unlockBadge('mole_hammer')) newBadges.push('mole_hammer');
+      if (id === 'catch' && result === 'win' && Store.unlockBadge('catch_star')) newBadges.push('catch_star');
+      if (id === 'puzzle' && result === 'win' && Store.unlockBadge('puzzle_star')) newBadges.push('puzzle_star');
+      if (id === 'diff' && result === 'win' && Store.unlockBadge('diff_master')) newBadges.push('diff_master');
+      if (id === 'simon' && result === 'win' && Store.unlockBadge('simon_brain')) newBadges.push('simon_brain');
+      if (id === 'slidepic' && result === 'win' && Store.unlockBadge('slide_pilot')) newBadges.push('slide_pilot');
+      if (id === 'dragpuzzle' && result === 'win' && Store.unlockBadge('drag_ninja')) newBadges.push('drag_ninja');
+      if (id === 'sokoban' && result === 'win' && Store.unlockBadge('sokoban_brain')) newBadges.push('sokoban_brain');
+      if (id === 'pipes' && result === 'win' && Store.unlockBadge('pipes_flow')) newBadges.push('pipes_flow');
+      if (id === 'mines' && result === 'win' && Store.unlockBadge('mines_digger')) newBadges.push('mines_digger');
+      if (id === 'balance' && result === 'win' && Store.unlockBadge('balance_angel')) newBadges.push('balance_angel');
+      if (id === 'xylo' && result === 'win' && Store.unlockBadge('music_star')) newBadges.push('music_star');
+      if (id === 'paint' && result === 'win') newBadges.push('paint_master');
+
+      var starsEl = $('result-stars');
+      if (starsEl) {
+        var starHtml = '';
+        for (var si = 0; si < earned; si++) starHtml += '<span class="rs-star" style="animation-delay:' + (0.1 + si * 0.15) + 's">⭐</span>';
+        starsEl.innerHTML = starHtml + '<span class="rs-label">获得 ' + earned + ' 颗智慧之星</span>';
+      }
+    }
+
+    if (global.Fx) {
+      if (result === 'win') {
+        global.Fx.confetti(info && info.perfect ? { count: 140 } : { count: 90 });
+        if (newBadges.length > 0) global.Fx.starFountain(null, null, 15);
+      } else if (result === 'lose') {
+        global.Fx.banner('继续加油！下次准行～', 'soft');
+      }
+    }
+
     Store.addRecord({
       game: id, name: global.Games[id].name, result: result,
       level: settings.levels[id] || 'normal', mode: settings.mode,
@@ -208,19 +354,32 @@
       score: info.score || ''
     });
     Store.clearGame(id);
-    if (result === 'win') Sfx.win();
-    else if (result === 'lose') Sfx.lose();
-    else Sfx.draw();
+
+    if (result === 'win') {
+      if (newBadges.length > 0 && Sfx.badge) Sfx.badge();
+      else Sfx.win();
+    } else if (result === 'lose') {
+      Sfx.lose();
+    } else {
+      Sfx.draw();
+    }
 
     var m = $('result-modal');
     $('result-emoji').textContent = result === 'win' ? '🎉' : result === 'lose' ? '💪' : '🤝';
     $('result-title').textContent =
-      result === 'win' ? '你赢啦！' : result === 'lose' ? '这局输了' : '和棋';
+      result === 'win' ? (newBadges.length > 0 ? '大获全胜！解锁新成就' : '你赢啦！真棒') : result === 'lose' ? '差一点点，再试一次！' : '旗鼓相当，和棋！';
     $('result-sub').textContent = global.Games[id].name + ' · ' +
-      (settings.mode === 'pvp' ? '双人' : LEVEL_NAME[settings.levels[id]]) +
+      (settings.mode === 'pvp' ? '双人' : (global.Games[id].noLevel ? '挑战' : LEVEL_NAME[settings.levels[id]])) +
       ' · ' + (info.moves || 0) + ' 手 · ' + (info.sec || 0) + ' 秒' +
       (info.score ? ' · ' + info.score : '');
     m.classList.remove('hidden');
+    if (global.Fx) global.Fx.pop($('result-emoji'));
+
+    if (newBadges.length > 0) {
+      setTimeout(function () {
+        toast('🏅 恭喜解锁新成就徽章！快去战绩页查看吧～');
+      }, 1500);
+    }
   }
 
   /* ---------------- 战绩 ---------------- */
@@ -240,6 +399,22 @@
     total.innerHTML = '<b>' + (tw + tl ? Math.round(tw / (tw + tl) * 100) : 0) + '%</b><span>总胜率（' + (tw + tl + td) + ' 局）</span>';
     box.appendChild(total);
 
+    /* 渲染徽章墙 */
+    var bg = $('badge-grid');
+    if (bg) {
+      bg.innerHTML = '';
+      var badges = Store.getAllBadges();
+      badges.forEach(function (b) {
+        var card = el('div', 'badge-item' + (b.unlocked ? ' unlocked' : ' locked'));
+        card.innerHTML =
+          '<div class="badge-icon">' + b.emoji + '</div>' +
+          '<div class="badge-name">' + esc(b.name) + '</div>' +
+          '<div class="badge-desc">' + esc(b.desc) + '</div>' +
+          '<div class="badge-tag">' + (b.unlocked ? '✨ 已解锁' : '🔒 待探索') + '</div>';
+        bg.appendChild(card);
+      });
+    }
+
     var list = Store.getRecords();
     var tb = $('records-table').querySelector('tbody');
     tb.innerHTML = '';
@@ -250,7 +425,7 @@
       tr.innerHTML =
         '<td>' + esc(r.name || '') + '</td>' +
         '<td style="color:' + color + ';font-weight:700">' + RESULT_NAME[r.result] + '</td>' +
-        '<td>' + (r.mode === 'pvp' ? '双人' : LEVEL_NAME[r.level]) + '</td>' +
+        '<td>' + (r.mode === 'pvp' ? '双人' : (global.Games[r.game] && global.Games[r.game].noLevel ? '挑战' : LEVEL_NAME[r.level])) + '</td>' +
         '<td>' + (r.moves || 0) + '</td>' +
         '<td>' + (r.sec || 0) + 's</td>' +
         '<td>' + new Date(r.ts).toLocaleString('zh-CN') + '</td>' +
@@ -351,8 +526,8 @@
     renderSettings();
     renderHome();
 
-    /* 导航 */
-    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
+    /* 顶部与底部导航 */
+    Array.prototype.forEach.call(document.querySelectorAll('.tab, .b-tab'), function (t) {
       t.onclick = function () { Sfx.click(); showView(t.dataset.view); };
     });
     Array.prototype.forEach.call(document.querySelectorAll('[data-goto]'), function (b) {
@@ -360,24 +535,44 @@
     });
 
     $('btn-back').onclick = function () { Sfx.click(); showView('home'); };
-    $('btn-restart').onclick = function () {
+
+    /* 玩法说明弹窗 */
+    $('btn-rules').onclick = function () { Sfx.click(); $('rules-modal').classList.remove('hidden'); };
+    $('btn-rules-close').onclick = function () { Sfx.click(); $('rules-modal').classList.add('hidden'); };
+    $('btn-rules-ok').onclick = function () { Sfx.click(); $('rules-modal').classList.add('hidden'); };
+
+    /* 侧栏常规操作与棋盘下方快捷操作同时绑定 */
+    function doRestart() {
       Sfx.click();
+      $('result-modal').classList.add('hidden'); /* 重开时收掉结算弹窗 */
+      currentFinished = false;
       if (inst) inst.restart(restartOpts());
       Store.clearGame(currentId);
       toast('已重新开始');
-    };
-    $('btn-undo').onclick = function () { Sfx.click(); if (inst) inst.undo(); };
-    $('btn-hint').onclick = function () { Sfx.click(); if (inst) inst.hint(); };
-    $('btn-resign').onclick = function () {
+    }
+    function doUndo() { Sfx.click(); if (inst) inst.undo(); }
+    function doHint() { Sfx.click(); if (inst) inst.hint(); }
+    function doResign() {
       Sfx.click();
       if (settings.mode === 'pvp') { toast('双人模式下请继续下棋'); return; }
       if (inst) inst.resign();
-    };
+    }
+
+    $('btn-restart').onclick = doRestart;
+    $('btn-undo').onclick = doUndo;
+    $('btn-hint').onclick = doHint;
+    $('btn-resign').onclick = doResign;
+
+    var qUndo = $('btn-quick-undo'); if (qUndo) qUndo.onclick = doUndo;
+    var qHint = $('btn-quick-hint'); if (qHint) qHint.onclick = doHint;
+    var qRestart = $('btn-quick-restart'); if (qRestart) qRestart.onclick = doRestart;
+    var qResign = $('btn-quick-resign'); if (qResign) qResign.onclick = doResign;
 
     els.selMode.onchange = function () {
       settings.mode = els.selMode.value;
       Store.saveSettings(settings);
       refreshSideOptions(currentId);
+      currentFinished = false;
       if (inst) inst.restart(restartOpts());
       Store.clearGame(currentId);
       toast(els.selMode.value === 'pvp' ? '已切换为双人对战' : '已切换为人机对战');
@@ -395,13 +590,15 @@
       if (g && g.sideOptions) {
         settings.sizes[currentId] = els.selSide.value;
         Store.saveSettings(settings);
-        if (inst) inst.restart(restartOpts());
+        currentFinished = false;
+      if (inst) inst.restart(restartOpts());
         Store.clearGame(currentId);
         toast('盘面已切换为「' + els.selSide.value + '」，重新开始');
         return;
       }
       settings.side = Number(els.selSide.value);
       Store.saveSettings(settings);
+      currentFinished = false;
       if (inst) inst.restart(restartOpts());
       Store.clearGame(currentId);
       toast('已交换先后手，重新开局');
@@ -410,6 +607,7 @@
     $('btn-again').onclick = function () {
       Sfx.click();
       $('result-modal').classList.add('hidden');
+      currentFinished = false;
       if (inst) inst.restart(restartOpts());
       Store.clearGame(currentId);
     };
@@ -427,6 +625,7 @@
     $('btn-clear-records').onclick = function () {
       if (global.confirm('确定清空所有对局记录吗？')) { Store.clearRecords(); renderRecords(); toast('记录已清空'); }
     };
+    $('btn-check-update').onclick = function () { Sfx.click(); checkUpdate(false); };
     $('btn-export').onclick = doExport;
     $('btn-export2').onclick = doExport;
     $('btn-import').onclick = doImport;
@@ -455,14 +654,76 @@
       }
     };
 
-    /* 离线缓存 */
-    if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
-      global.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js').catch(function () { /* file:// 或不支持时忽略 */ });
-      });
-    }
+    /* 离线缓存 + 联网自动更新 */
+    initServiceWorker();
+
+    /* 全局按键涟漪：所有按钮/标签按下都有水波反馈 */
+    document.addEventListener('pointerdown', function (e) {
+      var t = e.target.closest('.btn, .cat-chip, .tab, .b-tab, .q-btn, .mm-color, .mc-key, .sdk-digit');
+      if (t && global.Fx) Fx.ripple(t, e.clientX, e.clientY);
+    });
 
     global.addEventListener('beforeunload', saveCurrent);
+  }
+
+  /* ---------------- 离线缓存与自动更新 ---------------- */
+  /* 联网打开页面时：SW 脚本变更 → 新版本安装 → 保存当前进度 → 自动刷新到最新版 */
+  var swReg = null, swReloading = false, swFirstClaim = !navigator.serviceWorker.controller;
+
+  function initServiceWorker() {
+    if (!('serviceWorker' in navigator) || location.protocol.indexOf('http') !== 0) return;
+    global.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').then(function (reg) {
+        swReg = reg;
+        if (!reg) return;
+        /* 发现新版本：等它装好就更新 */
+        reg.addEventListener('updatefound', function () {
+          var nw = reg.installing || reg.waiting;
+          if (!nw) return;
+          nw.addEventListener('statechange', function () {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) applyUpdate();
+          });
+        });
+        /* 已在等待中的新版本（上次打开时装好但没生效） */
+        if (reg.waiting && navigator.serviceWorker.controller) applyUpdate();
+      }).catch(function () { /* 不支持时忽略 */ });
+    });
+
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      /* 首次安装时的「接管」不算更新，跳过；之后每次换人都是真有新版本 */
+      if (swFirstClaim) { swFirstClaim = false; return; }
+      applyUpdate();
+    });
+
+    /* 回到前台 / 每 30 分钟静默检查一次，联网就能拿到新版本 */
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) checkUpdate(true);
+    });
+    global.setInterval(function () { if (!document.hidden) checkUpdate(true); }, 30 * 60 * 1000);
+  }
+
+  /* 手动检查更新（设置页按钮 / 定时轮询 / 页面重新可见时） */
+  function checkUpdate(silent) {
+    if (!swReg) { if (!silent) toast('当前环境未启用离线缓存'); return; }
+    swReg.update().then(function () {
+      if (silent) return;
+      if (swReg.waiting) applyUpdate();
+      else toast('已是最新版本 ✅');
+    }).catch(function () {
+      if (!silent) toast('检查更新失败，可能处于离线状态');
+    });
+  }
+
+  function applyUpdate() {
+    if (swReloading) return;
+    swReloading = true;
+    if (global.Fx) global.Fx.banner('✨ 新版本到啦', 'soft');
+    toast('✨ 发现新版本，正在更新…');
+    try { saveCurrent(); } catch (e) {}
+    /* 给一小段时间让提示露脸、进度落盘，再刷新加载新版 */
+    setTimeout(function () { global.location.reload(); }, 1200);
+    /* 兜底：若 8 秒内 controllerchange 没触发（旧 SW 未释放），也强制刷新 */
+    setTimeout(function () { global.location.reload(); }, 8000);
   }
 
   function refreshSettingsPresets() {

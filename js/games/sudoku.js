@@ -346,11 +346,23 @@
 
     function erase(i) {
       if (T) { tutErase(i); return; }
-      if (S.over || S.given[i] || !S.cur[i]) return;
+      if (S.over || S.given[i]) return;
+      /* 格子上没数字但有笔记：擦除 = 清掉这格的笔记 */
+      if (!S.cur[i]) {
+        if (S.notes[i]) {
+          snapshot();
+          S.notes[i] = 0;
+          Sfx.click();
+          api.changed();
+          bk.redraw();
+        }
+        return;
+      }
       snapshot();
       S.cur[i] = 0; S.filled--;
       S.hintCell = -1;
       Sfx.click();
+      refreshTools();
       after();
     }
 
@@ -387,11 +399,15 @@
       if (T) { tutUpdate(); return; }
       if (!S) return;
       var left = S.n * S.n - S.filled;
+      /* 错误数实时统计：填错的格被擦掉后立即回退 */
+      var bad = 0;
+      for (var i = 0; i < S.cur.length; i++) if (S.cur[i] && S.cur[i] !== S.sol[i]) bad++;
       api.status(S.over ? '完成！用时 ' + S.sec + ' 秒' : '剩余 ' + left + ' 格 · ' + fmtTime(elapsed()));
       api.info(
         '盘面：<b>' + sizeLabel() + '</b>　进度：<b>' + Math.round(S.filled / (S.n * S.n) * 100) + '%</b><br>' +
-        '错误：<b>' + S.errors + '</b> 处　挖空：<b>' + S.blanks + '</b> 格<br>' +
-        '先选中一格，再点下方数字填入。<b>✏️ 笔记</b>模式可以记候选数。'
+        '错误：<b>' + bad + '</b> 处　挖空：<b>' + S.blanks + '</b> 格' +
+        (S.notesMode ? '<br>✏️ <b>笔记模式</b>：点下方数字会记成候选小字，再点一次取消。' : '') +
+        '<br>先选中一格，再点下方数字填入。'
       );
       api.changed();
       if (bk) bk.redraw();
@@ -448,15 +464,28 @@
         }
       }
       /* 网格线：宫线粗、细线细 */
+      /* 细线 */
+      ctx2d.lineWidth = 0.8; ctx2d.strokeStyle = C.grid;
+      ctx2d.beginPath();
       for (i = 0; i <= n; i++) {
-        var block = (i % S.ctx.bw === 0) || (i % S.ctx.bh === 0);
-        ctx2d.lineWidth = block ? Math.max(2, cell * 0.075) : 0.8;
-        ctx2d.strokeStyle = C.grid;
-        ctx2d.beginPath();
-        ctx2d.moveTo(i * cell, 0); ctx2d.lineTo(i * cell, H);
-        ctx2d.moveTo(0, i * cell); ctx2d.lineTo(W, i * cell);
-        ctx2d.stroke();
+        if (i % S.ctx.bw !== 0) { ctx2d.moveTo(i * cell, 0); ctx2d.lineTo(i * cell, H); }
+        if (i % S.ctx.bh !== 0) { ctx2d.moveTo(0, i * cell); ctx2d.lineTo(W, i * cell); }
       }
+      ctx2d.stroke();
+      /* 宫线粗线：竖线按宫宽 bw，横线按宫高 bh */
+      ctx2d.lineWidth = Math.max(2, cell * 0.075);
+      ctx2d.beginPath();
+      for (i = 0; i <= n; i++) {
+        if (i % S.ctx.bw === 0) { ctx2d.moveTo(i * cell, 0); ctx2d.lineTo(i * cell, H); }
+        if (i % S.ctx.bh === 0) { ctx2d.moveTo(0, i * cell); ctx2d.lineTo(W, i * cell); }
+      }
+      ctx2d.stroke();
+      /* 外框：画成与画布 CSS 圆角吻合的圆角矩形，四角才不会出现缺口 */
+      var fr = Math.max(2.5, cell * 0.09), inset = fr / 2 + 0.5;
+      ctx2d.lineWidth = fr;
+      ctx2d.strokeStyle = C.grid;
+      BoardKit.roundRect(ctx2d, inset, inset, W - inset * 2, H - inset * 2, 13);
+      ctx2d.stroke();
     }
 
     /* ---------------- 数字键盘 ---------------- */
@@ -468,6 +497,7 @@
       var tools = document.createElement('div');
       tools.className = 'sdk-tools';
       [['✏️ 笔记', function () {
+        if (T) { api.toast('学堂里不用记笔记哦'); return; }
         S.notesMode = !S.notesMode;
         refreshTools();
         api.toast(S.notesMode ? '笔记模式：点数字会记成候选小字' : '已退出笔记模式');
@@ -494,7 +524,9 @@
           b2.onclick = function () {
             var sv = curSel();
             if (sv < 0) { api.toast('先在棋盘上选一格'); return; }
-            place(sv, d);
+            /* 笔记模式下点数字 = 记候选小字（触屏唯一入口，必须判断） */
+            if (!T && S.notesMode) toggleNote(sv, d);
+            else place(sv, d);
             refreshTools();
           };
           digits.appendChild(b2);
@@ -512,6 +544,9 @@
     function refreshTools() {
       if (!pad || !S) return;
       pad.querySelector('.sdk-notes').classList.toggle('active', S.notesMode);
+      /* 笔记模式时给数字键盘加视觉状态 */
+      var digitsBox = pad.querySelector('.sdk-digits');
+      if (digitsBox) digitsBox.classList.toggle('notes-on', !!S.notesMode);
       var left = {};
       for (var d = 1; d <= S.n; d++) left[d] = S.n - countIn(S.cur, d);
       Array.prototype.forEach.call(pad.querySelectorAll('.sdk-digit'), function (b) {
@@ -721,15 +756,26 @@
         g.textAlign = 'center'; g.textBaseline = 'middle';
         g.fillText(String(v), cx, cy + cell * 0.02);
       }
+      g.lineWidth = 0.8; g.strokeStyle = C.grid;
+      g.beginPath();
       for (i = 0; i <= n; i++) {
-        var block = (i % T.ctx.bw === 0) || (i % T.ctx.bh === 0);
-        g.lineWidth = block ? Math.max(2, cell * 0.075) : 0.8;
-        g.strokeStyle = C.grid;
-        g.beginPath();
-        g.moveTo(i * cell, 0); g.lineTo(i * cell, H);
-        g.moveTo(0, i * cell); g.lineTo(W, i * cell);
-        g.stroke();
+        if (i % T.ctx.bw !== 0) { g.moveTo(i * cell, 0); g.lineTo(i * cell, H); }
+        if (i % T.ctx.bh !== 0) { g.moveTo(0, i * cell); g.lineTo(W, i * cell); }
       }
+      g.stroke();
+      g.lineWidth = Math.max(2, cell * 0.075);
+      g.beginPath();
+      for (i = 0; i <= n; i++) {
+        if (i % T.ctx.bw === 0) { g.moveTo(i * cell, 0); g.lineTo(i * cell, H); }
+        if (i % T.ctx.bh === 0) { g.moveTo(0, i * cell); g.lineTo(W, i * cell); }
+      }
+      g.stroke();
+      /* 外框：圆角矩形，与画布圆角吻合 */
+      var tfr = Math.max(2.5, cell * 0.09), tinset = tfr / 2 + 0.5;
+      g.lineWidth = tfr;
+      g.strokeStyle = C.grid;
+      BoardKit.roundRect(g, tinset, tinset, W - tinset * 2, H - tinset * 2, 13);
+      g.stroke();
     }
 
     function tutUpdate() {
@@ -756,6 +802,8 @@
     });
 
     function onKey(e) {
+      /* 焦点在下拉框/输入框时不要把按键当作填数 */
+      if (e.target && /SELECT|INPUT|TEXTAREA/.test(e.target.tagName)) return;
       var st = T || S;
       if (!st || st.over) return;
       var n = st.n;
@@ -836,6 +884,7 @@
         S.errors = s.errors; S.placed = s.placed; S.filled = s.filled;
         S.hintCell = -1;
         Sfx.click();
+        refreshTools();
         update();
       },
       hint: function () {
@@ -871,10 +920,13 @@
 
   global.Games = global.Games || {};
   global.Games.sudoku = {
+    cat: 'board',
     emoji: '🔢',
     name: '数独',
     desc: '从 4×4 一路练到 9×9！铅笔标注、错误检查、解题技巧提示，一步步成为数独高手。',
     tags: ['4×4/6×6/9×9', '唯一解题库', '技巧教学'],
+    rules: '① 每行、每列、每个粗框宫里，数字都不能重复；② 先点格子，再点下方数字填入，再点一次可取消；③ ✏️ 笔记模式点数字会记成候选小字；④ 填满且全部正确即通关，「检查」随时帮你纠错。',
+    guide: '① 先做「唯一余数法」：某格只剩一个能填的数就填它；② 再用「隐藏唯一法」：某数字在某行/宫只剩一个位置；③ 笔记模式把候选数都标出来，排除法一目了然；④ 卡住时从数字出现最多的行/宫入手。',
     tip: '先找只剩一个空位的行、列或宫——「隐藏唯一」是数独最常用的突破口。',
     single: true,
     sideOptions: [['4', '4×4 入门'], ['6', '6×6 进阶'], ['9', '9×9 经典']],

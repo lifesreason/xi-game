@@ -74,8 +74,13 @@
     function onClick(ev) {
       var r = canvas.getBoundingClientRect();
       var p = (ev.touches && ev.touches[0]) ? ev.touches[0] : ev;
-      var x = (p.clientX - r.left) * (W / r.width);
-      var y = (p.clientY - r.top) * (H / r.height);
+      var clientX = p.clientX, clientY = p.clientY;
+      var x = (clientX - r.left) * (W / r.width);
+      var y = (clientY - r.top) * (H / r.height);
+      if (global.Fx) {
+        global.Fx.vibrate(8);
+        global.Fx.ripple(host, clientX, clientY);
+      }
       if (opts.click) opts.click(x, y, W, H);
     }
     canvas.addEventListener('click', onClick);
@@ -87,7 +92,12 @@
     /* 视口高度变化（软键盘、旋转、浏览器工具栏收展）也可能改变高度上限 */
     global.addEventListener('resize', resize);
     setTimeout(resize, 0);
-    api.destroy = function () { if (ro) ro.disconnect(); global.removeEventListener('resize', resize); };
+    api.destroy = function () {
+      if (ro) ro.disconnect();
+      global.removeEventListener('resize', resize);
+      canvas.removeEventListener('click', onClick);
+      host.style.height = '';
+    };
     api.resize = resize;
     return api;
   }

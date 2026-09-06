@@ -109,20 +109,41 @@
     board[mv.to] = 0;
   }
 
-  /* 局面评估：己方总距离越小越好，对手总距离越大越好 */
+  /* 局面评估：己方总距离越小越好，对手总距离越大越好。
+     附加：掉队棋子（离目标最远者）额外惩罚，促使 AI 不丢下尾巴；
+     已进营的棋子给小额奖励，鼓励尽早清空出发营地。 */
   function evaluate(board, side) {
-    var o = 3 - side, s = 0, i;
+    var o = 3 - side, s = 0, i, maxOwn = 0, maxOpp = 0, ownIn = 0;
     for (i = 0; i < NC; i++) {
-      if (board[i] === side) s -= DIST[side][i];
-      else if (board[i] === o) s += DIST[o][i];
+      if (board[i] === side) {
+        s -= DIST[side][i];
+        if (DIST[side][i] > maxOwn) maxOwn = DIST[side][i];
+        if (DIST[side][i] === 0) ownIn++;
+      } else if (board[i] === o) {
+        s += DIST[o][i];
+        if (DIST[o][i] > maxOpp) maxOpp = DIST[o][i];
+      }
     }
+    s -= maxOwn * 0.6;   /* 己方掉队棋子拖后腿 */
+    s += maxOpp * 0.6;   /* 对手掉队棋子是优势 */
+    s += ownIn * 0.3;    /* 鼓励进营 */
     return s;
   }
+  /* 胜负（反赖皮规则）：目标区 10 格须全部被占据；己方棋子占的格子直接算数，
+     对方棋子占的格子只有在该格“曾被腾空过”后才算数（防止初始棋子白送胜利，
+     也防止对方把棋子赖进你营地导致死锁——赖着不走反而送你获胜）。 */
+  var vacated = new Uint8Array(NC);        /* 目标区格子是否被腾空过 */
+  function markVacated(board) {
+    [1, 2].forEach(function (s) {
+      GOAL[s].forEach(function (i) { if (!board[i]) vacated[i] = 1; });
+    });
+  }
   function isWin(board, side) {
-    var g = GOAL[side], cnt = 0;
-    for (var i = 0; i < NC; i++) if (board[i] === side) cnt++;
-    if (cnt === 0) return false;
-    for (var k = 0; k < g.length; k++) if (board[g[k]] !== side) return false;
+    var g = GOAL[side];
+    for (var k = 0; k < g.length; k++) {
+      if (!board[g[k]]) return false;
+      if (board[g[k]] !== side && !vacated[g[k]]) return false;
+    }
     return true;
   }
   function gainOf(mv, side) { return DIST[side][mv.from] - DIST[side][mv.to]; }
@@ -210,6 +231,15 @@
       G.turn = P1; G.over = false; G.winner = 0;
       G.history = []; G.snaps = []; G.sel = -1; G.moves = []; G.last = null;
       G.startTs = Date.now();
+      vacated.fill(0);
+    }
+    /* 从初始局面重放历史，重建 vacated 标记（悔棋/恢复存档用） */
+    function rebuildVacated() {
+      vacated.fill(0);
+      var b = new Int8Array(NC);
+      HOME[1].forEach(function (i) { b[i] = P1; });
+      HOME[2].forEach(function (i) { b[i] = P2; });
+      G.history.forEach(function (m) { applyMove(b, m); markVacated(b); });
     }
     function snap() {
       G.snaps.push({ b: Array.prototype.slice.call(G.board), t: G.turn, l: G.last });
@@ -241,8 +271,10 @@
 
     function doMove(mv, silent) {
       snap();
-      var jumped = Math.abs(DIST[G.turn][mv.from] - DIST[G.turn][mv.to]) > 1;
+      /* 连跳判定：落点与起点不相邻即为跳跃（单步只会落在相邻格） */
+      var jumped = BOARD.cells[mv.from].nb.indexOf(mv.to) < 0;
       applyMove(G.board, mv);
+      markVacated(G.board);
       G.history.push(mv); G.last = mv; G.sel = -1; G.moves = [];
       if (!silent) { if (jumped) Sfx.jump(); else Sfx.move(); }
       if (isWin(G.board, G.turn)) { finish(G.turn); return; }
@@ -351,13 +383,15 @@
     function cellAt(px, py) {
       var bestI = -1, bestD = 1e9;
       var unit = R;
+      /* 移动端小屏热区下限 24px，避免孔位过小点不中 */
+      var hitR = Math.max(unit * 0.46, 24);
       for (var i = 0; i < NC; i++) {
         var c = BOARD.cells[i];
         var dx = px - (ox + c.sx * unit), dy = py - (oy + c.sy * unit);
         var d = dx * dx + dy * dy;
         if (d < bestD) { bestD = d; bestI = i; }
       }
-      return bestD <= (unit * 0.46) * (unit * 0.46) ? bestI : -1;
+      return bestD <= hitR * hitR ? bestI : -1;
     }
 
     function onClick(px, py) {
@@ -400,6 +434,7 @@
           G.board = Int8Array.from(s.b); G.turn = s.t; G.last = s.l; G.history.pop();
         }
         G.over = false; G.winner = 0; G.sel = -1; G.moves = [];
+        rebuildVacated();
         update();
       },
       hint: function () {
@@ -432,6 +467,7 @@
         G.snaps = []; G.over = false; G.winner = 0; G.sel = -1; G.moves = [];
         G.last = G.history.length ? G.history[G.history.length - 1] : null;
         G.startTs = d.ts || Date.now();
+        rebuildVacated();
         if (isWin(G.board, P1)) { G.over = true; G.winner = P1; }
         else if (isWin(G.board, P2)) { G.over = true; G.winner = P2; }
         update();
@@ -445,10 +481,13 @@
 
   global.Games = global.Games || {};
   global.Games.checkers = {
+    cat: 'board',
     id: 'checkers', name: '跳棋', emoji: '🔺',
     desc: '六角星盘，双方各 10 枚。走一步或连跳，最先把全部棋子送进对面三角星算赢。',
     tags: ['121 孔', '可连跳', '先进营者胜'],
     sides: ['🔴 红方（先手）', '🔵 蓝方（后手）'],
+    rules: '① 双方各 10 枚棋子，每回合沿相邻空位走一步；② 也可以跳过相邻棋子落到它正后方，能连跳就连跳；③ 最先把全部棋子送进对面三角营者胜；④ 对方赖在你营地不走也白搭——那会直接判你占满。',
+    guide: '① 优先把落后的棋子往前赶，别留「尾巴」；② 搭「跳梯」：把自己的棋子排成间隔链，一次能连跳很远；③ 对方棋子也可以借力跳——它是桥不是墙；④ 控制中心区域，入口越窄对方越难防。',
     tip: '跳跃可以“搭桥”：把自己的棋子排成阶梯，一次能跳很远。别把落后的棋子落在后面。',
     mount: mount
   };

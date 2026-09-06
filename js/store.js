@@ -8,6 +8,40 @@
     global.localStorage.removeItem(PREFIX + '__t');
   } catch (e) { ok = false; }
 
+  var BADGE_DEFS = [
+    { id: 'first_win', name: '初露锋芒', emoji: '🐣', desc: '赢得任意 1 局游戏' },
+    { id: 'math_streak', name: '连对超人', emoji: '🔥', desc: '口算达成 5 连对及以上' },
+    { id: 'math_master', name: '极速心算家', emoji: '⚡', desc: '口算一轮全对 100%' },
+    { id: 'hanoi_3', name: '通天塔学徒', emoji: '🗼', desc: '通关汉诺塔 3 层' },
+    { id: 'hanoi_master', name: '汉诺塔宗师', emoji: '👑', desc: '通关汉诺塔 5 层或以上' },
+    { id: 'lights_novice', name: '点灯小行家', emoji: '💡', desc: '通关奇妙点灯关卡' },
+    { id: 'lights_master', name: '璀璨星空', emoji: '✨', desc: '通关奇妙点灯 5 关以上' },
+    { id: 'memory_champ', name: '最强大脑', emoji: '🎴', desc: '记忆翻牌全配对完成' },
+    { id: 'game24_pro', name: '巧凑24点', emoji: '🎯', desc: '成功解出 24 点' },
+    { id: 'slide_solved', name: '华容道破局', emoji: '🧩', desc: '成功还原数字华容道' },
+    { id: 'nonogram_clear', name: '像素画家', emoji: '🦊', desc: '完成一幅数织像素画' },
+    { id: 'nonogram_pro', name: '数织大师', emoji: '🎨', desc: '完成 10×10 高阶数织' },
+    { id: 'mastermind_crack', name: '神探破译', emoji: '🕵️', desc: '成功破译推理密码' },
+    { id: 'mastermind_fast', name: '极速神探', emoji: '🔍', desc: '4 次以内破译密码' },
+    { id: 'pattern_brain', name: '规律小达人', emoji: '🐣', desc: '规律排排看全部答对' },
+    { id: 'shadow_eagle', name: '火眼金睛', emoji: '🐰', desc: '影子找朋友全部答对' },
+    { id: 'mole_hammer', name: '快手小锤手', emoji: '🐹', desc: '打地鼠达成目标分数' },
+    { id: 'catch_star', name: '摘星小能手', emoji: '⭐', desc: '接星星达成目标分数' },
+    { id: 'puzzle_star', name: '拼拼乐高手', emoji: '🖼️', desc: '完成一幅可爱拼图' },
+    { id: 'diff_master', name: '找不同神眼', emoji: '🔍', desc: '找不同全部通关' },
+    { id: 'simon_brain', name: '记忆小灯神', emoji: '💡', desc: '记忆亮灯达到目标步数' },
+    { id: 'slide_pilot', name: '滑动小司机', emoji: '🚂', desc: '复原移动拼图' },
+    { id: 'drag_ninja', name: '巧手搬运工', emoji: '🧸', desc: '完成拖拖拼图' },
+    { id: 'sokoban_brain', name: '搬运小达人', emoji: '🚜', desc: '完成一个推箱子关卡包' },
+    { id: 'pipes_flow', name: '水利工程师', emoji: '🚇', desc: '接通全部水管不漏水' },
+    { id: 'mines_digger', name: '排雷小英雄', emoji: '💣', desc: '扫雷推理获胜' },
+    { id: 'balance_angel', name: '天平小法官', emoji: '⚖️', desc: '连续平衡 5 道天平题' },
+    { id: 'music_star', name: '小小音乐家', emoji: '🎵', desc: '完整弹完一首儿歌' },
+    { id: 'paint_master', name: '神笔小画家', emoji: '🎨', desc: '保存第一幅画作' },
+    { id: 'win_10', name: '常胜小将军', emoji: '🏆', desc: '累计获胜达到 10 局' },
+    { id: 'win_30', name: '棋坛小霸王', emoji: '🎖️', desc: '累计获胜达到 30 局' }
+  ];
+
   var Store = {
     persistent: ok,
     get: function (key, def) {
@@ -77,6 +111,31 @@
       Store.set('records', Store.getRecords().filter(function (r) { return r.ts !== ts; }));
     },
     clearRecords: function () { Store.set('records', []); Store.set('stats', {}); },
+
+    /* ---------- 成就与智慧之星系统 ---------- */
+    getStars: function () { return Store.get('stars', 0); },
+    addStars: function (n) {
+      var cur = Store.getStars() + (n || 1);
+      Store.set('stars', cur);
+      return cur;
+    },
+    getBadges: function () { return Store.get('badges', []); },
+    unlockBadge: function (id) {
+      var list = Store.getBadges();
+      if (list.indexOf(id) >= 0) return false;
+      list.push(id);
+      Store.set('badges', list);
+      return true;
+    },
+    getAllBadges: function () {
+      var unlocked = Store.getBadges();
+      return BADGE_DEFS.map(function (b) {
+        return {
+          id: b.id, name: b.name, emoji: b.emoji, desc: b.desc,
+          unlocked: unlocked.indexOf(b.id) >= 0
+        };
+      });
+    },
 
     saveGame: function (gameId, data) { Store.set('save.' + gameId, data); },
     loadGame: function (gameId) { return Store.get('save.' + gameId, null); },
