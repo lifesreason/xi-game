@@ -42,7 +42,7 @@
         return { e: e, done: false };
       });
       S = { mode: pairs, pairs: m.pairs, cols: m.cols, label: m.label, deck: deck,
-        first: -1, second: -1, lock: false, moves: 0, found: 0, sec: 0, t0: Date.now(), over: false, hist: [] };
+        first: -1, second: -1, lock: false, moves: 0, found: 0, sec: 0, t0: Date.now(), over: false, hist: [], streak: 0 };
       build();
       startTimer();
       update();
@@ -90,11 +90,19 @@
       if (a.e === b.e) {
         a.done = b.done = true;
         S.first = -1; S.second = -1; S.found++;
+        S.streak++;
+        /* 连击反馈：连续配对不放错就有热度加成 */
+        if (S.streak >= 2) {
+          Sfx.combo(Math.min(5, S.streak));
+          if (global.Fx) Fx.burst(board.children[i], '🔥', 3);
+        } else Sfx.pop();
+        if (S.streak >= 2 && global.Fx) api.toast('🔥 ' + S.streak + ' 连对！');
         refresh();
-        Sfx.win();
         update();
         if (S.found === S.pairs) finish();
       } else {
+        S.streak = 0;
+        Sfx.click();
         S.lock = true;
         refresh();
         flipBack = setTimeout(function () {
@@ -108,16 +116,23 @@
     function finish() {
       S.over = true; S.sec = elapsed(); stopTimer();
       refresh();
-      api.over('win', { moves: S.moves, sec: S.sec, score: S.label });
+      Sfx.win();
+      var isRec = global.Store && Store.setBest('memory.moves.' + S.mode, S.moves, true);
+      api.over('win', {
+        moves: S.moves, sec: S.sec, score: S.label,
+        newRecord: isRec ? S.label + ' 最少翻牌新纪录：' + S.moves + ' 次' : ''
+      });
     }
 
     function update() {
       if (!S) return;
       api.status(S.over ? '完成！' + S.moves + ' 次 · ' + fmtTime(S.sec)
         : '配对 ' + S.found + '/' + S.pairs + ' · ' + S.moves + ' 次 · ' + fmtTime(elapsed()));
+      var best = global.Store ? Store.getBest('memory.moves.' + S.mode) : null;
       api.info(
-        '模式：<b>' + S.label + '</b>　翻开：<b>' + S.moves + '</b> 次<br>' +
-        '一次翻两张，一样的就留下。<br>记不住？点<b>「提示」</b>偷看一秒，但要多翻一次哦！'
+        '模式：<b>' + S.label + '</b>　翻开：<b>' + S.moves + '</b> 次' +
+        (best ? '　🏆 本机最佳：<b>' + best + '</b> 次' : '') + '<br>' +
+        '一次翻两张，一样的就留下。连续配对不放错有连击加成！<br>记不住？点<b>「提示」</b>偷看一秒，但要多翻一次哦！'
       );
       api.changed();
     }
@@ -134,7 +149,7 @@
             mode: String(data.mode), pairs: MODES[String(data.mode)].pairs,
             cols: MODES[String(data.mode)].cols, label: MODES[String(data.mode)].label,
             deck: data.deck.map(function (c) { return { e: c.e, done: !!c.done }; }),
-            first: -1, second: -1, lock: false, moves: data.moves || 0,
+            first: -1, second: -1, lock: false, moves: data.moves || 0, streak: 0,
             found: data.deck.filter(function (c) { return c.done; }).length / 2,
             sec: data.sec || 0, over: !!data.over,
             t0: Date.now() - (data.sec || 0) * 1000, hist: []

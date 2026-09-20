@@ -171,7 +171,11 @@
         stopTimer();
         Fx.confetti({ count: 100 });
         Sfx.win();
-        api.over('win', { moves: G.moves || need, sec: elapsed(), score: LEVELS[G.levelKey].label });
+        var isRec = global.Store && Store.setBest('mines.time.' + G.levelKey, elapsed(), true);
+        api.over('win', {
+          moves: G.moves || need, sec: elapsed(), score: LEVELS[G.levelKey].label,
+          newRecord: isRec ? LEVELS[G.levelKey].label + ' 最快排雷新纪录：' + elapsed() + ' 秒' : ''
+        });
         update();
       } else {
         update();

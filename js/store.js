@@ -137,6 +137,17 @@
       });
     },
 
+    /* ---------- 最佳纪录系统 ----------
+       key: '游戏.模式'；lowerBetter=true 表示数值越小越好（步数/用时）。
+       返回 true 表示打破了之前的纪录（首次达成不算破纪录）。 */
+    getBest: function (key) { return Store.get('best.' + key, null); },
+    setBest: function (key, val, lowerBetter) {
+      var cur = Store.get('best.' + key, null);
+      var isRecord = cur != null && (lowerBetter ? val < cur : val > cur);
+      if (isRecord || cur == null) Store.set('best.' + key, val);
+      return isRecord;
+    },
+
     saveGame: function (gameId, data) { Store.set('save.' + gameId, data); },
     loadGame: function (gameId) { return Store.get('save.' + gameId, null); },
     clearGame: function (gameId) { Store.del('save.' + gameId); },

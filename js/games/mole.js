@@ -148,9 +148,11 @@
         Fx.confetti({ count: 90 });
         Sfx.win();
       } else Sfx.lose();
+      var isRec = global.Store && Store.setBest('mole.score.' + G.level, G.score, false);
       api.over(win ? 'win' : 'lose', {
         moves: G.whacks, sec: DURATION,
-        score: '敲到 ' + G.score + ' 只 · 目标 ' + goal
+        score: '敲到 ' + G.score + ' 只 · 目标 ' + goal,
+        newRecord: isRec ? '本机最多新纪录：敲到 ' + G.score + ' 只' : ''
       });
       update();
     }

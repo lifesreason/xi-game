@@ -199,11 +199,13 @@
           global.Store.unlockBadge('hanoi_3');
           if (S.n >= 5) global.Store.unlockBadge('hanoi_master');
         }
+        var isRec = global.Store && Store.setBest('hanoi.moves.' + S.n, S.moves, true);
         api.over('win', {
           moves: S.moves,
           sec: S.sec,
           perfect: perfect,
-          score: S.moves + '步 (最少' + S.minMoves + ')'
+          score: S.moves + '步 (最少' + S.minMoves + ')',
+          newRecord: isRec ? S.n + ' 层最少步数新纪录：' + S.moves + ' 步' : ''
         });
       }
     }

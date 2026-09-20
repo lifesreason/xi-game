@@ -46,6 +46,8 @@
     ['home', 'play', 'records', 'settings'].forEach(function (v) {
       $('view-' + v).classList.toggle('hidden', v !== name);
     });
+    /* 任何视图切换都收掉浮层弹窗，避免旧弹窗挡住新页面 */
+    $('rules-modal').classList.add('hidden');
     Array.prototype.forEach.call(document.querySelectorAll('.tab, .b-tab'), function (t) {
       t.classList.toggle('active', t.dataset.view === name);
     });
@@ -292,6 +294,8 @@
     var newBadges = [];
     var starsBox = $('result-stars');
     if (starsBox) starsBox.innerHTML = '';
+    var recordBox = $('result-record');
+    if (recordBox) { recordBox.textContent = ''; recordBox.style.display = 'none'; }
 
     if (result === 'win') {
       if (Store.unlockBadge('first_win')) newBadges.push('first_win');
@@ -372,6 +376,10 @@
       (settings.mode === 'pvp' ? '双人' : (global.Games[id].noLevel ? '挑战' : LEVEL_NAME[settings.levels[id]])) +
       ' · ' + (info.moves || 0) + ' 手 · ' + (info.sec || 0) + ' 秒' +
       (info.score ? ' · ' + info.score : '');
+    if (info.newRecord && recordBox) {
+      recordBox.textContent = '🏆 ' + info.newRecord;
+      recordBox.style.display = '';
+    }
     m.classList.remove('hidden');
     if (global.Fx) global.Fx.pop($('result-emoji'));
 

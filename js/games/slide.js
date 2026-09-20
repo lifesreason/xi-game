@@ -59,7 +59,7 @@
     }
 
     function newGame(n) {
-      S = { n: n, tiles: scramble(n), blank: 0, moves: 0, sec: 0, t0: Date.now(), over: false, hist: [], hintTile: -1, last: -1 };
+      S = { n: n, tiles: scramble(n), blank: 0, moves: 0, sec: 0, t0: Date.now(), over: false, hist: [], hintTile: -1, last: -1, anim: null };
       S.blank = S.tiles.indexOf(0);
       startTimer();
       update();
@@ -69,12 +69,23 @@
       var t = S.tiles, nb = neighbors(S.n, S.blank);
       if (nb.indexOf(p) < 0) return false;
       if (record) S.hist.push(S.blank);
+      var from = p, to = S.blank;
       t[S.blank] = t[p]; t[p] = 0;
       S.last = p; S.blank = p; S.hintTile = -1;
       S.moves++;
-      Sfx.click();
+      Sfx.move();
+      /* 滑动动画：让移动的块从原格平滑滑入空格 */
+      S.anim = { piece: t[to], from: from, to: to, t0: Date.now() };
+      animate();
       after();
       return true;
+    }
+
+    function animate() {
+      if (!S || !S.anim) return;
+      bk.redraw();
+      if (Date.now() - S.anim.t0 < 140) requestAnimationFrame(animate);
+      else { S.anim = null; bk.redraw(); }
     }
 
     function after() {
@@ -83,7 +94,12 @@
       for (var i = 0; i < S.tiles.length - 1; i++) if (S.tiles[i] !== i + 1) { win = false; break; }
       if (win) {
         S.over = true; S.sec = elapsed(); stopTimer();
-        api.over('win', { moves: S.moves, sec: S.sec, score: S.n + '×' + S.n });
+        var isRec = global.Store && Store.setBest('slide.moves.' + S.n, S.moves, true);
+        var best = global.Store ? Store.getBest('slide.moves.' + S.n) : null;
+        api.over('win', {
+          moves: S.moves, sec: S.sec, score: S.n + '×' + S.n + ' · 最佳 ' + best + ' 步',
+          newRecord: isRec ? S.n + '×' + S.n + ' 最少步数新纪录：' + S.moves + ' 步' : ''
+        });
       }
     }
 
@@ -92,10 +108,12 @@
       var near = nearDone();
       api.status(S.over ? '完成！' + S.moves + ' 步 · ' + fmtTime(S.sec)
         : (near ? '就快好了！' : '') + S.moves + ' 步 · ' + fmtTime(elapsed()));
+      var bestMove = global.Store ? Store.getBest('slide.moves.' + S.n) : null;
       api.info(
-        '盘面：<b>' + S.n + '×' + S.n + '</b>　步数：<b>' + S.moves + '</b><br>' +
+        '盘面：<b>' + S.n + '×' + S.n + '</b>　步数：<b>' + S.moves + '</b>' +
+        (bestMove ? '　🏆 本机最佳：<b>' + bestMove + '</b> 步' : '') + '<br>' +
         '目标：把数字按 <b>1 → ' + (S.n * S.n - 1) + '</b> 从左到右、从上到下排好。<br>' +
-        '点空格旁边的数字就能滑过去，想好再动哦！'
+        '点空格旁边的块，或直接<b>往滑的方向刷</b>，想好再动哦！'
       );
       api.changed();
       if (bk) bk.redraw();
@@ -116,6 +134,15 @@
         if (!v) continue;
         var r = (i / n) | 0, c = i % n;
         var x = c * cell + gap, y = r * cell + gap, w = cell - gap * 2;
+        /* 滑动动画：正在移动的块按缓动插值绘制 */
+        if (S.anim && v === S.anim.piece) {
+          var prog = Math.min(1, (Date.now() - S.anim.t0) / 140);
+          prog = 1 - (1 - prog) * (1 - prog); /* easeOut */
+          var fr = (S.anim.from / n) | 0, fc = S.anim.from % n;
+          var tr = (S.anim.to / n) | 0, tc = S.anim.to % n;
+          x = (fc + (tc - fc) * prog) * cell + gap;
+          y = (fr + (tr - fr) * prog) * cell + gap;
+        }
         var hue = 205 - (v / (n * n)) * 160;
         g.save();
         g.shadowColor = 'rgba(40,70,120,.25)'; g.shadowBlur = cell * 0.06; g.shadowOffsetY = cell * 0.03;
@@ -139,16 +166,39 @@
       }
     }
 
+    var swSuppressUntil = 0; /* 滑动手势后短暂抑制 click，防止一次滑动算两步 */
     bk = BK.create(host, {
       aspect: 1,
       draw: draw,
       click: function (x, y, W) {
         if (!S || S.over) return;
+        if (Date.now() < swSuppressUntil) return;
         var cell = W / S.n, c = (x / cell) | 0, r = (y / cell) | 0;
         if (c < 0 || r < 0 || c >= S.n || r >= S.n) return;
         slide(r * S.n + c, true);
       }
     });
+    /* 滑动手势：往哪个方向滑，相邻的块就往空格滑过去 */
+    var slideCv = host.querySelector('canvas');
+    if (slideCv) {
+      slideCv.style.touchAction = 'none';
+      var swX = 0, swY = 0, swOn = false;
+      slideCv.addEventListener('pointerdown', function (e) { swX = e.clientX; swY = e.clientY; swOn = true; });
+      slideCv.addEventListener('pointerup', function (e) {
+        if (!swOn) return;
+        swOn = false;
+        var dx = e.clientX - swX, dy = e.clientY - swY;
+        if (Math.abs(dx) + Math.abs(dy) < 28) return;
+        if (!S || S.over) return;
+        swSuppressUntil = Date.now() + 450;
+        var dcol = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? -1 : 1) : 0;   /* 往左滑＝右边的块滑进来 */
+        var drow = dcol === 0 ? (dy > 0 ? -1 : 1) : 0;
+        var br = (S.blank / S.n) | 0, bc = S.blank % S.n;
+        var tr = br + drow, tc = bc + dcol;
+        if (tr < 0 || tc < 0 || tr >= S.n || tc >= S.n) return;
+        slide(tr * S.n + tc, true);
+      });
+    }
 
     update();
 

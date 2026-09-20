@@ -141,9 +141,11 @@
       var goal = LEVELS[G.level].goal;
       var win = G.score >= goal;
       if (win) { Fx.confetti({ count: 90 }); Sfx.win(); } else Sfx.lose();
+      var isRec = global.Store && Store.setBest('catch.score.' + G.level, G.score, false);
       api.over(win ? 'win' : 'lose', {
         moves: G.caught, sec: DURATION,
-        score: '接到 ' + G.score + ' 分 · 目标 ' + goal
+        score: '接到 ' + G.score + ' 分 · 目标 ' + goal,
+        newRecord: isRec ? '本机最高分新纪录：' + G.score + ' 分' : ''
       });
       update();
       bk.redraw();

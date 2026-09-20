@@ -187,7 +187,11 @@
       if (S.nums.length === 1) {
         if (rEq24(S.nums[0])) {
           S.over = true; S.sec = elapsed(); stopTimer();
-          api.over('win', { moves: S.moves, sec: S.sec, score: S.nums[0].e + '=24' });
+          var isRec = global.Store && Store.setBest('game24.time.' + S.max, S.sec, true);
+          api.over('win', {
+            moves: S.moves, sec: S.sec, score: S.nums[0].e + '=24',
+            newRecord: isRec ? '本档最快新纪录：' + S.sec + ' 秒解出' : ''
+          });
         } else {
           api.toast('最后得到 ' + rStr(S.nums[0]) + '，不是 24。点「悔棋」换条路试试！');
         }
