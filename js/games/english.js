@@ -7125,6 +7125,978 @@
       bindEvents();
     }
 
+    /* ============================================================
+       PEP 人教版矢量绘本插画系统 (100% 离线、高清不失真矢量 SVG)
+       - 课文情景大图 (Let's talk 真实教材情景还原)
+       - 核心生词图文闪卡 (Let's learn 专属视觉记忆锚点)
+       - 课标金句情景徽章 (Key Patterns 语境微插画)
+       - 趣味歌谣律动横幅 (Let's chant 韵律音符)
+       ============================================================ */
+    var PepIllustrations = (function () {
+      function wrapSvg(w, h, content, className) {
+        className = className || '';
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" class="' + className + '" preserveAspectRatio="xMidYMid meet">' + content + '</svg>';
+      }
+
+      /* 1. 单元情景大图 (Scene Illustrations) */
+      function getSceneSvg(unitKey) {
+        var defs = '<defs>' +
+          '<linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#bae6fd"/><stop offset="100%" stop-color="#e0f2fe"/></linearGradient>' +
+          '<linearGradient id="grassGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#86efac"/><stop offset="100%" stop-color="#22c55e"/></linearGradient>' +
+          '<linearGradient id="warmWallGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#fef3c7"/><stop offset="100%" stop-color="#fed7aa"/></linearGradient>' +
+          '<linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fde047"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient>' +
+          '<linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ef4444"/><stop offset="20%" stop-color="#f97316"/><stop offset="40%" stop-color="#eab308"/><stop offset="60%" stop-color="#22c55e"/><stop offset="80%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#a855f7"/></linearGradient>' +
+          '<filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity="0.15"/></filter>' +
+        '</defs>';
+
+        var c = '';
+        if (unitKey === 'u1') {
+          // Unit 1: 校园相遇交友 (Mike & Wu Binbin 打招呼，Sarah & Chen Jie 分享文具)
+          c = defs +
+            '<rect width="600" height="240" rx="16" fill="url(#skyGrad)"/>' +
+            '<circle cx="80" cy="50" r="36" fill="url(#sunGrad)" opacity="0.9"/>' +
+            '<circle cx="80" cy="50" r="48" fill="#fef08a" opacity="0.3"/>' +
+            '<path d="M 120 180 A 180 130 0 0 1 480 180" fill="none" stroke="url(#rainbowGrad)" stroke-width="8" opacity="0.35"/>' +
+            '<path d="M 220 50 Q 235 35 255 45 Q 275 35 290 50 Q 305 60 285 75 Q 260 80 230 75 Q 210 65 220 50 Z" fill="#ffffff" opacity="0.85"/>' +
+            '<rect x="250" y="80" width="100" height="90" fill="#fca5a5" rx="4"/>' +
+            '<polygon points="250,80 300,45 350,80" fill="#dc2626"/>' +
+            '<rect x="285" y="55" width="30" height="25" fill="#f87171"/>' +
+            '<circle cx="300" cy="67" r="7" fill="#ffffff"/>' +
+            '<rect x="265" y="100" width="20" height="25" fill="#e0f2fe" rx="2"/>' +
+            '<rect x="315" y="100" width="20" height="25" fill="#e0f2fe" rx="2"/>' +
+            '<rect x="290" y="140" width="20" height="30" fill="#78350f" rx="3"/>' +
+            '<path d="M 0 170 Q 150 145 300 165 Q 450 180 600 160 L 600 240 L 0 240 Z" fill="url(#grassGrad)"/>' +
+            // Mike
+            '<g transform="translate(90, 95)" filter="url(#softShadow)">' +
+              '<rect x="0" y="38" width="14" height="28" rx="5" fill="#2563eb"/>' +
+              '<rect x="10" y="32" width="28" height="42" rx="8" fill="#38bdf8"/>' +
+              '<rect x="14" y="74" width="8" height="35" rx="4" fill="#1e3a8a"/>' +
+              '<rect x="26" y="74" width="8" height="35" rx="4" fill="#1e3a8a"/>' +
+              '<ellipse cx="17" cy="110" rx="7" ry="4" fill="#475569"/>' +
+              '<ellipse cx="31" cy="110" rx="7" ry="4" fill="#475569"/>' +
+              '<ellipse cx="24" cy="18" rx="14" ry="15" fill="#fde047"/>' +
+              '<ellipse cx="24" cy="20" rx="12" ry="13" fill="#fed7aa"/>' +
+              '<path d="M 12 18 Q 24 6 36 18 Q 30 10 24 11 Q 18 10 12 18 Z" fill="#eab308"/>' +
+              '<circle cx="20" cy="18" r="2" fill="#0f172a"/><circle cx="28" cy="18" r="2" fill="#0f172a"/>' +
+              '<path d="M 21 24 Q 24 28 27 24" stroke="#e11d48" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+              '<path d="M 36 36 Q 48 20 54 8" stroke="#fed7aa" stroke-width="6" stroke-linecap="round" fill="none"/>' +
+              '<circle cx="55" cy="7" r="5" fill="#fed7aa"/>' +
+              '<g transform="translate(45, -20)">' +
+                '<rect x="0" y="0" width="88" height="26" rx="8" fill="#ffffff" stroke="#38bdf8" stroke-width="2"/>' +
+                '<polygon points="8,26 14,33 18,26" fill="#ffffff"/>' +
+                '<polygon points="8,26 14,33 18,26" stroke="#38bdf8" stroke-width="2" fill="none"/>' +
+                '<text x="44" y="17" font-size="11" font-weight="bold" fill="#0369a1" text-anchor="middle">Hello! I\'m Mike</text>' +
+              '</g>' +
+            '</g>' +
+            // Wu Binbin
+            '<g transform="translate(230, 95)" filter="url(#softShadow)">' +
+              '<rect x="34" y="38" width="14" height="28" rx="5" fill="#10b981"/>' +
+              '<rect x="10" y="32" width="28" height="42" rx="8" fill="#f97316"/>' +
+              '<rect x="14" y="74" width="8" height="35" rx="4" fill="#334155"/>' +
+              '<rect x="26" y="74" width="8" height="35" rx="4" fill="#334155"/>' +
+              '<ellipse cx="17" cy="110" rx="7" ry="4" fill="#0f172a"/>' +
+              '<ellipse cx="31" cy="110" rx="7" ry="4" fill="#0f172a"/>' +
+              '<ellipse cx="24" cy="20" rx="12" ry="13" fill="#fed7aa"/>' +
+              '<path d="M 12 18 Q 24 5 36 18 Q 33 11 24 11 Q 15 11 12 18 Z" fill="#1e293b"/>' +
+              '<circle cx="20" cy="18" r="2" fill="#0f172a"/><circle cx="28" cy="18" r="2" fill="#0f172a"/>' +
+              '<path d="M 21 24 Q 24 28 27 24" stroke="#e11d48" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+              '<path d="M 12 36 Q -2 22 -6 10" stroke="#fed7aa" stroke-width="6" stroke-linecap="round" fill="none"/>' +
+              '<circle cx="-7" cy="9" r="5" fill="#fed7aa"/>' +
+              '<g transform="translate(-50, -20)">' +
+                '<rect x="0" y="0" width="94" height="26" rx="8" fill="#ffffff" stroke="#f97316" stroke-width="2"/>' +
+                '<polygon points="76,26 82,33 86,26" fill="#ffffff"/>' +
+                '<polygon points="76,26 82,33 86,26" stroke="#f97316" stroke-width="2" fill="none"/>' +
+                '<text x="47" y="17" font-size="11" font-weight="bold" fill="#c2410c" text-anchor="middle">Hi! Wu Binbin</text>' +
+              '</g>' +
+            '</g>' +
+            // Share Bench
+            '<g transform="translate(410, 130)">' +
+              '<rect x="0" y="45" width="130" height="10" rx="3" fill="#b45309"/>' +
+              '<rect x="15" y="55" width="6" height="30" fill="#78350f"/>' +
+              '<rect x="110" y="55" width="6" height="30" fill="#78350f"/>' +
+              '<rect x="45" y="36" width="36" height="10" rx="3" fill="#ec4899"/>' +
+              '<circle cx="30" cy="20" r="10" fill="#fed7aa"/>' +
+              '<circle cx="22" cy="18" r="5" fill="#facc15"/><circle cx="38" cy="18" r="5" fill="#facc15"/>' +
+              '<rect x="22" y="30" width="16" height="24" rx="4" fill="#f43f5e"/>' +
+              '<circle cx="98" cy="20" r="10" fill="#fed7aa"/>' +
+              '<path d="M 88 18 Q 98 8 108 18" fill="#0f172a"/>' +
+              '<rect x="90" y="30" width="16" height="24" rx="4" fill="#8b5cf6"/>' +
+              '<g transform="translate(15, -12)">' +
+                '<rect x="0" y="0" width="100" height="20" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5"/>' +
+                '<text x="50" y="14" font-size="10" font-weight="bold" fill="#047857" text-anchor="middle">🤝 We can share!</text>' +
+              '</g>' +
+            '</g>';
+        } else if (unitKey === 'u2') {
+          // Unit 2: 温馨家庭客厅与全家福大合影金相框
+          c = defs +
+            '<rect width="600" height="240" rx="16" fill="url(#warmWallGrad)"/>' +
+            '<line x1="0" y1="70" x2="600" y2="70" stroke="#fde68a" stroke-width="2"/>' +
+            '<path d="M 100 0 L 100 40" stroke="#78350f" stroke-width="2"/>' +
+            '<path d="M 85 40 Q 100 30 115 40 L 125 58 L 75 58 Z" fill="#f59e0b"/>' +
+            '<ellipse cx="100" cy="58" rx="25" ry="6" fill="#fef08a" opacity="0.6"/>' +
+            '<g transform="translate(180, 20)" filter="url(#softShadow)">' +
+              '<rect x="0" y="0" width="240" height="150" rx="10" fill="#fef9c3" stroke="#b45309" stroke-width="6"/>' +
+              '<rect x="6" y="6" width="228" height="138" rx="6" fill="#ffffff"/>' +
+              '<rect x="70" y="10" width="100" height="18" rx="9" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>' +
+              '<text x="120" y="23" font-size="10" font-weight="bold" fill="#b45309" text-anchor="middle">❤️ Our Big Family</text>' +
+              // Grandpa
+              '<g transform="translate(25, 38)"><circle cx="16" cy="16" r="14" fill="#fed7aa"/><path d="M 2 14 Q 16 0 30 14" fill="#e2e8f0"/><circle cx="11" cy="15" r="4" fill="none" stroke="#64748b" stroke-width="1.5"/><circle cx="21" cy="15" r="4" fill="none" stroke="#64748b" stroke-width="1.5"/><line x1="15" y1="15" x2="17" y2="15" stroke="#64748b" stroke-width="1.5"/><rect x="6" y="32" width="20" height="28" rx="4" fill="#0284c7"/><text x="16" y="69" font-size="8" font-weight="bold" fill="#475569" text-anchor="middle">Grandpa</text></g>' +
+              // Grandma
+              '<g transform="translate(68, 38)"><circle cx="16" cy="16" r="14" fill="#fed7aa"/><circle cx="16" cy="2" r="6" fill="#cbd5e1"/><path d="M 3 14 Q 16 4 29 14" fill="#cbd5e1"/><circle cx="11" cy="16" r="3.5" fill="none" stroke="#e11d48" stroke-width="1.2"/><circle cx="21" cy="16" r="3.5" fill="none" stroke="#e11d48" stroke-width="1.2"/><rect x="6" y="32" width="20" height="28" rx="4" fill="#be185d"/><text x="16" y="69" font-size="8" font-weight="bold" fill="#475569" text-anchor="middle">Grandma</text></g>' +
+              // Father
+              '<g transform="translate(112, 38)"><circle cx="16" cy="16" r="14" fill="#fed7aa"/><path d="M 2 12 Q 16 0 30 12" fill="#334155"/><circle cx="11" cy="16" r="2" fill="#0f172a"/><circle cx="21" cy="16" r="2" fill="#0f172a"/><rect x="6" y="32" width="20" height="28" rx="4" fill="#1e40af"/><polygon points="16,33 13,44 16,50 19,44" fill="#ef4444"/><text x="16" y="69" font-size="8" font-weight="bold" fill="#475569" text-anchor="middle">Father</text></g>' +
+              // Mother
+              '<g transform="translate(156, 38)"><circle cx="16" cy="16" r="14" fill="#fed7aa"/><path d="M 2 16 Q 16 2 30 16 Q 28 32 30 36 Q 2 36 4 32 Z" fill="#92400e"/><circle cx="11" cy="16" r="2" fill="#0f172a"/><circle cx="21" cy="16" r="2" fill="#0f172a"/><rect x="6" y="32" width="20" height="28" rx="4" fill="#db2777"/><text x="16" y="69" font-size="8" font-weight="bold" fill="#475569" text-anchor="middle">Mother</text></g>' +
+              // Brother
+              '<g transform="translate(196, 44)"><circle cx="12" cy="12" r="10" fill="#fed7aa"/><path d="M 2 10 Q 12 2 22 10" fill="#f59e0b"/><rect x="4" y="24" width="16" height="22" rx="3" fill="#10b981"/><text x="12" y="55" font-size="8" font-weight="bold" fill="#475569" text-anchor="middle">Me</text></g>' +
+            '</g>' +
+            '<rect x="0" y="190" width="600" height="50" fill="#b45309"/>' +
+            '<ellipse cx="300" cy="215" rx="220" ry="20" fill="#fef08a" opacity="0.4"/>' +
+            '<g transform="translate(30, 150)"><rect x="0" y="20" width="120" height="40" rx="10" fill="#93c5fd"/><rect x="10" y="5" width="100" height="25" rx="8" fill="#60a5fa"/></g>' +
+            '<g transform="translate(450, 160)"><ellipse cx="50" cy="35" rx="45" ry="12" fill="#78350f"/><rect x="42" y="15" width="16" height="20" rx="4" fill="#38bdf8"/><circle cx="50" cy="5" r="7" fill="#fb7185"/></g>';
+        } else if (unitKey === 'u3') {
+          // Unit 3: 奇妙动物乐园 (大熊猫吃竹子、小白兔吃胡萝卜、小狗小猫)
+          c = defs +
+            '<rect width="600" height="240" rx="16" fill="url(#skyGrad)"/>' +
+            '<path d="M 0 160 Q 120 90 240 160 Q 360 80 500 150 Q 560 120 600 140 L 600 240 L 0 240 Z" fill="#bbf7d0" opacity="0.6"/>' +
+            '<circle cx="530" cy="55" r="28" fill="url(#sunGrad)"/>' +
+            '<path d="M 0 165 Q 180 140 380 160 Q 500 170 600 155 L 600 240 L 0 240 Z" fill="url(#grassGrad)"/>' +
+            '<path d="M 230 240 Q 280 190 320 200 Q 370 210 400 240 Z" fill="#38bdf8" opacity="0.7"/>' +
+            '<g transform="translate(30, 40)"><line x1="20" y1="160" x2="20" y2="0" stroke="#16a34a" stroke-width="7"/><line x1="45" y1="160" x2="45" y2="10" stroke="#22c55e" stroke-width="8"/></g>' +
+            '<g transform="translate(100, 100)" filter="url(#softShadow)">' +
+              '<ellipse cx="45" cy="65" rx="36" ry="32" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>' +
+              '<ellipse cx="20" cy="90" rx="14" ry="10" fill="#0f172a"/><ellipse cx="70" cy="90" rx="14" ry="10" fill="#0f172a"/>' +
+              '<path d="M 15 55 Q 35 68 55 60" stroke="#0f172a" stroke-width="14" stroke-linecap="round" fill="none"/>' +
+              '<line x1="38" y1="35" x2="48" y2="85" stroke="#22c55e" stroke-width="6" stroke-linecap="round"/>' +
+              '<circle cx="45" cy="32" r="26" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>' +
+              '<circle cx="23" cy="13" r="10" fill="#0f172a"/><circle cx="67" cy="13" r="10" fill="#0f172a"/>' +
+              '<ellipse cx="35" cy="30" rx="7" ry="9" fill="#0f172a" transform="rotate(-15 35 30)"/>' +
+              '<ellipse cx="55" cy="30" rx="7" ry="9" fill="#0f172a" transform="rotate(15 55 30)"/>' +
+              '<circle cx="36" cy="29" r="2.5" fill="#ffffff"/><circle cx="54" cy="29" r="2.5" fill="#ffffff"/>' +
+              '<ellipse cx="45" cy="40" rx="4" ry="3" fill="#0f172a"/>' +
+              '<rect x="20" y="105" width="50" height="18" rx="9" fill="#f8fafc" stroke="#334155" stroke-width="1.2"/>' +
+              '<text x="45" y="118" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">🐼 Panda</text>' +
+            '</g>' +
+            '<g transform="translate(260, 130)" filter="url(#softShadow)">' +
+              '<ellipse cx="25" cy="50" rx="18" ry="16" fill="#ffffff"/>' +
+              '<ellipse cx="18" cy="14" rx="5" ry="16" fill="#ffffff"/><ellipse cx="18" cy="14" rx="2.5" ry="12" fill="#fbcfe8"/>' +
+              '<ellipse cx="30" cy="14" rx="5" ry="16" fill="#ffffff"/><ellipse cx="30" cy="14" rx="2.5" ry="12" fill="#fbcfe8"/>' +
+              '<circle cx="25" cy="32" r="14" fill="#ffffff"/><circle cx="20" cy="30" r="2" fill="#e11d48"/><circle cx="30" cy="30" r="2" fill="#e11d48"/>' +
+              '<polygon points="35,46 45,62 38,62" fill="#f97316"/>' +
+              '<rect x="3" y="68" width="46" height="16" rx="8" fill="#fdf2f8" stroke="#f472b6" stroke-width="1.2"/>' +
+              '<text x="26" y="80" font-size="9" font-weight="bold" fill="#db2777" text-anchor="middle">🐰 Rabbit</text>' +
+            '</g>' +
+            '<g transform="translate(370, 135)" filter="url(#softShadow)">' +
+              '<ellipse cx="30" cy="45" rx="20" ry="16" fill="#f59e0b"/><circle cx="22" cy="26" r="14" fill="#f59e0b"/>' +
+              '<ellipse cx="10" cy="26" rx="5" ry="10" fill="#d97706"/><ellipse cx="34" cy="26" rx="5" ry="10" fill="#d97706"/>' +
+              '<circle cx="18" cy="24" r="2" fill="#0f172a"/><circle cx="26" cy="24" r="2" fill="#0f172a"/>' +
+              '<rect x="8" y="65" width="40" height="16" rx="8" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.2"/>' +
+              '<text x="28" y="77" font-size="9" font-weight="bold" fill="#b45309" text-anchor="middle">🐶 Dog</text>' +
+            '</g>' +
+            '<g transform="translate(480, 80)"><circle cx="25" cy="12" r="12" fill="#38bdf8"/><polygon points="35,12 43,15 35,18" fill="#f59e0b"/><text x="25" y="4" font-size="12" fill="#0284c7">🎶</text></g>';
+        } else if (unitKey === 'u4') {
+          // Unit 4: 阳光果园与植物温室 (大苹果树、香蕉、向日葵花田、花洒)
+          c = defs +
+            '<rect width="600" height="240" rx="16" fill="url(#skyGrad)"/>' +
+            '<circle cx="500" cy="50" r="42" fill="url(#sunGrad)"/>' +
+            '<path d="M 0 160 Q 150 140 300 160 Q 450 175 600 150 L 600 240 L 0 240 Z" fill="url(#grassGrad)"/>' +
+            '<g transform="translate(40, 30)" filter="url(#softShadow)">' +
+              '<path d="M 90 200 L 90 120 Q 90 90 70 80 L 110 80 Q 90 100 100 200 Z" fill="#92400e"/>' +
+              '<circle cx="50" cy="70" r="45" fill="#22c55e"/><circle cx="100" cy="50" r="50" fill="#16a34a"/><circle cx="140" cy="75" r="42" fill="#15803d"/>' +
+              '<g transform="translate(45, 55)"><circle cx="8" cy="8" r="8" fill="#ef4444"/><ellipse cx="6" cy="6" rx="2" ry="1" fill="#fff" opacity="0.6"/></g>' +
+              '<g transform="translate(85, 35)"><circle cx="8" cy="8" r="8" fill="#ef4444"/><ellipse cx="6" cy="6" rx="2" ry="1" fill="#fff" opacity="0.6"/></g>' +
+              '<g transform="translate(125, 65)"><circle cx="8" cy="8" r="8" fill="#ef4444"/><ellipse cx="6" cy="6" rx="2" ry="1" fill="#fff" opacity="0.6"/></g>' +
+              '<g transform="translate(75, 80)"><circle cx="8" cy="8" r="8" fill="#ef4444"/><ellipse cx="6" cy="6" rx="2" ry="1" fill="#fff" opacity="0.6"/></g>' +
+              '<rect x="60" y="180" width="70" height="20" rx="10" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>' +
+              '<text x="95" y="194" font-size="10" font-weight="bold" fill="#b91c1c" text-anchor="middle">🍎 Apple Tree</text>' +
+            '</g>' +
+            '<g transform="translate(260, 150)" filter="url(#softShadow)">' +
+              '<path d="M 10 30 Q 35 55 60 30 L 55 50 Q 35 60 15 50 Z" fill="#b45309"/>' +
+              '<path d="M 15 25 Q 35 15 50 35 Q 35 25 15 25 Z" fill="#eab308"/><path d="M 18 30 Q 38 20 54 40 Q 38 30 18 30 Z" fill="#facc15"/>' +
+              '<rect x="12" y="58" width="52" height="16" rx="8" fill="#fefce8" stroke="#eab308" stroke-width="1.2"/>' +
+              '<text x="38" y="70" font-size="9" font-weight="bold" fill="#a16207" text-anchor="middle">🍌 Banana</text>' +
+            '</g>' +
+            '<g transform="translate(360, 100)" filter="url(#softShadow)">' +
+              '<line x1="40" y1="60" x2="40" y2="120" stroke="#16a34a" stroke-width="6"/>' +
+              '<circle cx="40" cy="50" r="16" fill="#78350f"/>' +
+              '<g fill="#facc15"><ellipse cx="40" cy="28" rx="6" ry="10"/><ellipse cx="62" cy="50" rx="10" ry="6"/><ellipse cx="40" cy="72" rx="6" ry="10"/><ellipse cx="18" cy="50" rx="10" ry="6"/></g>' +
+              '<rect x="14" y="115" width="54" height="16" rx="8" fill="#fefce8" stroke="#ca8a04" stroke-width="1.2"/>' +
+              '<text x="41" y="127" font-size="9" font-weight="bold" fill="#854d0e" text-anchor="middle">🌻 Flower</text>' +
+            '</g>' +
+            '<g transform="translate(460, 130)">' +
+              '<rect x="15" y="15" width="30" height="22" rx="6" fill="#38bdf8"/><path d="M 45 22 L 65 14" stroke="#0284c7" stroke-width="4"/><circle cx="68" cy="13" r="5" fill="#0284c7"/>' +
+              '<circle cx="74" cy="22" r="2.5" fill="#38bdf8"/><circle cx="78" cy="30" r="2.5" fill="#38bdf8"/>' +
+              '<g transform="translate(75, 45)"><ellipse cx="10" cy="20" rx="14" ry="4" fill="#78350f"/><path d="M 10 20 L 10 10 Q 5 5 2 8" stroke="#16a34a" stroke-width="2.5" fill="none"/><path d="M 10 12 Q 16 6 18 10" stroke="#22c55e" stroke-width="2.5" fill="none"/></g>' +
+            '</g>';
+        } else if (unitKey === 'u5') {
+          // Unit 5: 艺术工坊与七彩调色板 (跨天彩虹、大调色盘挤满鲜艳颜料、画板画笔)
+          c = defs +
+            '<rect width="600" height="240" rx="16" fill="url(#skyGrad)"/>' +
+            '<g fill="none" stroke-width="7" opacity="0.9">' +
+              '<path d="M 20 220 A 280 200 0 0 1 580 220" stroke="#ef4444"/>' +
+              '<path d="M 28 220 A 272 192 0 0 1 572 220" stroke="#f97316"/>' +
+              '<path d="M 36 220 A 264 184 0 0 1 564 220" stroke="#eab308"/>' +
+              '<path d="M 44 220 A 256 176 0 0 1 556 220" stroke="#22c55e"/>' +
+              '<path d="M 52 220 A 248 168 0 0 1 548 220" stroke="#06b6d4"/>' +
+              '<path d="M 60 220 A 240 160 0 0 1 540 220" stroke="#3b82f6"/>' +
+              '<path d="M 68 220 A 232 152 0 0 1 532 220" stroke="#a855f7"/>' +
+            '</g>' +
+            '<g transform="translate(480, 40)"><ellipse cx="15" cy="20" rx="14" ry="18" fill="#ef4444"/><ellipse cx="40" cy="15" rx="14" ry="18" fill="#3b82f6"/><ellipse cx="60" cy="30" rx="13" ry="17" fill="#eab308"/></g>' +
+            '<g transform="translate(60, 60)" filter="url(#softShadow)">' +
+              '<path d="M 40 60 Q 20 20 80 15 Q 180 5 210 50 Q 235 90 190 120 Q 140 140 80 120 Q 30 110 40 60 Z" fill="#fde68a" stroke="#d97706" stroke-width="3"/>' +
+              '<ellipse cx="180" cy="85" rx="12" ry="16" fill="#e0f2fe" stroke="#d97706" stroke-width="2"/>' +
+              '<circle cx="65" cy="40" r="13" fill="#ef4444"/><circle cx="105" cy="30" r="13" fill="#eab308"/><circle cx="145" cy="35" r="13" fill="#3b82f6"/><circle cx="85" cy="78" r="13" fill="#22c55e"/><circle cx="125" cy="85" r="13" fill="#a855f7"/>' +
+              '<rect x="65" y="132" width="110" height="22" rx="11" fill="#ffffff" stroke="#d97706" stroke-width="1.5"/>' +
+              '<text x="120" y="147" font-size="11" font-weight="bold" fill="#b45309" text-anchor="middle">🎨 Colour Palette</text>' +
+            '</g>' +
+            '<g transform="translate(320, 70)" filter="url(#softShadow)">' +
+              '<line x1="80" y1="15" x2="25" y2="155" stroke="#92400e" stroke-width="5"/><line x1="80" y1="15" x2="135" y2="155" stroke="#92400e" stroke-width="5"/>' +
+              '<rect x="30" y="25" width="100" height="80" rx="4" fill="#ffffff" stroke="#b45309" stroke-width="3"/>' +
+              '<rect x="35" y="30" width="90" height="70" fill="#e0f2fe"/><circle cx="55" cy="48" r="10" fill="#facc15"/><path d="M 35 80 Q 60 60 85 75 Q 105 68 125 80 L 125 100 L 35 100 Z" fill="#4ade80"/>' +
+            '</g>';
+        } else if (unitKey === 'u6') {
+          // Unit 6: 生日派对数蜡烛 (双层草莓蛋糕插5根点亮蜡烛、彩色拉旗、数字气球、礼盒)
+          c = defs +
+            '<rect width="600" height="240" rx="16" fill="#fef2f2"/>' +
+            '<path d="M 0 35 Q 150 70 300 40 Q 450 70 600 35" fill="none" stroke="#f43f5e" stroke-width="2"/>' +
+            '<polygon points="40,43 55,75 70,47" fill="#ef4444"/><polygon points="90,50 105,82 120,54" fill="#f59e0b"/><polygon points="140,55 155,87 170,57" fill="#10b981"/><polygon points="190,55 205,87 220,55" fill="#3b82f6"/><polygon points="240,52 255,84 270,49" fill="#8b5cf6"/><polygon points="330,48 345,80 360,51" fill="#ec4899"/><polygon points="380,54 395,86 410,56" fill="#06b6d4"/><polygon points="430,56 445,88 460,55" fill="#f97316"/><polygon points="480,52 495,84 510,48" fill="#eab308"/><polygon points="530,45 545,77 560,40" fill="#22c55e"/>' +
+            '<g transform="translate(60, 45)"><ellipse cx="20" cy="30" rx="16" ry="20" fill="#ef4444"/><text x="20" y="37" font-size="14" font-weight="900" fill="#fff" text-anchor="middle">1</text><ellipse cx="50" cy="20" rx="16" ry="20" fill="#3b82f6"/><text x="50" y="27" font-size="14" font-weight="900" fill="#fff" text-anchor="middle">2</text><ellipse cx="80" cy="35" rx="16" ry="20" fill="#10b981"/><text x="80" y="42" font-size="14" font-weight="900" fill="#fff" text-anchor="middle">3</text></g>' +
+            '<g transform="translate(440, 45)"><ellipse cx="20" cy="25" rx="16" ry="20" fill="#f59e0b"/><text x="20" y="32" font-size="14" font-weight="900" fill="#fff" text-anchor="middle">4</text><ellipse cx="50" cy="18" rx="16" ry="20" fill="#8b5cf6"/><text x="50" y="25" font-size="14" font-weight="900" fill="#fff" text-anchor="middle">5</text></g>' +
+            '<ellipse cx="300" cy="210" rx="200" ry="28" fill="#fda4af" opacity="0.4"/><ellipse cx="300" cy="205" rx="180" ry="24" fill="#ffffff"/>' +
+            '<g transform="translate(210, 85)" filter="url(#softShadow)">' +
+              '<rect x="15" y="65" width="150" height="42" rx="8" fill="#fbcfe8"/><rect x="40" y="30" width="100" height="38" rx="6" fill="#fef08a"/>' +
+              '<g transform="translate(48, 10)"><rect x="0" y="8" width="5" height="15" fill="#38bdf8"/><circle cx="2.5" cy="4" r="3" fill="#f59e0b"/></g>' +
+              '<g transform="translate(66, 8)"><rect x="0" y="8" width="5" height="17" fill="#f43f5e"/><circle cx="2.5" cy="4" r="3" fill="#f59e0b"/></g>' +
+              '<g transform="translate(86, 6)"><rect x="0" y="8" width="5" height="19" fill="#10b981"/><circle cx="2.5" cy="4" r="3.5" fill="#f59e0b"/></g>' +
+              '<g transform="translate(106, 8)"><rect x="0" y="8" width="5" height="17" fill="#a855f7"/><circle cx="2.5" cy="4" r="3" fill="#f59e0b"/></g>' +
+              '<g transform="translate(124, 10)"><rect x="0" y="8" width="5" height="15" fill="#f97316"/><circle cx="2.5" cy="4" r="3" fill="#f59e0b"/></g>' +
+            '</g>' +
+            '<g transform="translate(100, 150)" filter="url(#softShadow)"><rect x="0" y="15" width="45" height="40" rx="4" fill="#38bdf8"/><line x1="22" y1="10" x2="22" y2="55" stroke="#f43f5e" stroke-width="6"/><circle cx="22" cy="7" r="5" fill="#f43f5e"/></g>' +
+            '<g transform="translate(450, 145)" filter="url(#softShadow)"><rect x="0" y="15" width="50" height="45" rx="4" fill="#a855f7"/><line x1="25" y1="10" x2="25" y2="60" stroke="#facc15" stroke-width="6"/><circle cx="25" cy="6" r="6" fill="#facc15"/></g>';
+        } else {
+          // 兜底 / 自然拼读森林大图
+          c = defs +
+            '<rect width="600" height="240" rx="16" fill="url(#skyGrad)"/>' +
+            '<circle cx="80" cy="60" r="35" fill="url(#sunGrad)"/>' +
+            '<path d="M 0 170 Q 200 140 400 170 Q 520 180 600 160 L 600 240 L 0 240 Z" fill="url(#grassGrad)"/>' +
+            '<g transform="translate(60, 40)"><rect x="75" y="100" width="30" height="90" fill="#92400e" rx="4"/><circle cx="90" cy="70" r="65" fill="#22c55e"/><circle cx="55" cy="50" r="16" fill="#ef4444"/><text x="55" y="56" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">A</text><circle cx="90" cy="35" r="16" fill="#3b82f6"/><text x="90" y="41" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">E</text><circle cx="125" cy="50" r="16" fill="#eab308"/><text x="125" y="56" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">I</text><circle cx="65" cy="90" r="16" fill="#f97316"/><text x="65" y="96" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">O</text><circle cx="115" cy="90" r="16" fill="#a855f7"/><text x="115" y="96" font-size="16" font-weight="900" fill="#fff" text-anchor="middle">U</text></g>' +
+            '<g transform="translate(260, 120)" filter="url(#softShadow)"><rect x="0" y="20" width="70" height="45" rx="6" fill="#ef4444"/><rect x="80" y="30" width="55" height="35" rx="5" fill="#f59e0b"/><rect x="145" y="30" width="55" height="35" rx="5" fill="#10b981"/><text x="108" y="52" font-size="14" font-weight="bold" fill="#fff" text-anchor="middle">c-a-t</text><text x="172" y="52" font-size="14" font-weight="bold" fill="#fff" text-anchor="middle">cat</text></g>';
+        }
+
+        return wrapSvg(600, 240, c, 'pep-svg-scene');
+      }
+
+      /* 2. 核心生词图文闪卡专属插画 (Word Illustrated Flashcard) */
+      function getWordSvg(w) {
+        var word = (w && w.word ? w.word : '').toLowerCase().trim();
+        var emoji = (w && w.emoji) || '📖';
+
+        var bg = '<rect width="100" height="80" rx="14" fill="#f1f5f9"/>';
+        var inner = '';
+
+        switch (word) {
+          // 五官与身体
+          case 'ear':
+            bg = '<rect width="100" height="80" rx="14" fill="#eff6ff"/>';
+            inner = '<path d="M 40 22 C 28 22 25 40 35 52 C 40 58 45 62 48 56 C 52 50 48 42 42 38" stroke="#3b82f6" stroke-width="4.5" stroke-linecap="round" fill="none"/>' +
+              '<path d="M 56 30 A 15 15 0 0 1 56 46" stroke="#60a5fa" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+              '<path d="M 64 24 A 25 25 0 0 1 64 52" stroke="#93c5fd" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+              '<path d="M 72 18 A 35 35 0 0 1 72 58" stroke="#bfdbfe" stroke-width="3" fill="none" stroke-linecap="round"/>';
+            break;
+          case 'eye':
+            bg = '<rect width="100" height="80" rx="14" fill="#f0fdf4"/>';
+            inner = '<path d="M 20 40 Q 50 16 80 40 Q 50 64 20 40 Z" fill="#ffffff" stroke="#16a34a" stroke-width="3"/>' +
+              '<circle cx="50" cy="40" r="13" fill="#15803d"/>' +
+              '<circle cx="50" cy="40" r="7" fill="#0f172a"/>' +
+              '<circle cx="47" cy="36" r="3.5" fill="#ffffff"/>' +
+              '<path d="M 32 24 L 28 17" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round"/>' +
+              '<path d="M 50 20 L 50 13" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round"/>' +
+              '<path d="M 68 24 L 72 17" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round"/>';
+            break;
+          case 'mouth':
+          case 'lip':
+            bg = '<rect width="100" height="80" rx="14" fill="#fef2f2"/>';
+            inner = '<path d="M 22 38 Q 50 32 78 38 Q 66 60 50 60 Q 34 60 22 38 Z" fill="#ef4444"/>' +
+              '<path d="M 26 40 Q 50 48 74 40 Q 64 54 50 54 Q 36 54 26 40 Z" fill="#991b1b"/>' +
+              '<rect x="36" y="40" width="28" height="6" rx="2" fill="#ffffff"/>' +
+              '<ellipse cx="50" cy="50" rx="9" ry="5" fill="#f43f5e"/>';
+            break;
+          case 'hand':
+            bg = '<rect width="100" height="80" rx="14" fill="#fefce8"/>';
+            inner = '<g transform="translate(26, 12)">' +
+              '<path d="M 16 48 L 16 35 C 16 31 22 31 22 35 L 22 20 C 22 16 28 16 28 20 L 28 16 C 28 12 34 12 34 16 L 34 22 C 34 18 40 18 40 22 L 40 38 C 40 50 36 58 24 58 L 18 58 C 10 58 6 52 10 46 L 14 42" fill="#fde047" stroke="#ca8a04" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+              '<circle cx="28" cy="42" r="4" fill="#f59e0b"/>' +
+            '</g>';
+            break;
+          case 'arm':
+            bg = '<rect width="100" height="80" rx="14" fill="#fdf2f8"/>';
+            inner = '<g transform="translate(18, 16)">' +
+              '<path d="M 10 42 C 10 42 16 26 28 26 C 36 26 40 32 46 32 C 54 32 58 20 54 12 C 48 8 40 14 36 18 C 30 18 20 24 10 32 Z" fill="#f472b6" stroke="#db2777" stroke-width="3"/>' +
+              '<circle cx="56" cy="14" r="8" fill="#db2777"/>' +
+              '<line x1="32" y1="26" x2="36" y2="30" stroke="#be185d" stroke-width="2"/>' +
+            '</g>';
+            break;
+          case 'smile':
+            bg = '<rect width="100" height="80" rx="14" fill="#fefce8"/>';
+            inner = '<circle cx="50" cy="40" r="28" fill="#facc15" stroke="#ca8a04" stroke-width="3"/>' +
+              '<ellipse cx="38" cy="34" rx="3.5" ry="5" fill="#78350f"/>' +
+              '<ellipse cx="62" cy="34" rx="3.5" ry="5" fill="#78350f"/>' +
+              '<circle cx="32" cy="44" r="4" fill="#f87171" opacity="0.6"/>' +
+              '<circle cx="68" cy="44" r="4" fill="#f87171" opacity="0.6"/>' +
+              '<path d="M 36 46 Q 50 62 64 46" stroke="#78350f" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
+            break;
+          case 'listen':
+            bg = '<rect width="100" height="80" rx="14" fill="#eff6ff"/>';
+            inner = '<circle cx="45" cy="40" r="20" fill="#93c5fd"/>' +
+              '<path d="M 25 40 A 20 20 0 0 1 65 40" stroke="#1d4ed8" stroke-width="4" fill="none"/>' +
+              '<rect x="20" y="32" width="10" height="18" rx="4" fill="#1e40af"/>' +
+              '<rect x="60" y="32" width="10" height="18" rx="4" fill="#1e40af"/>' +
+              '<text x="78" y="32" font-size="14" fill="#2563eb">🎵</text>';
+            break;
+          case 'share':
+            bg = '<rect width="100" height="80" rx="14" fill="#f0fdf4"/>';
+            inner = '<g transform="translate(18, 18)">' +
+              '<circle cx="16" cy="24" r="10" fill="#60a5fa"/>' +
+              '<circle cx="48" cy="24" r="10" fill="#f472b6"/>' +
+              '<path d="M 32 18 Q 36 12 40 18 Q 40 26 32 34 Q 24 26 24 18 Q 28 12 32 18 Z" fill="#ef4444"/>' +
+              '<path d="M 12 34 L 28 34" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>' +
+              '<path d="M 52 34 L 36 34" stroke="#db2777" stroke-width="3" stroke-linecap="round"/>' +
+            '</g>';
+            break;
+          case 'help':
+            bg = '<rect width="100" height="80" rx="14" fill="#fef3c7"/>';
+            inner = '<g transform="translate(24, 18)">' +
+              '<path d="M 8 16 Q 24 16 28 26 L 36 26" stroke="#d97706" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+              '<path d="M 46 36 Q 32 36 26 26 L 16 26" stroke="#2563eb" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+              '<circle cx="27" cy="26" r="5" fill="#ef4444"/>' +
+              '<text x="22" y="10" font-size="12" fill="#f59e0b">✨</text>' +
+            '</g>';
+            break;
+          case 'say':
+            bg = '<rect width="100" height="80" rx="14" fill="#f5f3ff"/>';
+            inner = '<g transform="translate(18, 14)">' +
+              '<rect x="4" y="4" width="56" height="36" rx="12" fill="#8b5cf6"/>' +
+              '<polygon points="20,40 16,50 30,40" fill="#8b5cf6"/>' +
+              '<circle cx="22" cy="22" r="3" fill="#ffffff"/><circle cx="32" cy="22" r="3" fill="#ffffff"/><circle cx="42" cy="22" r="3" fill="#ffffff"/>' +
+            '</g>';
+            break;
+          case 'can':
+            bg = '<rect width="100" height="80" rx="14" fill="#ecfdf5"/>';
+            inner = '<circle cx="50" cy="40" r="26" fill="#10b981"/>' +
+              '<path d="M 36 40 L 46 50 L 64 30" stroke="#ffffff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+            break;
+          case 'friend':
+            bg = '<rect width="100" height="80" rx="14" fill="#eff6ff"/>';
+            inner = '<g transform="translate(20, 16)">' +
+              '<circle cx="18" cy="18" r="10" fill="#facc15"/>' +
+              '<rect x="10" y="28" width="16" height="20" rx="4" fill="#3b82f6"/>' +
+              '<circle cx="42" cy="18" r="10" fill="#f472b6"/>' +
+              '<rect x="34" y="28" width="16" height="20" rx="4" fill="#ec4899"/>' +
+              '<path d="M 30 10 Q 30 4 34 8 Q 38 4 38 10 Q 38 14 34 18 Q 30 14 30 10 Z" fill="#ef4444"/>' +
+            '</g>';
+            break;
+
+          // 家庭成员
+          case 'father':
+          case 'dad':
+          case 'man':
+          case 'men':
+            bg = '<rect width="100" height="80" rx="14" fill="#eff6ff"/>';
+            inner = '<g transform="translate(28, 10)">' +
+              '<circle cx="22" cy="20" r="16" fill="#fed7aa"/>' +
+              '<path d="M 6 16 Q 22 0 38 16" fill="#334155"/>' +
+              '<circle cx="16" cy="18" r="2.5" fill="#0f172a"/><circle cx="28" cy="18" r="2.5" fill="#0f172a"/>' +
+              '<path d="M 18 26 Q 22 30 26 26" stroke="#e11d48" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+              '<rect x="8" y="36" width="28" height="26" rx="6" fill="#1d4ed8"/>' +
+              '<polygon points="22,36 18,48 22,54 26,48" fill="#ef4444"/>' +
+            '</g>';
+            break;
+          case 'mother':
+          case 'mum':
+          case 'woman':
+            bg = '<rect width="100" height="80" rx="14" fill="#fdf2f8"/>';
+            inner = '<g transform="translate(28, 10)">' +
+              '<circle cx="22" cy="20" r="16" fill="#fed7aa"/>' +
+              '<path d="M 4 20 Q 22 2 40 20 Q 38 40 40 44 Q 4 44 6 40 Z" fill="#92400e"/>' +
+              '<circle cx="16" cy="20" r="2.5" fill="#0f172a"/><circle cx="28" cy="20" r="2.5" fill="#0f172a"/>' +
+              '<path d="M 18 27 Q 22 31 26 27" stroke="#e11d48" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+              '<rect x="8" y="38" width="28" height="24" rx="6" fill="#db2777"/>' +
+            '</g>';
+            break;
+          case 'brother':
+          case 'kid':
+          case 'me':
+            bg = '<rect width="100" height="80" rx="14" fill="#ecfdf5"/>';
+            inner = '<g transform="translate(28, 12)">' +
+              '<circle cx="22" cy="18" r="14" fill="#fed7aa"/>' +
+              '<path d="M 8 16 Q 22 2 36 16" fill="#f59e0b"/>' +
+              '<circle cx="16" cy="18" r="2" fill="#0f172a"/><circle cx="28" cy="18" r="2" fill="#0f172a"/>' +
+              '<path d="M 18 24 Q 22 28 26 24" stroke="#e11d48" stroke-width="1.8" fill="none"/>' +
+              '<rect x="10" y="32" width="24" height="26" rx="5" fill="#10b981"/>' +
+            '</g>';
+            break;
+          case 'sister':
+            bg = '<rect width="100" height="80" rx="14" fill="#fdf2f8"/>';
+            inner = '<g transform="translate(28, 12)">' +
+              '<circle cx="22" cy="18" r="14" fill="#fed7aa"/>' +
+              '<circle cx="8" cy="14" r="6" fill="#f43f5e"/><circle cx="36" cy="14" r="6" fill="#f43f5e"/>' +
+              '<path d="M 8 16 Q 22 4 36 16" fill="#f43f5e"/>' +
+              '<circle cx="16" cy="18" r="2" fill="#0f172a"/><circle cx="28" cy="18" r="2" fill="#0f172a"/>' +
+              '<path d="M 18 24 Q 22 28 26 24" stroke="#e11d48" stroke-width="1.8" fill="none"/>' +
+              '<rect x="10" y="32" width="24" height="26" rx="5" fill="#ec4899"/>' +
+            '</g>';
+            break;
+          case 'grandfather':
+          case 'grandpa':
+            bg = '<rect width="100" height="80" rx="14" fill="#f8fafc"/>';
+            inner = '<g transform="translate(28, 10)">' +
+              '<circle cx="22" cy="20" r="16" fill="#fed7aa"/>' +
+              '<path d="M 6 16 Q 22 2 38 16" fill="#cbd5e1"/>' +
+              '<circle cx="15" cy="18" r="4.5" fill="none" stroke="#475569" stroke-width="2"/>' +
+              '<circle cx="29" cy="18" r="4.5" fill="none" stroke="#475569" stroke-width="2"/>' +
+              '<line x1="20" y1="18" x2="24" y2="18" stroke="#475569" stroke-width="2"/>' +
+              '<path d="M 16 28 Q 22 24 28 28" stroke="#cbd5e1" stroke-width="3" fill="none"/>' +
+              '<rect x="8" y="36" width="28" height="26" rx="6" fill="#0284c7"/>' +
+            '</g>';
+            break;
+          case 'grandmother':
+          case 'grandma':
+            bg = '<rect width="100" height="80" rx="14" fill="#fdf4ff"/>';
+            inner = '<g transform="translate(28, 10)">' +
+              '<circle cx="22" cy="20" r="16" fill="#fed7aa"/>' +
+              '<circle cx="22" cy="4" r="7" fill="#cbd5e1"/>' +
+              '<path d="M 6 16 Q 22 6 38 16" fill="#cbd5e1"/>' +
+              '<circle cx="15" cy="19" r="4" fill="none" stroke="#be185d" stroke-width="1.8"/>' +
+              '<circle cx="29" cy="19" r="4" fill="none" stroke="#be185d" stroke-width="1.8"/>' +
+              '<line x1="19" y1="19" x2="25" y2="19" stroke="#be185d" stroke-width="1.8"/>' +
+              '<rect x="8" y="36" width="28" height="26" rx="6" fill="#9333ea"/>' +
+            '</g>';
+            break;
+          case 'family':
+            bg = '<rect width="100" height="80" rx="14" fill="#fef2f2"/>';
+            inner = '<path d="M 50 16 Q 30 0 16 16 Q 2 32 50 68 Q 98 32 84 16 Q 70 0 50 16 Z" fill="#f87171" opacity="0.25"/>' +
+              '<g transform="translate(22, 22)">' +
+                '<circle cx="14" cy="14" r="8" fill="#3b82f6"/>' +
+                '<circle cx="42" cy="14" r="8" fill="#ec4899"/>' +
+                '<circle cx="28" cy="26" r="6" fill="#facc15"/>' +
+              '</g>';
+            break;
+          case 'baby':
+            bg = '<rect width="100" height="80" rx="14" fill="#fefce8"/>';
+            inner = '<circle cx="50" cy="38" r="20" fill="#fed7aa"/>' +
+              '<path d="M 48 18 Q 50 10 54 14" stroke="#f59e0b" stroke-width="3" fill="none"/>' +
+              '<circle cx="42" cy="34" r="2.5" fill="#0f172a"/><circle cx="58" cy="34" r="2.5" fill="#0f172a"/>' +
+              '<circle cx="50" cy="46" r="7" fill="#38bdf8"/>' +
+              '<circle cx="50" cy="46" r="3.5" fill="#fde047"/>';
+            break;
+
+          // 动物
+          case 'cat':
+            bg = '<rect width="100" height="80" rx="14" fill="#fefce8"/>';
+            inner = '<g transform="translate(26, 14)">' +
+              '<polygon points="6,18 14,2 22,14" fill="#f59e0b"/><polygon points="26,14 34,2 42,18" fill="#f59e0b"/>' +
+              '<polygon points="9,16 14,6 19,14" fill="#fbcfe8"/><polygon points="29,14 34,6 39,16" fill="#fbcfe8"/>' +
+              '<circle cx="24" cy="26" r="18" fill="#f59e0b"/>' +
+              '<circle cx="17" cy="24" r="2.5" fill="#0f172a"/><circle cx="31" cy="24" r="2.5" fill="#0f172a"/>' +
+              '<polygon points="24,30 22,28 26,28" fill="#f43f5e"/>' +
+              '<line x1="6" y1="28" x2="16" y2="29" stroke="#78350f" stroke-width="1.8"/>' +
+              '<line x1="32" y1="29" x2="42" y2="28" stroke="#78350f" stroke-width="1.8"/>' +
+            '</g>';
+            break;
+          case 'dog':
+          case 'pup':
+            bg = '<rect width="100" height="80" rx="14" fill="#fffbeb"/>';
+            inner = '<g transform="translate(26, 14)">' +
+              '<ellipse cx="8" cy="24" rx="6" ry="12" fill="#d97706"/><ellipse cx="40" cy="24" rx="6" ry="12" fill="#d97706"/>' +
+              '<circle cx="24" cy="26" r="18" fill="#f59e0b"/>' +
+              '<circle cx="17" cy="24" r="2.5" fill="#0f172a"/><circle cx="31" cy="24" r="2.5" fill="#0f172a"/>' +
+              '<ellipse cx="24" cy="30" rx="4" ry="3" fill="#0f172a"/>' +
+              '<path d="M 24 33 Q 24 40 28 37" stroke="#ef4444" stroke-width="3" fill="none"/>' +
+            '</g>';
+            break;
+          case 'fish':
+            bg = '<rect width="100" height="80" rx="14" fill="#e0f2fe"/>';
+            inner = '<g transform="translate(20, 18)">' +
+              '<ellipse cx="32" cy="24" rx="22" ry="14" fill="#f97316"/>' +
+              '<polygon points="50,24 66,12 66,36" fill="#ea580c"/>' +
+              '<polygon points="30,10 40,2 40,14" fill="#ea580c"/>' +
+              '<circle cx="18" cy="22" r="3" fill="#0f172a"/><circle cx="17" cy="21" r="1" fill="#fff"/>' +
+              '<circle cx="8" cy="14" r="3" fill="#38bdf8" opacity="0.6"/><circle cx="4" cy="8" r="2" fill="#38bdf8" opacity="0.6"/>' +
+            '</g>';
+            break;
+          case 'bird':
+            bg = '<rect width="100" height="80" rx="14" fill="#e0f2fe"/>';
+            inner = '<g transform="translate(22, 16)">' +
+              '<circle cx="28" cy="22" r="16" fill="#38bdf8"/>' +
+              '<polygon points="42,20 54,24 42,28" fill="#f59e0b"/>' +
+              '<circle cx="34" cy="18" r="2.5" fill="#0f172a"/>' +
+              '<path d="M 16 26 Q 8 16 14 36" fill="#0284c7"/>' +
+              '<text x="40" y="8" font-size="12" fill="#0284c7">🎶</text>' +
+            '</g>';
+            break;
+          case 'rabbit':
+            bg = '<rect width="100" height="80" rx="14" fill="#fdf2f8"/>';
+            inner = '<g transform="translate(26, 8)">' +
+              '<ellipse cx="16" cy="18" rx="5" ry="16" fill="#ffffff" stroke="#f472b6" stroke-width="1.5"/><ellipse cx="16" cy="18" rx="2.5" ry="12" fill="#fbcfe8"/>' +
+              '<ellipse cx="32" cy="18" rx="5" ry="16" fill="#ffffff" stroke="#f472b6" stroke-width="1.5"/><ellipse cx="32" cy="18" rx="2.5" ry="12" fill="#fbcfe8"/>' +
+              '<circle cx="24" cy="38" r="18" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>' +
+              '<circle cx="17" cy="36" r="2" fill="#e11d48"/><circle cx="31" cy="36" r="2" fill="#e11d48"/>' +
+              '<polygon points="24,42 22,40 26,40" fill="#f43f5e"/>' +
+            '</g>';
+            break;
+          case 'panda':
+            bg = '<rect width="100" height="80" rx="14" fill="#f1f5f9"/>';
+            inner = '<g transform="translate(26, 12)">' +
+              '<circle cx="10" cy="12" r="8" fill="#0f172a"/><circle cx="38" cy="12" r="8" fill="#0f172a"/>' +
+              '<circle cx="24" cy="28" r="20" fill="#ffffff" stroke="#0f172a" stroke-width="2"/>' +
+              '<ellipse cx="16" cy="26" rx="5" ry="7" fill="#0f172a" transform="rotate(-15 16 26)"/>' +
+              '<ellipse cx="32" cy="26" rx="5" ry="7" fill="#0f172a" transform="rotate(15 32 26)"/>' +
+              '<circle cx="17" cy="25" r="2" fill="#ffffff"/><circle cx="31" cy="25" r="2" fill="#ffffff"/>' +
+              '<ellipse cx="24" cy="34" rx="3.5" ry="2.5" fill="#0f172a"/>' +
+            '</g>';
+            break;
+          case 'monkey':
+            bg = '<rect width="100" height="80" rx="14" fill="#fef3c7"/>';
+            inner = '<g transform="translate(26, 12)">' +
+              '<circle cx="6" cy="26" r="8" fill="#b45309"/><circle cx="42" cy="26" r="8" fill="#b45309"/>' +
+              '<circle cx="24" cy="28" r="18" fill="#b45309"/>' +
+              '<ellipse cx="24" cy="32" rx="13" ry="11" fill="#fed7aa"/>' +
+              '<circle cx="17" cy="25" r="2.5" fill="#0f172a"/><circle cx="31" cy="25" r="2.5" fill="#0f172a"/>' +
+              '<ellipse cx="24" cy="33" rx="3" ry="2" fill="#78350f"/>' +
+            '</g>';
+            break;
+          case 'tiger':
+            bg = '<rect width="100" height="80" rx="14" fill="#fff7ed"/>';
+            inner = '<g transform="translate(26, 12)">' +
+              '<circle cx="8" cy="12" r="8" fill="#ea580c"/><circle cx="40" cy="12" r="8" fill="#ea580c"/>' +
+              '<circle cx="24" cy="28" r="20" fill="#f97316"/>' +
+              '<path d="M 20 14 L 28 14 M 24 14 L 24 22 M 20 18 L 28 18" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>' +
+              '<circle cx="16" cy="28" r="2.5" fill="#0f172a"/><circle cx="32" cy="28" r="2.5" fill="#0f172a"/>' +
+            '</g>';
+            break;
+          case 'elephant':
+            bg = '<rect width="100" height="80" rx="14" fill="#f1f5f9"/>';
+            inner = '<g transform="translate(22, 12)">' +
+              '<ellipse cx="14" cy="26" rx="14" ry="18" fill="#94a3b8"/><ellipse cx="42" cy="26" rx="14" ry="18" fill="#94a3b8"/>' +
+              '<circle cx="28" cy="26" r="18" fill="#cbd5e1"/>' +
+              '<circle cx="20" cy="22" r="2.5" fill="#0f172a"/><circle cx="36" cy="22" r="2.5" fill="#0f172a"/>' +
+              '<path d="M 28 30 Q 28 46 36 44" stroke="#94a3b8" stroke-width="6" stroke-linecap="round" fill="none"/>' +
+            '</g>';
+            break;
+          case 'pet':
+            bg = '<rect width="100" height="80" rx="14" fill="#fdf2f8"/>';
+            inner = '<g transform="translate(26, 14)">' +
+              '<ellipse cx="24" cy="30" rx="12" ry="10" fill="#f43f5e"/>' +
+              '<circle cx="12" cy="16" r="4.5" fill="#f43f5e"/><circle cx="20" cy="11" r="4.5" fill="#f43f5e"/><circle cx="28" cy="11" r="4.5" fill="#f43f5e"/><circle cx="36" cy="16" r="4.5" fill="#f43f5e"/>' +
+            '</g>';
+            break;
+
+          // 植物与水果
+          case 'apple':
+            bg = '<rect width="100" height="80" rx="14" fill="#fef2f2"/>';
+            inner = '<g transform="translate(28, 12)">' +
+              '<path d="M 22 14 Q 22 2 28 4" stroke="#78350f" stroke-width="3" stroke-linecap="round" fill="none"/>' +
+              '<path d="M 28 4 Q 38 2 34 12 Z" fill="#22c55e"/>' +
+              '<ellipse cx="15" cy="32" rx="14" ry="18" fill="#ef4444"/><ellipse cx="29" cy="32" rx="14" ry="18" fill="#ef4444"/>' +
+              '<ellipse cx="12" cy="26" rx="3" ry="6" fill="#ffffff" opacity="0.6"/>' +
+            '</g>';
+            break;
+          case 'banana':
+            bg = '<rect width="100" height="80" rx="14" fill="#fefce8"/>';
+            inner = '<g transform="translate(22, 16)">' +
+              '<path d="M 12 12 Q 32 4 52 28 Q 32 24 12 12 Z" fill="#eab308"/>' +
+              '<path d="M 14 18 Q 34 10 54 34 Q 34 30 14 18 Z" fill="#facc15"/>' +
+              '<circle cx="12" cy="12" r="3" fill="#78350f"/>' +
+            '</g>';
+            break;
+          case 'orange':
+            bg = '<rect width="100" height="80" rx="14" fill="#fff7ed"/>';
+            inner = '<circle cx="50" cy="40" r="22" fill="#f97316"/>' +
+              '<circle cx="50" cy="20" r="3" fill="#15803d"/>' +
+              '<path d="M 50 20 Q 60 14 56 22 Z" fill="#22c55e"/>';
+            break;
+          case 'grape':
+            bg = '<rect width="100" height="80" rx="14" fill="#faf5ff"/>';
+            inner = '<g transform="translate(32, 10)">' +
+              '<path d="M 18 12 L 18 2" stroke="#78350f" stroke-width="3"/>' +
+              '<circle cx="12" cy="18" r="7" fill="#a855f7"/><circle cx="24" cy="18" r="7" fill="#a855f7"/>' +
+              '<circle cx="8" cy="28" r="7" fill="#9333ea"/><circle cx="18" cy="28" r="7" fill="#9333ea"/><circle cx="28" cy="28" r="7" fill="#9333ea"/>' +
+              '<circle cx="13" cy="38" r="7" fill="#7e22ce"/><circle cx="23" cy="38" r="7" fill="#7e22ce"/>' +
+              '<circle cx="18" cy="48" r="7" fill="#6b21a8"/>' +
+            '</g>';
+            break;
+          case 'flower':
+            bg = '<rect width="100" height="80" rx="14" fill="#fdf2f8"/>';
+            inner = '<g transform="translate(30, 10)">' +
+              '<line x1="20" y1="36" x2="20" y2="58" stroke="#16a34a" stroke-width="4"/>' +
+              '<circle cx="20" cy="24" r="8" fill="#f59e0b"/>' +
+              '<circle cx="20" cy="10" r="8" fill="#f43f5e"/><circle cx="34" cy="24" r="8" fill="#f43f5e"/><circle cx="20" cy="38" r="8" fill="#f43f5e"/><circle cx="6" cy="24" r="8" fill="#f43f5e"/>' +
+            '</g>';
+            break;
+          case 'grass':
+            bg = '<rect width="100" height="80" rx="14" fill="#f0fdf4"/>';
+            inner = '<g transform="translate(24, 20)">' +
+              '<path d="M 10 40 Q 12 10 2 12 Q 18 20 20 40" fill="#22c55e"/>' +
+              '<path d="M 22 40 Q 26 2 30 6 Q 30 20 32 40" fill="#16a34a"/>' +
+              '<path d="M 34 40 Q 40 12 50 16 Q 40 24 42 40" fill="#22c55e"/>' +
+            '</g>';
+            break;
+          case 'tree':
+            bg = '<rect width="100" height="80" rx="14" fill="#f0fdf4"/>';
+            inner = '<g transform="translate(26, 8)">' +
+              '<rect x="18" y="36" width="12" height="28" rx="3" fill="#78350f"/>' +
+              '<circle cx="24" cy="26" r="22" fill="#22c55e"/>' +
+              '<circle cx="14" cy="20" r="14" fill="#16a34a"/><circle cx="34" cy="20" r="14" fill="#16a34a"/>' +
+            '</g>';
+            break;
+          case 'plant':
+          case 'seed':
+            bg = '<rect width="100" height="80" rx="14" fill="#f0fdf4"/>';
+            inner = '<g transform="translate(28, 16)">' +
+              '<polygon points="6,34 38,34 34,52 10,52" fill="#b45309"/>' +
+              '<path d="M 22 34 L 22 18 Q 12 12 10 18 Q 16 26 22 24" fill="#22c55e"/>' +
+              '<path d="M 22 22 Q 32 14 34 20 Q 28 28 22 26" fill="#16a34a"/>' +
+            '</g>';
+            break;
+          case 'water':
+          case 'wet':
+            bg = '<rect width="100" height="80" rx="14" fill="#e0f2fe"/>';
+            inner = '<g transform="translate(30, 12)">' +
+              '<path d="M 20 6 C 20 6 36 26 36 36 A 16 16 0 1 1 4 36 C 4 26 20 6 20 6 Z" fill="#38bdf8"/>' +
+              '<ellipse cx="15" cy="36" rx="4" ry="7" fill="#ffffff" opacity="0.6"/>' +
+            '</g>';
+            break;
+          case 'sun':
+          case 'hot':
+            bg = '<rect width="100" height="80" rx="14" fill="#fefce8"/>';
+            inner = '<circle cx="50" cy="40" r="18" fill="#f59e0b"/>' +
+              '<g stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round">' +
+                '<line x1="50" y1="12" x2="50" y2="4"/><line x1="50" y1="68" x2="50" y2="76"/>' +
+                '<line x1="22" y1="40" x2="14" y2="40"/><line x1="78" y1="40" x2="86" y2="40"/>' +
+                '<line x1="30" y1="20" x2="24" y2="14"/><line x1="70" y1="60" x2="76" y2="66"/>' +
+                '<line x1="30" y1="60" x2="24" y2="66"/><line x1="70" y1="20" x2="76" y2="14"/>' +
+              '</g>';
+            break;
+
+          // 颜色
+          case 'red':
+            bg = '<rect width="100" height="80" rx="14" fill="#fef2f2"/>';
+            inner = '<circle cx="50" cy="40" r="22" fill="#ef4444"/><circle cx="44" cy="34" r="5" fill="#fff" opacity="0.5"/>';
+            break;
+          case 'yellow':
+            bg = '<rect width="100" height="80" rx="14" fill="#fefce8"/>';
+            inner = '<circle cx="50" cy="40" r="22" fill="#eab308"/><circle cx="44" cy="34" r="5" fill="#fff" opacity="0.6"/>';
+            break;
+          case 'blue':
+            bg = '<rect width="100" height="80" rx="14" fill="#eff6ff"/>';
+            inner = '<circle cx="50" cy="40" r="22" fill="#3b82f6"/><circle cx="44" cy="34" r="5" fill="#fff" opacity="0.5"/>';
+            break;
+          case 'green':
+            bg = '<rect width="100" height="80" rx="14" fill="#f0fdf4"/>';
+            inner = '<circle cx="50" cy="40" r="22" fill="#22c55e"/><circle cx="44" cy="34" r="5" fill="#fff" opacity="0.5"/>';
+            break;
+          case 'purple':
+            bg = '<rect width="100" height="80" rx="14" fill="#faf5ff"/>';
+            inner = '<circle cx="50" cy="40" r="22" fill="#a855f7"/><circle cx="44" cy="34" r="5" fill="#fff" opacity="0.5"/>';
+            break;
+          case 'pink':
+            bg = '<rect width="100" height="80" rx="14" fill="#fdf2f8"/>';
+            inner = '<circle cx="50" cy="40" r="22" fill="#ec4899"/><circle cx="44" cy="34" r="5" fill="#fff" opacity="0.5"/>';
+            break;
+          case 'brown':
+            bg = '<rect width="100" height="80" rx="14" fill="#fffbeb"/>';
+            inner = '<circle cx="50" cy="40" r="22" fill="#78350f"/><circle cx="44" cy="34" r="5" fill="#fff" opacity="0.4"/>';
+            break;
+          case 'white':
+            bg = '<rect width="100" height="80" rx="14" fill="#f1f5f9"/>';
+            inner = '<circle cx="50" cy="40" r="22" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>';
+            break;
+          case 'black':
+            bg = '<rect width="100" height="80" rx="14" fill="#f8fafc"/>';
+            inner = '<circle cx="50" cy="40" r="22" fill="#0f172a"/>';
+            break;
+          case 'colour':
+          case 'rainbow':
+            bg = '<rect width="100" height="80" rx="14" fill="#f0f9ff"/>';
+            inner = '<path d="M 20 60 A 30 30 0 0 1 80 60" stroke="#ef4444" stroke-width="4" fill="none"/>' +
+              '<path d="M 26 60 A 24 24 0 0 1 74 60" stroke="#f59e0b" stroke-width="4" fill="none"/>' +
+              '<path d="M 32 60 A 18 18 0 0 1 68 60" stroke="#10b981" stroke-width="4" fill="none"/>' +
+              '<path d="M 38 60 A 12 12 0 0 1 62 60" stroke="#3b82f6" stroke-width="4" fill="none"/>';
+            break;
+
+          // 数字与派对
+          case 'one':
+          case '1':
+            bg = '<rect width="100" height="80" rx="14" fill="#eff6ff"/>';
+            inner = '<text x="50" y="55" font-size="44" font-weight="900" fill="#2563eb" text-anchor="middle">1</text>';
+            break;
+          case 'two':
+          case '2':
+            bg = '<rect width="100" height="80" rx="14" fill="#f0fdf4"/>';
+            inner = '<text x="50" y="55" font-size="44" font-weight="900" fill="#16a34a" text-anchor="middle">2</text>';
+            break;
+          case 'three':
+          case '3':
+            bg = '<rect width="100" height="80" rx="14" fill="#fefce8"/>';
+            inner = '<text x="50" y="55" font-size="44" font-weight="900" fill="#ca8a04" text-anchor="middle">3</text>';
+            break;
+          case 'four':
+          case '4':
+            bg = '<rect width="100" height="80" rx="14" fill="#fff7ed"/>';
+            inner = '<text x="50" y="55" font-size="44" font-weight="900" fill="#ea580c" text-anchor="middle">4</text>';
+            break;
+          case 'five':
+          case '5':
+            bg = '<rect width="100" height="80" rx="14" fill="#fdf2f8"/>';
+            inner = '<text x="50" y="55" font-size="44" font-weight="900" fill="#db2777" text-anchor="middle">5</text>';
+            break;
+          case 'six':
+          case '6':
+            bg = '<rect width="100" height="80" rx="14" fill="#faf5ff"/>';
+            inner = '<text x="50" y="55" font-size="44" font-weight="900" fill="#9333ea" text-anchor="middle">6</text>';
+            break;
+          case 'seven':
+          case '7':
+            bg = '<rect width="100" height="80" rx="14" fill="#eff6ff"/>';
+            inner = '<text x="50" y="55" font-size="44" font-weight="900" fill="#0284c7" text-anchor="middle">7</text>';
+            break;
+          case 'eight':
+          case '8':
+            bg = '<rect width="100" height="80" rx="14" fill="#f0fdf4"/>';
+            inner = '<text x="50" y="55" font-size="44" font-weight="900" fill="#059669" text-anchor="middle">8</text>';
+            break;
+          case 'nine':
+          case '9':
+            bg = '<rect width="100" height="80" rx="14" fill="#fef2f2"/>';
+            inner = '<text x="50" y="55" font-size="44" font-weight="900" fill="#dc2626" text-anchor="middle">9</text>';
+            break;
+          case 'ten':
+          case '10':
+            bg = '<rect width="100" height="80" rx="14" fill="#fefce8"/>';
+            inner = '<text x="50" y="55" font-size="40" font-weight="900" fill="#b45309" text-anchor="middle">10</text>';
+            break;
+          case 'birthday':
+          case 'cake':
+            bg = '<rect width="100" height="80" rx="14" fill="#fdf2f8"/>';
+            inner = '<g transform="translate(24, 14)">' +
+              '<rect x="4" y="26" width="44" height="24" rx="5" fill="#fbcfe8"/>' +
+              '<path d="M 4 26 Q 14 32 24 26 Q 34 32 48 26" fill="#f43f5e"/>' +
+              '<rect x="23" y="10" width="5" height="16" fill="#38bdf8"/>' +
+              '<circle cx="25.5" cy="6" r="4" fill="#f59e0b"/>' +
+            '</g>';
+            break;
+          case 'candle':
+            bg = '<rect width="100" height="80" rx="14" fill="#fffbeb"/>';
+            inner = '<g transform="translate(42, 12)">' +
+              '<rect x="4" y="20" width="8" height="40" rx="3" fill="#f43f5e"/>' +
+              '<path d="M 8 6 Q 14 14 8 20 Q 2 14 8 6 Z" fill="#f59e0b"/>' +
+              '<circle cx="8" cy="14" r="2.5" fill="#fef08a"/>' +
+            '</g>';
+            break;
+          case 'gift':
+          case 'party':
+            bg = '<rect width="100" height="80" rx="14" fill="#eff6ff"/>';
+            inner = '<g transform="translate(26, 16)">' +
+              '<rect x="4" y="14" width="40" height="34" rx="4" fill="#38bdf8"/>' +
+              '<rect x="2" y="10" width="44" height="8" rx="2" fill="#0284c7"/>' +
+              '<line x1="24" y1="10" x2="24" y2="48" stroke="#ef4444" stroke-width="6"/>' +
+              '<circle cx="24" cy="6" r="4" fill="#ef4444"/>' +
+            '</g>';
+            break;
+
+          // 日常物品与拼读词
+          case 'bed':
+            bg = '<rect width="100" height="80" rx="14" fill="#f1f5f9"/>';
+            inner = '<g transform="translate(18, 22)">' +
+              '<rect x="4" y="16" width="56" height="20" rx="4" fill="#38bdf8"/>' +
+              '<rect x="8" y="8" width="16" height="12" rx="3" fill="#ffffff"/>' +
+              '<line x1="4" y1="4" x2="4" y2="40" stroke="#78350f" stroke-width="4"/>' +
+              '<line x1="60" y1="18" x2="60" y2="40" stroke="#78350f" stroke-width="4"/>' +
+            '</g>';
+            break;
+          case 'pen':
+            bg = '<rect width="100" height="80" rx="14" fill="#f8fafc"/>';
+            inner = '<g transform="translate(24, 14) rotate(45 26 26)">' +
+              '<rect x="22" y="4" width="8" height="42" rx="2" fill="#2563eb"/>' +
+              '<polygon points="22,46 30,46 26,56" fill="#0f172a"/>' +
+            '</g>';
+            break;
+          case 'cup':
+          case 'mug':
+            bg = '<rect width="100" height="80" rx="14" fill="#fffbeb"/>';
+            inner = '<g transform="translate(26, 18)">' +
+              '<rect x="8" y="14" width="32" height="30" rx="6" fill="#f59e0b"/>' +
+              '<path d="M 40 20 Q 52 28 40 38" stroke="#f59e0b" stroke-width="4" fill="none"/>' +
+              '<path d="M 18 8 Q 20 2 18 0 M 26 8 Q 28 2 26 0" stroke="#cbd5e1" stroke-width="2" fill="none"/>' +
+            '</g>';
+            break;
+          case 'bus':
+            bg = '<rect width="100" height="80" rx="14" fill="#fefce8"/>';
+            inner = '<g transform="translate(16, 20)">' +
+              '<rect x="4" y="8" width="60" height="30" rx="6" fill="#facc15"/>' +
+              '<rect x="10" y="12" width="10" height="10" rx="2" fill="#38bdf8"/><rect x="24" y="12" width="10" height="10" rx="2" fill="#38bdf8"/><rect x="38" y="12" width="10" height="10" rx="2" fill="#38bdf8"/>' +
+              '<circle cx="18" cy="38" r="6" fill="#0f172a"/><circle cx="50" cy="38" r="6" fill="#0f172a"/>' +
+            '</g>';
+            break;
+          case 'duck':
+            bg = '<rect width="100" height="80" rx="14" fill="#fefce8"/>';
+            inner = '<g transform="translate(24, 18)">' +
+              '<ellipse cx="26" cy="28" rx="18" ry="12" fill="#facc15"/>' +
+              '<circle cx="34" cy="16" r="10" fill="#facc15"/>' +
+              '<polygon points="42,16 54,18 42,22" fill="#ea580c"/>' +
+              '<circle cx="36" cy="14" r="2" fill="#0f172a"/>' +
+            '</g>';
+            break;
+          case 'pig':
+            bg = '<rect width="100" height="80" rx="14" fill="#fdf2f8"/>';
+            inner = '<g transform="translate(26, 14)">' +
+              '<circle cx="24" cy="26" r="18" fill="#f472b6"/>' +
+              '<polygon points="8,14 16,8 16,18" fill="#f43f5e"/><polygon points="32,18 32,8 40,14" fill="#f43f5e"/>' +
+              '<circle cx="17" cy="22" r="2" fill="#0f172a"/><circle cx="31" cy="22" r="2" fill="#0f172a"/>' +
+              '<ellipse cx="24" cy="30" rx="8" ry="5" fill="#fbcfe8"/>' +
+              '<circle cx="21" cy="30" r="1.5" fill="#be185d"/><circle cx="27" cy="30" r="1.5" fill="#be185d"/>' +
+            '</g>';
+            break;
+          case 'box':
+            bg = '<rect width="100" height="80" rx="14" fill="#fffbeb"/>';
+            inner = '<g transform="translate(24, 18)">' +
+              '<rect x="6" y="16" width="40" height="30" rx="4" fill="#d97706"/>' +
+              '<polygon points="2,16 10,4 42,4 50,16" fill="#b45309"/>' +
+            '</g>';
+            break;
+          case 'fox':
+            bg = '<rect width="100" height="80" rx="14" fill="#fff7ed"/>';
+            inner = '<g transform="translate(26, 12)">' +
+              '<polygon points="6,16 16,4 20,20" fill="#ea580c"/><polygon points="28,20 32,4 42,16" fill="#ea580c"/>' +
+              '<circle cx="24" cy="28" r="18" fill="#ea580c"/>' +
+              '<polygon points="12,32 24,44 36,32" fill="#ffffff"/>' +
+              '<circle cx="17" cy="26" r="2" fill="#0f172a"/><circle cx="31" cy="26" r="2" fill="#0f172a"/>' +
+              '<circle cx="24" cy="38" r="2.5" fill="#0f172a"/>' +
+            '</g>';
+            break;
+          case 'hat':
+          case 'cap':
+            bg = '<rect width="100" height="80" rx="14" fill="#eff6ff"/>';
+            inner = '<g transform="translate(20, 20)">' +
+              '<path d="M 12 28 C 12 12 36 12 40 28 Z" fill="#ef4444"/>' +
+              '<path d="M 8 28 L 56 28" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>' +
+            '</g>';
+            break;
+          case 'bag':
+            bg = '<rect width="100" height="80" rx="14" fill="#f0fdf4"/>';
+            inner = '<g transform="translate(26, 14)">' +
+              '<rect x="6" y="16" width="36" height="34" rx="8" fill="#10b981"/>' +
+              '<path d="M 16 16 L 16 10 Q 24 4 32 10 L 32 16" stroke="#047857" stroke-width="3" fill="none"/>' +
+              '<rect x="12" y="24" width="24" height="14" rx="4" fill="#34d399"/>' +
+            '</g>';
+            break;
+          case 'egg':
+            bg = '<rect width="100" height="80" rx="14" fill="#fefce8"/>';
+            inner = '<ellipse cx="50" cy="40" rx="18" ry="24" fill="#fed7aa" stroke="#f59e0b" stroke-width="2"/>';
+            break;
+          case 'milk':
+            bg = '<rect width="100" height="80" rx="14" fill="#eff6ff"/>';
+            inner = '<g transform="translate(32, 12)">' +
+              '<rect x="6" y="14" width="24" height="38" rx="4" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>' +
+              '<polygon points="6,14 12,6 24,6 30,14" fill="#e0f2fe"/>' +
+              '<text x="18" y="38" font-size="10" font-weight="900" fill="#2563eb" text-anchor="middle">MILK</text>' +
+            '</g>';
+            break;
+
+          default:
+            bg = '<rect width="100" height="80" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>';
+            inner = '<circle cx="50" cy="40" r="24" fill="#e0f2fe"/>' +
+              '<text x="50" y="48" font-size="28" text-anchor="middle">' + emoji + '</text>' +
+              '<text x="24" y="24" font-size="10" fill="#f59e0b">✨</text>' +
+              '<text x="76" y="60" font-size="10" fill="#3b82f6">★</text>';
+            break;
+        }
+
+        return wrapSvg(100, 80, bg + inner, 'pep-svg-word');
+      }
+
+      /* 3. 考点必背金句情景插图 (Pattern Situational Micro-illustration) */
+      function getPatternSvg(kp, unitKey, index) {
+        var pStr = (kp && kp.pattern ? kp.pattern : '') + ' ' + (kp && kp.example ? kp.example : '');
+        var bg = '<rect width="90" height="70" rx="12" fill="#eff6ff"/>';
+        var inner = '';
+
+        if (/Hello|Hi|name|I'm/i.test(pStr) || (unitKey === 'u1' && index === 0)) {
+          bg = '<rect width="90" height="70" rx="12" fill="#eff6ff"/>';
+          inner = '<circle cx="35" cy="30" r="14" fill="#fed7aa"/>' +
+            '<path d="M 23 26 Q 35 14 47 26" fill="#facc15"/>' +
+            '<path d="M 45 35 Q 56 20 62 12" stroke="#fed7aa" stroke-width="5" stroke-linecap="round" fill="none"/>' +
+            '<g transform="translate(48, 28)"><rect x="0" y="0" width="38" height="18" rx="6" fill="#38bdf8"/><text x="19" y="13" font-size="9" font-weight="900" fill="#fff" text-anchor="middle">Hi!</text></g>';
+        } else if (/meet you/i.test(pStr) || unitKey === 'u1') {
+          bg = '<rect width="90" height="70" rx="12" fill="#ecfdf5"/>';
+          inner = '<g transform="translate(18, 16)">' +
+            '<path d="M 6 18 Q 20 18 26 26" stroke="#d97706" stroke-width="5" stroke-linecap="round" fill="none"/>' +
+            '<path d="M 48 34 Q 34 34 26 26" stroke="#2563eb" stroke-width="5" stroke-linecap="round" fill="none"/>' +
+            '<circle cx="27" cy="26" r="6" fill="#ef4444"/>' +
+            '<text x="27" y="10" font-size="14" text-anchor="middle">🤝</text>' +
+          '</g>';
+        } else if (/father|mother|family|Who's this/i.test(pStr) || unitKey === 'u2') {
+          bg = '<rect width="90" height="70" rx="12" fill="#fefce8"/>';
+          inner = '<rect x="18" y="12" width="54" height="42" rx="6" fill="#ffffff" stroke="#ca8a04" stroke-width="3"/>' +
+            '<circle cx="34" cy="30" r="8" fill="#3b82f6"/><circle cx="56" cy="30" r="8" fill="#ec4899"/>' +
+            '<path d="M 45 42 L 45 58 L 52 50 Z" fill="#f59e0b"/>' +
+            '<text x="70" y="24" font-size="12">👉</text>';
+        } else if (/What's this|panda|animal/i.test(pStr) || unitKey === 'u3') {
+          bg = '<rect width="90" height="70" rx="12" fill="#f0fdf4"/>';
+          inner = '<circle cx="36" cy="34" r="16" fill="#10b981" opacity="0.3"/>' +
+            '<text x="36" y="40" font-size="18" text-anchor="middle">🐼</text>' +
+            '<circle cx="48" cy="30" r="16" fill="none" stroke="#2563eb" stroke-width="3.5"/>' +
+            '<line x1="60" y1="42" x2="72" y2="54" stroke="#2563eb" stroke-width="4.5" stroke-linecap="round"/>';
+        } else if (/apple|plant|like/i.test(pStr) || unitKey === 'u4') {
+          bg = '<rect width="90" height="70" rx="12" fill="#fef2f2"/>';
+          inner = '<circle cx="35" cy="36" r="16" fill="#ef4444"/>' +
+            '<line x1="35" y1="20" x2="38" y2="14" stroke="#78350f" stroke-width="2.5"/>' +
+            '<path d="M 38 14 Q 46 10 42 18 Z" fill="#22c55e"/>' +
+            '<text x="62" y="44" font-size="18">👍</text>';
+        } else if (/colour|red|blue/i.test(pStr) || unitKey === 'u5') {
+          bg = '<rect width="90" height="70" rx="12" fill="#faf5ff"/>';
+          inner = '<path d="M 20 40 Q 15 20 38 18 Q 65 14 68 36 Q 70 54 48 54 Q 24 54 20 40 Z" fill="#fde68a" stroke="#d97706" stroke-width="2"/>' +
+            '<circle cx="32" cy="28" r="5" fill="#ef4444"/><circle cx="46" cy="26" r="5" fill="#3b82f6"/><circle cx="56" cy="36" r="5" fill="#22c55e"/>' +
+            '<line x1="50" y1="12" x2="70" y2="48" stroke="#78350f" stroke-width="3.5" stroke-linecap="round"/>';
+        } else if (/old|year|How old|birthday/i.test(pStr) || unitKey === 'u6') {
+          bg = '<rect width="90" height="70" rx="12" fill="#fdf2f8"/>';
+          inner = '<rect x="20" y="32" width="50" height="24" rx="4" fill="#fbcfe8"/>' +
+            '<line x1="35" y1="22" x2="35" y2="32" stroke="#38bdf8" stroke-width="3"/>' +
+            '<circle cx="35" cy="18" r="3" fill="#f59e0b"/>' +
+            '<line x1="55" y1="22" x2="55" y2="32" stroke="#f43f5e" stroke-width="3"/>' +
+            '<circle cx="55" cy="18" r="3" fill="#f59e0b"/>' +
+            '<text x="66" y="24" font-size="14">🎂</text>';
+        } else {
+          bg = '<rect width="90" height="70" rx="12" fill="#eff6ff"/>';
+          inner = '<circle cx="45" cy="35" r="20" fill="#3b82f6"/>' +
+            '<text x="45" y="42" font-size="20" text-anchor="middle">⭐</text>';
+        }
+
+        return wrapSvg(90, 70, bg + inner, 'ppc-svg-pattern');
+      }
+
+      /* 4. 歌谣横幅插画 (Chant Banner Graphic) */
+      function getChantSvg() {
+        var bg = '<rect width="110" height="70" rx="12" fill="#fffbeb"/>';
+        var inner = '<path d="M 10 25 Q 35 15 60 25 Q 85 35 100 25" stroke="#fde68a" stroke-width="3" fill="none"/>' +
+          '<path d="M 10 38 Q 35 28 60 38 Q 85 48 100 38" stroke="#fde68a" stroke-width="3" fill="none"/>' +
+          '<circle cx="30" cy="32" r="7" fill="#f59e0b"/>' +
+          '<line x1="37" y1="32" x2="37" y2="12" stroke="#d97706" stroke-width="3.5"/>' +
+          '<circle cx="65" cy="22" r="7" fill="#f59e0b"/>' +
+          '<line x1="72" y1="22" x2="72" y2="6" stroke="#d97706" stroke-width="3.5"/>' +
+          '<line x1="37" y1="12" x2="72" y2="6" stroke="#d97706" stroke-width="4"/>' +
+          '<text x="86" y="52" font-size="18">🎤</text>';
+        return wrapSvg(110, 70, bg + inner, 'pep-svg-chant');
+      }
+
+      return {
+        getSceneSvg: getSceneSvg,
+        getWordSvg: getWordSvg,
+        getPatternSvg: getPatternSvg,
+        getChantSvg: getChantSvg
+      };
+    })();
+
     /* ---------------- 模式 0：教材同步伴学助教视图 ---------------- */
     function renderLessonView() {
       var les = LESSON_DATA[S.unit] || LESSON_DATA['u1'];
@@ -7180,7 +8152,17 @@
 
       // 4. 按选中的子模块精准独立渲染
       if (curTab === 'dialogue') {
-        // 子模块 1: 💬 Let's talk · 课文情景对话领读
+        // 子模块 1: 💬 Let's talk · 课文情景对话领读 (包含教材真实情景大插画)
+        h += '<div class="pep-scene-card">' +
+          '<div class="psc-media">' +
+            PepIllustrations.getSceneSvg(S.unit) +
+          '</div>' +
+          '<div class="psc-caption">' +
+            '<span class="psc-badge">🏫 课文情景大图 · Textbook Scene</span>' +
+            '<span class="psc-text">' + esc(les.sub) + ' · ' + esc(les.title) + '</span>' +
+          '</div>' +
+        '</div>';
+
         h += '<div class="pep-section-card">' +
           '<div class="psc-head">' +
             '<div class="psc-title">💬 <b>Let\'s talk · 课文情景对话领读</b> <span class="badge">情景模拟 · ' + les.dialogues.length + '轮互动</span></div>' +
@@ -7209,10 +8191,10 @@
         '</div>';
 
       } else if (curTab === 'vocab') {
-        // 子模块 2: 🔤 Let's learn · 单元核心生词库 (100% 巧记与TPR)
+        // 子模块 2: 🔤 Let's learn · 单元核心生词库 (图文结合闪卡 + 100% 巧记与TPR)
         h += '<div class="pep-section-card">' +
           '<div class="psc-head">' +
-            '<div class="psc-title">🔤 <b>Let\'s learn · 单元核心生词库 (' + unitWords.length + ' 词)</b> <span class="badge">100% 巧记+动作</span></div>' +
+            '<div class="psc-title">🔤 <b>Let\'s learn · 单元核心生词库 (' + unitWords.length + ' 词)</b> <span class="badge">100% 图文+巧记+动作</span></div>' +
             '<div class="psc-actions">' +
               '<button type="button" class="btn small ghost" id="btnPlayAllVocab">🎧 连播全部单词</button>' +
               '<button type="button" class="btn small ghost" id="btnGoSoundout">🧩 开启音素拆读</button>' +
@@ -7221,20 +8203,22 @@
           '<div class="pep-vocab-grid">';
         unitWords.forEach(function (w, wIdx) {
           h += '<div class="pep-vocab-card" data-word="' + esc(w.word) + '" data-widx="' + wIdx + '">' +
-            '<div class="pvc-top">' +
-              '<span class="pvc-emoji">' + (w.emoji || '📖') + '</span>' +
-              '<div class="pvc-word-info">' +
+            '<div class="pvc-illustration-box">' +
+              PepIllustrations.getWordSvg(w) +
+              '<button type="button" class="pvc-floating-speaker" data-word="' + esc(w.word) + '" title="听单词发音">🔊</button>' +
+            '</div>' +
+            '<div class="pvc-card-body">' +
+              '<div class="pvc-word-row">' +
                 '<span class="pvc-en">' + esc(w.word) + '</span>' +
                 '<span class="pvc-ipa">' + esc(w.ipa || '') + '</span>' +
               '</div>' +
-              '<button type="button" class="pvc-speaker" data-word="' + esc(w.word) + '" title="听单词发音">🔊</button>' +
-            '</div>' +
-            '<div class="pvc-cn">' + esc(w.cn) + '</div>' +
-            (w.magicTip ? '<div class="pvc-magic">💡 <b>1秒巧记：</b>' + esc(w.magicTip) + '</div>' : (w.tip ? '<div class="pvc-tip">💡 ' + esc(w.tip) + '</div>' : '')) +
-            (w.tpr ? '<div class="pvc-tpr">🏃 <b>动一动：</b>' + esc(w.tpr) + '</div>' : '') +
-            '<div class="pvc-actions">' +
-              '<button type="button" class="btn small ghost pvc-soundout-btn" data-widx="' + wIdx + '">🧩 音素拆读</button>' +
-              (w.pair ? '<span class="pvc-pair-badge">⚡ 反义: ' + esc(w.pair) + '</span>' : '') +
+              '<div class="pvc-cn">' + esc(w.cn) + '</div>' +
+              (w.magicTip ? '<div class="pvc-magic">💡 <b>1秒巧记：</b>' + esc(w.magicTip) + '</div>' : (w.tip ? '<div class="pvc-tip">💡 ' + esc(w.tip) + '</div>' : '')) +
+              (w.tpr ? '<div class="pvc-tpr">🏃 <b>动一动：</b>' + esc(w.tpr) + '</div>' : '') +
+              '<div class="pvc-actions">' +
+                '<button type="button" class="btn small ghost pvc-soundout-btn" data-widx="' + wIdx + '">🧩 音素拆读</button>' +
+                (w.pair ? '<span class="pvc-pair-badge">⚡ 反义: ' + esc(w.pair) + '</span>' : '') +
+              '</div>' +
             '</div>' +
           '</div>';
         });
@@ -7246,10 +8230,19 @@
         '</div>';
 
       } else if (curTab === 'chant') {
-        // 子模块 3: 🎵 Let's chant · 课本趣味韵律歌谣 + ⭐ 单元课标金句秘籍
+        // 子模块 3: 🎵 Let's chant · 课本趣味韵律歌谣 + ⭐ 单元课标金句秘籍 (图文结合情景呈现)
         h += '<div class="pep-section-card">' +
+          '<div class="pep-chant-banner">' +
+            '<div class="pcb-media">' +
+              PepIllustrations.getChantSvg() +
+            '</div>' +
+            '<div class="pcb-info">' +
+              '<div class="pcb-title">🎶 Let\'s chant · 课本趣味韵律歌谣伴读</div>' +
+              '<div class="pcb-desc">打着节拍跟读，韵律节奏朗朗上口，建立纯正英语语感与语音记忆！</div>' +
+            '</div>' +
+          '</div>' +
           '<div class="psc-head">' +
-            '<div class="psc-title">🎵 <b>Let\'s chant · 课本趣味歌谣伴读</b> <span class="badge">语感律动</span></div>' +
+            '<div class="psc-title">🎵 <b>歌谣点读</b> <span class="badge">语感律动</span></div>' +
             '<button type="button" class="btn small ghost" id="btnPlayChant">▶️ 完整歌谣朗读</button>' +
           '</div>' +
           '<div class="pep-chant-list" id="pepChantList">';
@@ -7265,23 +8258,31 @@
         });
         h += '</div></div>';
 
-        // 单元课标考点金句秘籍
+        // 单元课标考点金句秘籍 (左侧情景微插图 + 右侧句型公式与例句释义)
         h += '<div class="pep-section-card" style="margin-top:12px;">' +
           '<div class="psc-head">' +
             '<div class="psc-title">⭐ <b>单元课标金句秘籍</b> <span class="badge">必背 & 考试提分</span></div>' +
           '</div>' +
           '<div class="pep-pattern-list">';
-        les.keyPatterns.forEach(function (kp) {
+        les.keyPatterns.forEach(function (kp, kpIdx) {
           h += '<div class="pep-pattern-card">' +
-            '<div class="ppc-badge">必背句型</div>' +
-            '<div class="ppc-content">' +
-              '<div class="ppc-pattern"><b>公式：</b>' + esc(kp.pattern) + '</div>' +
-              '<div class="ppc-example-row">' +
-                '<span class="ppc-example"><b>例句：</b>' + esc(kp.example) + '</span>' +
-                '<button type="button" class="ppc-speaker" data-en="' + esc(kp.example) + '">🔊</button>' +
+            '<div class="ppc-body-split">' +
+              '<div class="ppc-scene-visual">' +
+                PepIllustrations.getPatternSvg(kp, S.unit, kpIdx) +
               '</div>' +
-              '<div class="ppc-cn"><b>释义：</b>' + esc(kp.cn) + '</div>' +
-              '<div class="ppc-tip">💡 <b>秘籍：</b>' + esc(kp.tip) + '</div>' +
+              '<div class="ppc-content">' +
+                '<div class="ppc-badge-row">' +
+                  '<span class="ppc-badge">必背句型</span>' +
+                  '<span class="ppc-tag">情景图解</span>' +
+                '</div>' +
+                '<div class="ppc-pattern"><b>公式：</b>' + esc(kp.pattern) + '</div>' +
+                '<div class="ppc-example-row">' +
+                  '<span class="ppc-example"><b>例句：</b>' + esc(kp.example) + '</span>' +
+                  '<button type="button" class="ppc-speaker" data-en="' + esc(kp.example) + '" title="朗读此句">🔊</button>' +
+                '</div>' +
+                '<div class="ppc-cn"><b>释义：</b>' + esc(kp.cn) + '</div>' +
+                '<div class="ppc-tip">💡 <b>秘籍：</b>' + esc(kp.tip) + '</div>' +
+              '</div>' +
             '</div>' +
           '</div>';
         });
@@ -7639,7 +8640,9 @@
       // 核心卡片展示区
       h += '<div class="pep-sound-card ' + (S.hidden ? 'masked' : '') + '">' +
         '<div class="pep-card-top">' +
-          '<span class="pep-emoji" title="' + esc(w.cn) + '">' + w.emoji + '</span>' +
+          '<div class="pep-illustration-thumb">' +
+            PepIllustrations.getWordSvg(w) +
+          '</div>' +
           '<div class="pep-cn-box">' +
             '<span class="pep-cn-txt">' + (S.hidden ? '❓ (先在脑海中读一读)' : esc(w.cn)) + '</span>' +
             '<span class="pep-ipa-txt">' + (S.hidden ? '/ ??? /' : esc(w.ipa)) + '</span>' +

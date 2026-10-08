@@ -3014,6 +3014,66 @@ body.standalone-active .main {
   transform: translateY(-1px);
 }
 
+/* ---------------- 课文情景大图卡片 (Let's talk 场景真实还原) ---------------- */
+.pep-scene-card {
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+.psc-media {
+  width: 100%;
+  background: #f0fdf4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.pep-svg-scene {
+  width: 100%;
+  height: auto;
+  max-height: 220px;
+  display: block;
+}
+.psc-caption {
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.psc-badge {
+  font-size: 11px;
+  font-weight: 800;
+  background: #2563eb;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+.psc-text {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+@media (max-width: 520px) {
+  .pep-svg-scene {
+    max-height: 160px;
+  }
+  .psc-caption {
+    padding: 8px 10px;
+  }
+  .psc-text {
+    font-size: 11px;
+  }
+}
+
 .pep-section-card {
   background: var(--card); border: 2px solid var(--line);
   border-radius: 18px; padding: 16px; box-shadow: var(--shadow);
@@ -3072,7 +3132,7 @@ body.standalone-active .main {
   background: var(--bg-hover, #f8fafc);
   border: 1.5px solid var(--line);
   border-radius: 16px;
-  padding: 12px;
+  padding: 10px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
@@ -3092,21 +3152,58 @@ body.standalone-active .main {
   background: #eff6ff;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
-.pvc-top {
+
+/* ---------------- 生词图文闪卡专属插画展示区 ---------------- */
+.pvc-illustration-box {
+  width: 100%;
+  height: 84px;
+  position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
+  background: var(--card);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+.pep-svg-word {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.pvc-floating-speaker {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease;
+  user-select: none;
+}
+.pvc-floating-speaker:active {
+  transform: scale(0.86);
+}
+.pvc-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 2px;
+}
+.pvc-word-row {
+  display: flex;
+  align-items: baseline;
   justify-content: space-between;
   gap: 6px;
-}
-.pvc-emoji {
-  font-size: 26px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-.pvc-word-info {
-  flex: 1;
-  min-width: 0;
-  margin-left: 4px;
+  flex-wrap: wrap;
 }
 .pvc-en {
   display: block;
@@ -3121,24 +3218,6 @@ body.standalone-active .main {
   color: var(--ink-2);
   margin-top: 1px;
 }
-.pvc-speaker {
-  background: #ffffff;
-  border: 1px solid var(--line);
-  font-size: 16px;
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: transform 0.1s ease, background 0.15s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-}
-.pvc-speaker:active {
-  transform: scale(0.88);
-}
 .pvc-cn {
   font-size: 13.5px;
   font-weight: 800;
@@ -3147,6 +3226,45 @@ body.standalone-active .main {
 .pvc-tip {
   font-size: 11px;
   color: var(--ink-2);
+  line-height: 1.35;
+}
+
+/* ---------------- 趣味歌谣律动横幅 (Chant Banner) ---------------- */
+.pep-chant-banner {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1.5px solid #fde68a;
+  border-radius: 16px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.pcb-media {
+  flex-shrink: 0;
+  width: 76px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.pep-svg-chant {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.pcb-info {
+  flex: 1;
+  min-width: 0;
+}
+.pcb-title {
+  font-size: 13.5px;
+  font-weight: 900;
+  color: #92400e;
+  margin-bottom: 2px;
+}
+.pcb-desc {
+  font-size: 11px;
+  color: #b45309;
   line-height: 1.35;
 }
 
@@ -3164,22 +3282,92 @@ body.standalone-active .main {
 .pci-en { font-size: 14px; font-weight: 800; color: #78350f; }
 .pci-cn { font-size: 11.5px; color: #92400e; }
 
-/* 课标金句卡 */
+/* ---------------- 课标金句情景图解卡片 (Key Patterns Micro-Scene) ---------------- */
 .pep-pattern-list { display: flex; flex-direction: column; gap: 10px; }
 .pep-pattern-card {
   border: 1.5px solid var(--line); border-radius: 14px; padding: 12px;
   background: var(--bg-hover, #f8fafc); position: relative;
 }
+.ppc-body-split {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.ppc-scene-visual {
+  flex-shrink: 0;
+  width: 90px;
+  height: 70px;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+.ppc-svg-pattern {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.ppc-content { display: flex; flex-direction: column; gap: 4px; font-size: 13px; flex: 1; min-width: 0; }
+.ppc-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
 .ppc-badge {
   display: inline-block; background: #10b981; color: #fff;
-  font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-bottom: 6px;
+  font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px;
 }
-.ppc-content { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.ppc-tag {
+  font-size: 10px;
+  font-weight: 800;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
 .ppc-pattern { color: var(--ink); font-weight: 800; }
 .ppc-example-row { display: flex; align-items: center; gap: 8px; color: #2563eb; font-weight: 800; }
 .ppc-speaker { background: transparent; border: none; font-size: 15px; cursor: pointer; }
 .ppc-cn { color: var(--ink-2); font-size: 12px; }
 .ppc-tip { color: #d97706; font-size: 11.5px; }
+
+/* ---------------- 音素拆读卡片内的插画微缩图 ---------------- */
+.pep-illustration-thumb {
+  width: 68px;
+  height: 54px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pep-illustration-thumb svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@media (max-width: 520px) {
+  .ppc-body-split {
+    gap: 8px;
+  }
+  .ppc-scene-visual {
+    width: 74px;
+    height: 58px;
+  }
+  .pvc-illustration-box {
+    height: 74px;
+  }
+}
 
 /* 🌟 单词助记小魔法与 TPR 动作样式 */
 .pvc-magic {
