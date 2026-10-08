@@ -264,7 +264,8 @@
 
   global.Games = global.Games || {};
   global.Games.mines = {
-    id: 'mines', cat: 'brain', emoji: '💣',
+    stageType: 'puzzle',
+    id: 'mines', cat: 'puzzle', emoji: '💣',
     name: '扫雷·少儿版',
     desc: '经典扫雷的儿童友好版！数字推理雷区，第一次点击永远安全，插旗标记慢慢排。锻炼数字演绎。',
     tags: ['数字演绎', '概率排除', '6-10 岁'],

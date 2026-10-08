@@ -96,23 +96,27 @@
         <button class="btn ghost" id="btn-back" data-page-node-id="8emHOEUbFTn7sByCYvJZdE">← 返回首页</button>
         <h2 id="play-title" data-page-node-id="vrKD1AfkrNwvuLKn5gL6ee">五子棋</h2>
         <button type="button" class="btn small" id="btn-rules" data-page-node-id="KOLGZrhgUQpgkpkzAvlXuF">❓ 玩法</button>
+        <button type="button" class="btn small ghost icon-btn" id="btn-settings-drawer" title="对局设置">⚙️</button>
         <span class="pill" id="play-status" data-page-node-id="GbWT1fE5OiBwIOtr5SoxZT">准备开始</span>
       </div>
 
-      <div class="play-body" data-page-node-id="VqkLXCyFS4vjZ2abs1Vnzs">
-        <div class="board-panel" data-page-node-id="GAoCkKUYBmFIN7YQRf6C8B">
-          <div class="board-host" id="board-host" data-page-node-id="Zz4eKQWIxaszXXF8Ev58oF"></div>
-          <div class="board-foot" data-page-node-id="ZCmj35nyM7L2333t8qgwhM"><span id="turn-tip" data-page-node-id="KdknpfHZ9TG9KklGUBmYvf"></span></div>
-          <div class="board-quick-actions" id="board-quick-actions" data-page-node-id="vw4ZxHgV3x3ZMTFuMMCQbi">
-            <button type="button" class="btn small q-btn" id="btn-quick-undo" data-page-node-id="2AnyTtmwEDSjPGLt1LXCGV">↩️ 悔棋</button>
-            <button type="button" class="btn small q-btn" id="btn-quick-hint" data-page-node-id="3YF9i73K2JHH233OVCxtxh">💡 提示</button>
-            <button type="button" class="btn small q-btn" id="btn-quick-restart" data-page-node-id="ohJ1mNB3jYiH71CkjRBq6S">🔄 重开</button>
-            <button type="button" class="btn small q-btn" id="btn-quick-resign" data-page-node-id="KLV8IsramI09TuFO4NsNyC">🏳️ 认输</button>
+      <div class="play-body" id="play-body" data-page-node-id="VqkLXCyFS4vjZ2abs1Vnzs">
+        <!-- 动态舞台视口容器：由 stageType ('board' | 'puzzle' | 'arcade' | 'story') 挂载 -->
+        <div class="stage-viewport board-panel" id="stage-viewport" data-page-node-id="GAoCkKUYBmFIN7YQRf6C8B">
+          <div class="stage-host board-host" id="board-host" data-page-node-id="Zz4eKQWIxaszXXF8Ev58oF"></div>
+          <div class="stage-foot board-foot" id="board-foot" data-page-node-id="ZCmj35nyM7L2333t8qgwhM"><span id="turn-tip" data-page-node-id="KdknpfHZ9TG9KklGUBmYvf"></span></div>
+          <div class="stage-actions" id="stage-actions">
+            <div class="board-quick-actions" id="board-quick-actions" data-page-node-id="vw4ZxHgV3x3ZMTFuMMCQbi">
+              <button type="button" class="btn small q-btn" id="btn-quick-undo" data-page-node-id="2AnyTtmwEDSjPGLt1LXCGV">↩️ 悔棋</button>
+              <button type="button" class="btn small q-btn" id="btn-quick-hint" data-page-node-id="3YF9i73K2JHH233OVCxtxh">💡 提示</button>
+              <button type="button" class="btn small q-btn" id="btn-quick-restart" data-page-node-id="ohJ1mNB3jYiH71CkjRBq6S">🔄 重开</button>
+              <button type="button" class="btn small q-btn" id="btn-quick-resign" data-page-node-id="KLV8IsramI09TuFO4NsNyC">🏳️ 认输</button>
+            </div>
           </div>
         </div>
 
-        <aside class="side-panel" data-page-node-id="qDiXRIg1fCMkvNUkFe1v5Y">
-          <div class="card" data-page-node-id="2yCJ1zWcQ7K7LFV5Y6Zig4">
+        <aside class="side-panel" id="side-panel" data-page-node-id="qDiXRIg1fCMkvNUkFe1v5Y">
+          <div class="card" id="side-settings-card" data-page-node-id="2yCJ1zWcQ7K7LFV5Y6Zig4">
             <h3 data-page-node-id="K4jT8g9AoVB6jGDUhNhRra">对局设置</h3>
             <label class="field" data-page-node-id="AazJMEnl3HsELG5DUYWqNA"><span data-page-node-id="qMzIHpRClNFprasPrEPg4A">对手</span>
               <select id="sel-mode" data-page-node-id="BBw4DIg0UUmZOnNFMKYhy6">
@@ -132,7 +136,7 @@
             </label>
           </div>
 
-          <div class="card" data-page-node-id="vET1DEIGinDw6ENNUwb5h5">
+          <div class="card" id="side-actions-card" data-page-node-id="vET1DEIGinDw6ENNUwb5h5">
             <h3 data-page-node-id="gza6dwCJUZJts66hfLnjhD">操作</h3>
             <div class="btn-col" data-page-node-id="X3Yk8SGboDQJHsypTGAP83">
               <button class="btn" id="btn-restart" data-page-node-id="8UAMNp8tEeQIMp2aDkVH7U">🔄 重新开始</button>
@@ -142,11 +146,21 @@
             </div>
           </div>
 
-          <div class="card" data-page-node-id="A7C11T4tFW7oZcAhPmCV3R">
+          <div class="card" id="side-info-card" data-page-node-id="A7C11T4tFW7oZcAhPmCV3R">
             <h3 data-page-node-id="QnQ0v6nZJHaG4FSowZi3yW">对局信息</h3>
             <div id="game-info" class="info" data-page-node-id="RmLT7fdCcLknXpYqN05Zat"></div>
           </div>
         </aside>
+      </div>
+
+      <!-- 移动端底部设置半屏抽屉 -->
+      <div class="drawer-overlay hidden" id="drawer-overlay"></div>
+      <div class="settings-drawer hidden" id="settings-drawer">
+        <div class="drawer-head">
+          <h3 id="drawer-title">⚙️ 游戏设置</h3>
+          <button type="button" class="btn ghost small" id="btn-drawer-close">✕</button>
+        </div>
+        <div class="drawer-body" id="drawer-body"></div>
       </div>
     </section>
 
@@ -273,39 +287,42 @@
 
 <input type="file" id="file-input" accept="application/json" hidden data-page-node-id="kmH6jFGHVUxAFtAXweVFOP" />
 
-<script src="js/store.js?v=v42"></script>
-<script src="js/sfx.js?v=v42"></script>
-<script src="js/fx.js?v=v42"></script>
-<script src="js/boardkit.js?v=v42"></script>
-<script src="js/games/gomoku.js?v=v42"></script>
-<script src="js/games/go.js?v=v42"></script>
-<script src="js/games/checkers.js?v=v42"></script>
-<script src="js/games/xiangqi.js?v=v42"></script>
-<script src="js/games/sudoku.js?v=v42"></script>
-<script src="js/games/slide.js?v=v42"></script>
-<script src="js/games/memory.js?v=v42"></script>
-<script src="js/games/game24.js?v=v42"></script>
-<script src="js/games/mathcamp.js?v=v42"></script>
-<script src="js/games/english.js?v=v55"></script>
-<script src="js/games/hanoi.js?v=v42"></script>
-<script src="js/games/lightsout.js?v=v42"></script>
-<script src="js/games/nonogram.js?v=v42"></script>
-<script src="js/games/mastermind.js?v=v42"></script>
-<script src="js/games/pattern.js?v=v42"></script>
-<script src="js/games/shadow.js?v=v42"></script>
-<script src="js/games/mole.js?v=v42"></script>
-<script src="js/games/catch.js?v=v42"></script>
-<script src="js/games/puzzle.js?v=v42"></script>
-<script src="js/games/diff.js?v=v42"></script>
-<script src="js/games/simon.js?v=v42"></script>
-<script src="js/games/slidepic.js?v=v42"></script>
-<script src="js/games/dragpuzzle.js?v=v42"></script>
-<script src="js/games/sokoban.js?v=v42"></script>
-<script src="js/games/pipes.js?v=v42"></script>
-<script src="js/games/mines.js?v=v42"></script>
-<script src="js/games/balance.js?v=v42"></script>
-<script src="js/games/xylo.js?v=v42"></script>
-<script src="js/games/paint.js?v=v42"></script>
-<script src="js/app.js?v=v53"></script>
+<canvas id="fx-canvas" class="fx-canvas" style="position:fixed;inset:0;pointer-events:none;z-index:130;"></canvas>
+
+<script src="js/store.js?v=v56"></script>
+<script src="js/sfx.js?v=v56"></script>
+<script src="js/fx.js?v=v56"></script>
+<script src="js/gestures.js?v=v56"></script>
+<script src="js/boardkit.js?v=v56"></script>
+<script src="js/games/gomoku.js?v=v56"></script>
+<script src="js/games/go.js?v=v56"></script>
+<script src="js/games/checkers.js?v=v56"></script>
+<script src="js/games/xiangqi.js?v=v56"></script>
+<script src="js/games/sudoku.js?v=v56"></script>
+<script src="js/games/slide.js?v=v56"></script>
+<script src="js/games/memory.js?v=v56"></script>
+<script src="js/games/game24.js?v=v56"></script>
+<script src="js/games/mathcamp.js?v=v56"></script>
+<script src="js/games/english.js?v=v56"></script>
+<script src="js/games/hanoi.js?v=v56"></script>
+<script src="js/games/lightsout.js?v=v56"></script>
+<script src="js/games/nonogram.js?v=v56"></script>
+<script src="js/games/mastermind.js?v=v56"></script>
+<script src="js/games/pattern.js?v=v56"></script>
+<script src="js/games/shadow.js?v=v56"></script>
+<script src="js/games/mole.js?v=v56"></script>
+<script src="js/games/catch.js?v=v56"></script>
+<script src="js/games/puzzle.js?v=v56"></script>
+<script src="js/games/diff.js?v=v56"></script>
+<script src="js/games/simon.js?v=v56"></script>
+<script src="js/games/slidepic.js?v=v56"></script>
+<script src="js/games/dragpuzzle.js?v=v56"></script>
+<script src="js/games/sokoban.js?v=v56"></script>
+<script src="js/games/pipes.js?v=v56"></script>
+<script src="js/games/mines.js?v=v56"></script>
+<script src="js/games/balance.js?v=v56"></script>
+<script src="js/games/xylo.js?v=v56"></script>
+<script src="js/games/paint.js?v=v56"></script>
+<script src="js/app.js?v=v56"></script>
 </body>
 </html>

@@ -508,6 +508,7 @@
 
   global.Games = global.Games || {};
   global.Games.go = {
+    stageType: 'board',
     cat: 'board',
     id: 'go', name: '围棋', emoji: '⚪',
     desc: '围地多者胜。棋盘 9×9，规则已简化：无气提子、禁止自杀与打劫，双方连续停一手即终局。',

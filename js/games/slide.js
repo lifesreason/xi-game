@@ -270,6 +270,7 @@
 
   global.Games = global.Games || {};
   global.Games.slide = {
+    stageType: 'puzzle',
     cat: 'puzzle',
     emoji: '🧩',
     name: '数字华容道',

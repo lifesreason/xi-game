@@ -48,29 +48,42 @@
     });
     /* 任何视图切换都收掉浮层弹窗，避免旧弹窗挡住新页面 */
     $('rules-modal').classList.add('hidden');
+    var drawerEl = $('settings-drawer'); if (drawerEl) drawerEl.classList.add('hidden');
+    var drawerOverlay = $('drawer-overlay'); if (drawerOverlay) drawerOverlay.classList.add('hidden');
+
     Array.prototype.forEach.call(document.querySelectorAll('.tab, .b-tab'), function (t) {
       t.classList.toggle('active', t.dataset.view === name);
     });
     if (name === 'home') renderHome();
     if (name === 'records') renderRecords();
-    /* 离开游戏视图时恢复独立工作台样式 */
+    /* 离开游戏视图时恢复舞台容器样式 */
     if (name !== 'play') {
       document.body.classList.remove('standalone-active');
       var appEl = document.querySelector('.app');
       if (appEl) appEl.classList.remove('standalone-active');
       var viewPlayEl = $('view-play');
-      if (viewPlayEl) viewPlayEl.classList.remove('standalone-mode');
-      var playBodyEl = document.querySelector('.play-body');
-      if (playBodyEl) playBodyEl.classList.remove('standalone-mode');
+      if (viewPlayEl) {
+        viewPlayEl.classList.remove('standalone-mode');
+        ['stage-board', 'stage-puzzle', 'stage-arcade', 'stage-story'].forEach(function (c) {
+          viewPlayEl.classList.remove(c);
+        });
+      }
+      var stageViewportEl = $('stage-viewport') || document.querySelector('.board-panel');
+      if (stageViewportEl) {
+        stageViewportEl.classList.remove('standalone-mode');
+        ['stage-board', 'stage-puzzle', 'stage-arcade', 'stage-story'].forEach(function (c) {
+          stageViewportEl.classList.remove(c);
+        });
+      }
       var quickActionsEl = $('board-quick-actions');
       if (quickActionsEl) quickActionsEl.style.display = '';
-      var sidePanelEl = document.querySelector('.side-panel');
+      var sidePanelEl = $('side-panel') || document.querySelector('.side-panel');
       if (sidePanelEl) sidePanelEl.style.display = '';
       var playStatusEl = $('play-status');
       if (playStatusEl) playStatusEl.style.display = '';
       var turnTipEl = $('turn-tip');
       if (turnTipEl) turnTipEl.style.display = '';
-      var boardFootEl = document.querySelector('.board-foot');
+      var boardFootEl = $('board-foot') || document.querySelector('.board-foot');
       if (boardFootEl) boardFootEl.style.display = '';
       var btnRulesEl = $('btn-rules');
       if (btnRulesEl) btnRulesEl.textContent = '❓ 玩法';
@@ -225,11 +238,116 @@
     };
   }
 
+  /* 4 大沉浸式交互舞台分类映射 */
+  var STAGE_MAP = {
+    gomoku: 'board', go: 'board', checkers: 'board', xiangqi: 'board',
+    sudoku: 'puzzle', slide: 'puzzle', game24: 'puzzle', hanoi: 'puzzle',
+    sokoban: 'puzzle', lightsout: 'puzzle', mines: 'puzzle', nonogram: 'puzzle',
+    pipes: 'puzzle', mastermind: 'puzzle', balance: 'puzzle',
+    mole: 'arcade', catch: 'arcade', xylo: 'arcade', paint: 'arcade',
+    diff: 'arcade', puzzle: 'arcade', slidepic: 'arcade', dragpuzzle: 'arcade',
+    shadow: 'arcade', pattern: 'arcade', simon: 'arcade', memory: 'arcade',
+    english: 'story', mathcamp: 'story'
+  };
+
+  function applyStage(stageType, g, id) {
+    var viewPlayEl = $('view-play');
+    var stageViewportEl = $('stage-viewport') || document.querySelector('.board-panel');
+    var sidePanelEl = $('side-panel') || document.querySelector('.side-panel');
+    var quickActionsEl = $('board-quick-actions');
+    var playStatusEl = $('play-status');
+    var turnTipEl = $('turn-tip');
+    var boardFootEl = $('board-foot') || document.querySelector('.board-foot');
+    var btnRulesEl = $('btn-rules');
+    var btnSettingsDrawer = $('btn-settings-drawer');
+    var sideSettingsCard = $('side-settings-card');
+    var sideActionsCard = $('side-actions-card');
+    var sideInfoCard = $('side-info-card');
+
+    /* 清除旧 stage 类 */
+    ['stage-board', 'stage-puzzle', 'stage-arcade', 'stage-story', 'standalone-mode'].forEach(function (c) {
+      if (viewPlayEl) viewPlayEl.classList.remove(c);
+      if (stageViewportEl) stageViewportEl.classList.remove(c);
+    });
+    document.body.classList.remove('standalone-active');
+    var appEl = document.querySelector('.app');
+    if (appEl) appEl.classList.remove('standalone-active');
+
+    if (viewPlayEl) viewPlayEl.classList.add('stage-' + stageType);
+    if (stageViewportEl) stageViewportEl.classList.add('stage-' + stageType);
+
+    /* 默认可见性复位 */
+    if (playStatusEl) playStatusEl.style.display = '';
+    if (turnTipEl) turnTipEl.style.display = '';
+    if (boardFootEl) boardFootEl.style.display = '';
+    if (btnRulesEl) btnRulesEl.textContent = (id === 'english') ? '💡 拼读秘籍' : '❓ 玩法';
+    if (btnSettingsDrawer) btnSettingsDrawer.style.display = '';
+
+    /* 快捷操作栏按钮重置 */
+    var btnUndo = $('btn-quick-undo');
+    var btnHint = $('btn-quick-hint');
+    var btnRestart = $('btn-quick-restart');
+    var btnResign = $('btn-quick-resign');
+
+    if (stageType === 'board') {
+      /* 传统棋类：完整对弈界面 */
+      if (sidePanelEl) sidePanelEl.style.display = '';
+      if (sideSettingsCard) sideSettingsCard.style.display = '';
+      if (sideActionsCard) sideActionsCard.style.display = '';
+      if (sideInfoCard) sideInfoCard.style.display = '';
+      if (quickActionsEl) quickActionsEl.style.display = '';
+      if (btnUndo) { btnUndo.style.display = ''; btnUndo.textContent = '↩️ 悔棋'; }
+      if (btnHint) { btnHint.style.display = ''; btnHint.textContent = '💡 提示'; }
+      if (btnRestart) { btnRestart.style.display = ''; btnRestart.textContent = '🔄 重开'; }
+      if (btnResign) { btnResign.style.display = ''; btnResign.textContent = '🏳️ 认输'; }
+    } else if (stageType === 'puzzle') {
+      /* 逻辑解谜：无认输、无PVE/PVP对手、无先后手（保留档位） */
+      if (sidePanelEl) sidePanelEl.style.display = '';
+      if (sideSettingsCard) sideSettingsCard.style.display = (g.sideOptions ? '' : 'none');
+      if (sideActionsCard) sideActionsCard.style.display = 'none';
+      if (sideInfoCard) sideInfoCard.style.display = '';
+      if (quickActionsEl) quickActionsEl.style.display = '';
+      if (btnUndo) { btnUndo.style.display = (g.noUndo ? 'none' : ''); btnUndo.textContent = '↩️ 撤销'; }
+      if (btnHint) { btnHint.style.display = (g.noHint ? 'none' : ''); btnHint.textContent = '💡 提示'; }
+      if (btnRestart) { btnRestart.style.display = ''; btnRestart.textContent = '🔄 重置'; }
+      if (btnResign) btnResign.style.display = 'none'; // 彻底隐藏认输
+    } else if (stageType === 'arcade') {
+      /* 动感感官：全屏沉浸，隐藏侧边栏与棋类对弈按键 */
+      if (sidePanelEl) sidePanelEl.style.display = 'none';
+      if (sideSettingsCard) sideSettingsCard.style.display = 'none';
+      if (sideActionsCard) sideActionsCard.style.display = 'none';
+      if (turnTipEl) turnTipEl.style.display = 'none';
+      if (boardFootEl) boardFootEl.style.display = 'none';
+      if (g.noQuickActions || id === 'xylo' || id === 'paint') {
+        if (quickActionsEl) quickActionsEl.style.display = 'none';
+      } else {
+        if (quickActionsEl) quickActionsEl.style.display = '';
+        if (btnUndo) btnUndo.style.display = 'none';
+        if (btnHint) btnHint.style.display = (g.hasHint ? '' : 'none');
+        if (btnRestart) { btnRestart.style.display = ''; btnRestart.textContent = '🔄 重玩'; }
+        if (btnResign) btnResign.style.display = 'none';
+      }
+    } else if (stageType === 'story') {
+      /* 情景伴学：全屏满幅、独立剧场 */
+      document.body.classList.add('standalone-active');
+      if (appEl) appEl.classList.add('standalone-active');
+      if (viewPlayEl) viewPlayEl.classList.add('standalone-mode');
+      if (stageViewportEl) stageViewportEl.classList.add('standalone-mode');
+      if (sidePanelEl) sidePanelEl.style.display = 'none';
+      if (quickActionsEl) quickActionsEl.style.display = 'none';
+      if (turnTipEl) turnTipEl.style.display = 'none';
+      if (boardFootEl) boardFootEl.style.display = 'none';
+      if (playStatusEl) playStatusEl.style.display = (id === 'mathcamp' ? '' : 'none');
+    }
+  }
+
   function openGame(id, keep) {
     currentId = id;
     currentFinished = false;
     $('result-modal').classList.add('hidden'); /* 切换游戏时收掉旧结算弹窗 */
     var g = global.Games[id];
+    var stageType = g.stageType || STAGE_MAP[id] || (g.cat === 'board' ? 'board' : 'puzzle');
+
     $('play-title').textContent = g.emoji + ' ' + g.name;
     /* 规则说明：弹窗内容按游戏填充 */
     $('rules-title').textContent = g.emoji + ' ' + g.name + ' · 玩法说明';
@@ -243,27 +361,8 @@
     els.selLevel.value = settings.levels[id] || 'normal';
     refreshSideOptions(id);
 
-    /* 独立沉浸式模块（如人教版英语）：彻底隐藏对弈操作（悔棋/认输/重开/提示/对局设置），全屏满幅 */
-    var isStandalone = !!(g && g.standalone);
-    document.body.classList.toggle('standalone-active', isStandalone);
-    var appEl = document.querySelector('.app');
-    if (appEl) appEl.classList.toggle('standalone-active', isStandalone);
-    var viewPlayEl = $('view-play');
-    if (viewPlayEl) viewPlayEl.classList.toggle('standalone-mode', isStandalone);
-    var playBodyEl = document.querySelector('.play-body');
-    if (playBodyEl) playBodyEl.classList.toggle('standalone-mode', isStandalone);
-    var quickActionsEl = $('board-quick-actions');
-    if (quickActionsEl) quickActionsEl.style.display = isStandalone ? 'none' : '';
-    var sidePanelEl = document.querySelector('.side-panel');
-    if (sidePanelEl) sidePanelEl.style.display = isStandalone ? 'none' : '';
-    var playStatusEl = $('play-status');
-    if (playStatusEl) playStatusEl.style.display = isStandalone ? 'none' : '';
-    var turnTipEl = $('turn-tip');
-    if (turnTipEl) turnTipEl.style.display = isStandalone ? 'none' : '';
-    var boardFootEl = document.querySelector('.board-foot');
-    if (boardFootEl) boardFootEl.style.display = isStandalone ? 'none' : '';
-    var btnRulesEl = $('btn-rules');
-    if (btnRulesEl) btnRulesEl.textContent = isStandalone ? '💡 拼读秘籍' : '❓ 玩法';
+    /* 接入 4 大舞台系统规范 */
+    applyStage(stageType, g, id);
 
     showView('play');
     var panelEl = document.querySelector('.board-panel');
@@ -271,7 +370,7 @@
 
     if (inst) { try { inst.destroy(); } catch (e) {} inst = null; }
     var hostEl = $('board-host');
-    /* DOM 型游戏（口算 / 汉诺塔 / 点灯 / 记忆 / 24 点）彻底重置旧高度，按内容自适应撑高 */
+    /* DOM 型游戏彻底重置旧高度，按内容自适应撑高 */
     hostEl.style.height = '';
     hostEl.classList.toggle('dom-fit', !!g.dom);
     hostEl.innerHTML = '';
@@ -286,7 +385,7 @@
       inst.restart(restartOpts());
     }
     renderExtra(id);
-    if (restored) toast('已恢复上次未下完的对局');
+    if (restored) toast('已恢复上次未完成的对局');
     /* 每款游戏第一次玩时自动展示玩法说明 */
     if (!Store.get('rules.seen.' + id)) {
       Store.set('rules.seen.' + id, true);
@@ -323,12 +422,27 @@
   function renderExtra(id) {
     /* 游戏自定义按钮（如围棋“停一手”） */
     var box = $('extra-btns');
-    if (!inst || !inst.extra) { if (box) box.innerHTML = ''; return; }
-    box.innerHTML = '';
+    if (box) box.innerHTML = '';
+    var quickBox = $('board-quick-actions');
+    /* 清理旧的快速额外按钮 */
+    var oldExtras = document.querySelectorAll('.q-extra-btn');
+    Array.prototype.forEach.call(oldExtras, function (b) { b.remove(); });
+
+    if (!inst || !inst.extra) return;
     inst.extra.forEach(function (b) {
-      var btn = el('button', 'btn', b.label);
-      btn.onclick = function () { Sfx.click(); b.fn(); };
-      box.appendChild(btn);
+      if (box) {
+        var btn = el('button', 'btn', b.label);
+        btn.onclick = function () { Sfx.click(); b.fn(); };
+        box.appendChild(btn);
+      }
+      if (quickBox) {
+        var qBtn = el('button', 'btn small q-btn q-extra-btn', b.label);
+        qBtn.type = 'button';
+        qBtn.onclick = function () { Sfx.click(); b.fn(); };
+        var btnResign = $('btn-quick-resign');
+        if (btnResign) quickBox.insertBefore(qBtn, btnResign);
+        else quickBox.appendChild(qBtn);
+      }
     });
   }
 
@@ -557,6 +671,157 @@
     els.file.click();
   }
 
+  /* ---------------- 移动端底部设置抽屉 ---------------- */
+  function renderDrawerContent() {
+    var db = $('drawer-body');
+    if (!db) return;
+    db.innerHTML = '';
+    var g = global.Games[currentId];
+    if (!g) return;
+    var stageType = g.stageType || STAGE_MAP[currentId] || 'board';
+
+    var headWrap = el('div', 'drawer-game-info');
+    headWrap.innerHTML = '<b>' + g.emoji + ' ' + g.name + '</b><span class="muted small">' + (g.desc || '') + '</span>';
+    db.appendChild(headWrap);
+
+    /* 棋类/对弈设置 */
+    if (stageType === 'board' && !g.single) {
+      var modeGroup = el('div', 'drawer-field');
+      modeGroup.innerHTML = '<label>对手模式</label>';
+      var modeSelect = el('select', 'drawer-select');
+      modeSelect.innerHTML = '<option value="pve"' + (settings.mode === 'pve' ? ' selected' : '') + '>🤖 人机对战</option>' +
+                             '<option value="pvp"' + (settings.mode === 'pvp' ? ' selected' : '') + '>👫 双人对战</option>';
+      modeSelect.onchange = function () {
+        settings.mode = this.value;
+        Store.saveSettings(settings);
+        els.selMode.value = this.value;
+        refreshSideOptions(currentId);
+        currentFinished = false;
+        if (inst) inst.restart(restartOpts());
+        Store.clearGame(currentId);
+        closeDrawer();
+        toast(this.value === 'pvp' ? '已切换为双人对战' : '已切换为人机对战');
+      };
+      modeGroup.appendChild(modeSelect);
+      db.appendChild(modeGroup);
+    }
+
+    /* 难度选择 */
+    if (!g.noLevel && (stageType === 'board' ? (g.single || settings.mode === 'pve') : true)) {
+      var lvlGroup = el('div', 'drawer-field');
+      lvlGroup.innerHTML = '<label>难度选择</label>';
+      var lvlSelect = el('select', 'drawer-select');
+      var curLvl = settings.levels[currentId] || 'normal';
+      lvlSelect.innerHTML = '<option value="easy"' + (curLvl === 'easy' ? ' selected' : '') + '>🐣 简单</option>' +
+                            '<option value="normal"' + (curLvl === 'normal' ? ' selected' : '') + '>🙂 一般</option>' +
+                            '<option value="hard"' + (curLvl === 'hard' ? ' selected' : '') + '>🔥 困难</option>';
+      lvlSelect.onchange = function () {
+        settings.levels[currentId] = this.value;
+        Store.saveSettings(settings);
+        els.selLevel.value = this.value;
+        if (inst && inst.setLevel) inst.setLevel(this.value);
+        closeDrawer();
+        toast('难度已切换为「' + LEVEL_NAME[this.value] + '」');
+      };
+      lvlGroup.appendChild(lvlSelect);
+      db.appendChild(lvlGroup);
+    }
+
+    /* 盘面档位 / 我执选择 */
+    if (g.sideOptions) {
+      var sizeGroup = el('div', 'drawer-field');
+      sizeGroup.innerHTML = '<label>盘面档位</label>';
+      var sizeSelect = el('select', 'drawer-select');
+      var curSize = settings.sizes[currentId] || g.sideOptions[0][0];
+      g.sideOptions.forEach(function (opt) {
+        var op = el('option', null, opt[1]);
+        op.value = opt[0];
+        if (opt[0] === curSize) op.selected = true;
+        sizeSelect.appendChild(op);
+      });
+      sizeSelect.onchange = function () {
+        settings.sizes[currentId] = this.value;
+        Store.saveSettings(settings);
+        els.selSide.value = this.value;
+        currentFinished = false;
+        if (inst) inst.restart(restartOpts());
+        Store.clearGame(currentId);
+        closeDrawer();
+        toast('盘面已切换为「' + this.value + '」');
+      };
+      sizeGroup.appendChild(sizeSelect);
+      db.appendChild(sizeGroup);
+    } else if (stageType === 'board' && settings.mode === 'pve') {
+      var sideGroup = el('div', 'drawer-field');
+      sideGroup.innerHTML = '<label>先后手我执</label>';
+      var sideSelect = el('select', 'drawer-select');
+      (g.sides || ['先手', '后手']).forEach(function (s, i) {
+        var op = el('option', null, s);
+        op.value = String(i + 1);
+        if (String(settings.side) === String(i + 1)) op.selected = true;
+        sideSelect.appendChild(op);
+      });
+      sideSelect.onchange = function () {
+        settings.side = Number(this.value);
+        Store.saveSettings(settings);
+        els.selSide.value = this.value;
+        currentFinished = false;
+        if (inst) inst.restart(restartOpts());
+        Store.clearGame(currentId);
+        closeDrawer();
+        toast('已交换先后手，重新开局');
+      };
+      sideGroup.appendChild(sideSelect);
+      db.appendChild(sideGroup);
+    }
+
+    /* 快捷功能按钮组 */
+    var btnRow = el('div', 'drawer-btn-row');
+    var btnRules = el('button', 'btn small', '❓ 玩法说明');
+    btnRules.onclick = function () {
+      closeDrawer();
+      $('rules-modal').classList.remove('hidden');
+    };
+    btnRow.appendChild(btnRules);
+
+    var btnSound = el('button', 'btn small ghost', settings.sound ? '🔊 音效：开' : '🔇 音效：关');
+    btnSound.onclick = function () {
+      settings.sound = !settings.sound;
+      Store.saveSettings(settings);
+      this.textContent = settings.sound ? '🔊 音效：开' : '🔇 音效：关';
+      applySettings();
+      if (settings.sound && global.Sfx) Sfx.click();
+      toast(settings.sound ? '音效已开启' : '音效已静音');
+    };
+    btnRow.appendChild(btnSound);
+    db.appendChild(btnRow);
+  }
+
+  var drawerOverlay = null, drawerEl = null;
+  function openDrawer() {
+    drawerOverlay = $('drawer-overlay');
+    drawerEl = $('settings-drawer');
+    if (!drawerEl || !drawerOverlay) return;
+    renderDrawerContent();
+    drawerOverlay.classList.remove('hidden');
+    drawerEl.classList.remove('hidden');
+    void drawerEl.offsetWidth;
+    drawerEl.classList.add('open');
+    drawerOverlay.classList.add('open');
+  }
+
+  function closeDrawer() {
+    drawerOverlay = $('drawer-overlay');
+    drawerEl = $('settings-drawer');
+    if (!drawerEl || !drawerOverlay) return;
+    drawerEl.classList.remove('open');
+    drawerOverlay.classList.remove('open');
+    setTimeout(function () {
+      if (drawerEl) drawerEl.classList.add('hidden');
+      if (drawerOverlay) drawerOverlay.classList.add('hidden');
+    }, 240);
+  }
+
   /* ---------------- 初始化 ---------------- */
   function init() {
     els.toast = $('toast');
@@ -566,6 +831,14 @@
     els.selLevel = $('sel-level');
     els.selSide = $('sel-side');
     els.file = $('file-input');
+
+    /* 移动端设置抽屉开关 */
+    var btnDrawer = $('btn-settings-drawer');
+    var btnDrawerClose = $('btn-drawer-close');
+    var dOverlay = $('drawer-overlay');
+    if (btnDrawer) btnDrawer.onclick = function () { Sfx.click(); openDrawer(); };
+    if (btnDrawerClose) btnDrawerClose.onclick = function () { Sfx.click(); closeDrawer(); };
+    if (dOverlay) dOverlay.onclick = closeDrawer;
 
     /* 操作卡片里插入一个自定义按钮容器 */
     var ops = $('btn-resign').parentNode;

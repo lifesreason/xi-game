@@ -221,6 +221,7 @@
 
   global.Games = global.Games || {};
   global.Games.mastermind = {
+    stageType: 'puzzle',
     cat: 'number',
     id: 'mastermind', emoji: '🕵️',
     name: '推理密码',

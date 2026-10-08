@@ -414,6 +414,7 @@
 
   global.Games = global.Games || {};
   global.Games.gomoku = {
+    stageType: 'board',
     cat: 'board',
     id: 'gomoku', name: '五子棋', emoji: '⚫',
     desc: '横、竖、斜任意方向先连成五子即胜。规则最简单，最适合入门。',

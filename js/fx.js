@@ -146,26 +146,39 @@
     setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 1200);
   }
 
-  /* ---------- 星星喷泉 ---------- */
-  function starFountain(x, y, count) {
-    if (reduce) return;
-    count = count || 12;
-    var emojis = ['⭐', '✨', '🌟', '💫', '🎉'];
-    for (var i = 0; i < count; i++) {
-      (function (i) {
-        var s = document.createElement('span');
-        s.className = 'fx-emoji';
-        s.textContent = emojis[(Math.random() * emojis.length) | 0];
-        s.style.left = (x || (global.innerWidth / 2)) + 'px';
-        s.style.top = (y || (global.innerHeight / 2)) + 'px';
-        s.style.fontSize = (22 + Math.random() * 16) + 'px';
-        s.style.setProperty('--dx', (-90 + Math.random() * 180) + 'px');
-        s.style.setProperty('--rot', (-60 + Math.random() * 120) + 'deg');
-        s.style.animationDelay = (i * 35) + 'ms';
-        document.body.appendChild(s);
-        setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 1300 + i * 35);
-      })(i);
+  /* ---------- 连击浮字系统 (Combo Floater) ---------- */
+  function combo(count, x, y) {
+    if (reduce || count < 2) return;
+    vibrate(10);
+    var badge = document.createElement('div');
+    badge.className = 'fx-combo-badge';
+    badge.textContent = 'Combo x' + count + '! 🔥';
+    if (x != null && y != null) {
+      badge.style.left = x + 'px';
+      badge.style.top = y + 'px';
+    } else {
+      badge.style.left = '50%';
+      badge.style.top = '36%';
+      badge.style.transform = 'translate(-50%, -50%)';
     }
+    document.body.appendChild(badge);
+    setTimeout(function () {
+      if (badge.parentNode) badge.parentNode.removeChild(badge);
+    }, 1100);
+  }
+
+  /* ---------- 浮动加分 / 提示反馈 (Floating Score) ---------- */
+  function floatScore(text, x, y, kind) {
+    if (reduce) return;
+    var node = document.createElement('div');
+    node.className = 'fx-float-score' + (kind ? ' ' + kind : '');
+    node.textContent = text;
+    node.style.left = (x || (global.innerWidth / 2)) + 'px';
+    node.style.top = (y || (global.innerHeight / 2)) + 'px';
+    document.body.appendChild(node);
+    setTimeout(function () {
+      if (node.parentNode) node.parentNode.removeChild(node);
+    }, 900);
   }
 
   global.Fx = {
@@ -177,6 +190,9 @@
     ripple: ripple,
     vibrate: vibrate,
     starFountain: starFountain,
+    combo: combo,
+    floatScore: floatScore,
     reduced: reduce
   };
 })(window);
+

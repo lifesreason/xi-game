@@ -283,6 +283,9 @@
 
   global.Games = global.Games || {};
   global.Games.puzzle = {
+    stageType: 'arcade',
+    hasHint: true,
+    noUndo: true,
     id: 'puzzle', cat: 'kids', emoji: '🖼️',
     name: '可爱拼图',
     desc: '阳光小屋图画拼图！点两块互相交换，把图画拼回原样。比滑块拼图更简单，适合 3-6 岁。',

@@ -920,7 +920,8 @@
 
   global.Games = global.Games || {};
   global.Games.sudoku = {
-    cat: 'board',
+    stageType: 'puzzle',
+    cat: 'puzzle',
     emoji: '🔢',
     name: '数独',
     desc: '从 4×4 一路练到 9×9！铅笔标注、错误检查、解题技巧提示，一步步成为数独高手。',

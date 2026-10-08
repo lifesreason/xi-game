@@ -2413,7 +2413,7 @@ body.standalone-active .main {
    人教版 PEP 三年级英语 · 自然拼读与抗遗忘专属样式
    ============================================================ */
 .pep-wrap {
-  width: 100%; max-width: 960px; margin: 0 auto;
+  width: 100%; max-width: 100%; margin: 0;
   display: flex; flex-direction: column; gap: 14px;
   box-sizing: border-box; padding-bottom: 24px;
 }
@@ -3015,6 +3015,7 @@ body.standalone-active .main {
 }
 
 /* ---------------- 课文情景大图卡片 (Let's talk 场景真实还原) ---------------- */
+/* ---------------- 课文情景大图卡片与分镜剧场 (Let's talk 场景真实还原) ---------------- */
 .pep-scene-card {
   background: var(--card);
   border: 2px solid var(--line);
@@ -3025,6 +3026,60 @@ body.standalone-active .main {
   flex-direction: column;
   margin-bottom: 12px;
 }
+.pep-scene-acts-bar {
+  padding: 8px 12px;
+  background: var(--card);
+  border-bottom: 1.5px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.psab-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.pep-act-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 0;
+}
+.pep-act-pills::-webkit-scrollbar { display: none; }
+.pep-act-btn {
+  background: var(--bg-hover, #f1f5f9);
+  border: 1.5px solid var(--line);
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.pep-act-btn:hover {
+  background: #e0f2fe;
+  color: #0284c7;
+  border-color: #7dd3fc;
+}
+.pep-act-btn.active {
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+  transform: translateY(-1px);
+}
 .psc-media {
   width: 100%;
   background: #f0fdf4;
@@ -3032,12 +3087,14 @@ body.standalone-active .main {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  transition: opacity 0.25s ease;
 }
 .pep-svg-scene {
   width: 100%;
   height: auto;
   max-height: 220px;
   display: block;
+  transition: transform 0.3s ease;
 }
 .psc-caption {
   padding: 10px 14px;
@@ -3054,13 +3111,18 @@ body.standalone-active .main {
   font-weight: 800;
   background: #2563eb;
   color: #fff;
-  padding: 2px 8px;
-  border-radius: 6px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 .psc-text {
   font-size: 12.5px;
   font-weight: 700;
   color: var(--ink-2);
+  flex: 1;
+  min-width: 200px;
 }
 @media (max-width: 520px) {
   .pep-svg-scene {
@@ -3098,6 +3160,23 @@ body.standalone-active .main {
   border-color: #3b82f6; background: #eff6ff;
   box-shadow: 0 0 0 2px rgba(59,130,246,0.2); transform: scale(1.01);
 }
+.pep-dialogue-item.karaoke-active {
+  border-color: #3b82f6 !important;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3), 0 4px 14px rgba(59, 130, 246, 0.15) !important;
+  transform: scale(1.015);
+}
+.pep-dialogue-item.karaoke-active .pdi-en {
+  color: #1d4ed8 !important;
+  text-shadow: 0 0 1px rgba(29, 78, 216, 0.4);
+}
+.pep-dialogue-item.karaoke-active .pdi-avatar {
+  animation: avatarBounce 0.5s ease infinite alternate;
+}
+@keyframes avatarBounce {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-3px) scale(1.1); }
+}
 .pdi-avatar { font-size: 26px; line-height: 1; flex-shrink: 0; padding-top: 2px; }
 .pdi-body { flex: 1; min-width: 0; }
 .pdi-speaker { font-size: 11px; font-weight: 800; color: var(--ink-2); margin-bottom: 2px; }
@@ -3110,61 +3189,110 @@ body.standalone-active .main {
 }
 .pdi-speak-btn:active { transform: scale(0.85); }
 
-/* Let's learn 核心词汇卡片网格 (手机双列自适应，平板 3 列，桌面 4 列) */
+/* ---------------- 3D 拟物翻转记忆闪卡 (Let's learn 3D Cards) ---------------- */
 .pep-vocab-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 12px;
 }
 @media (min-width: 600px) {
   .pep-vocab-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    gap: 14px;
   }
 }
 @media (min-width: 900px) {
   .pep-vocab-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
   }
 }
-.pep-vocab-card {
-  background: var(--bg-hover, #f8fafc);
-  border: 1.5px solid var(--line);
-  border-radius: 16px;
-  padding: 10px;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  position: relative;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+
+.pep-vocab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  width: 100%;
+  box-sizing: border-box;
 }
-.pep-vocab-card:hover {
-  border-color: #93c5fd;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.08);
-  background: #ffffff;
+@media (max-width: 580px) {
+  .pep-vocab-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
 }
-.pep-vocab-card.speaking {
-  border-color: #3b82f6;
-  background: #eff6ff;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+@media (max-width: 360px) {
+  .pep-vocab-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }
 
-/* ---------------- 生词图文闪卡专属插画展示区 ---------------- */
+.pep-card-3d {
+  position: relative;
+  min-height: 310px;
+  perspective: 1200px;
+  -webkit-perspective: 1200px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  width: 100%;
+}
+.pep-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 310px;
+  transition: transform 0.52s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+.pep-card-3d.flipped .pep-card-inner {
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+}
+.pep-card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  border-radius: 18px;
+  border: 2px solid var(--line);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: var(--card);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.pep-card-3d:hover .pep-card-face {
+  border-color: #60a5fa;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.14);
+}
+.pep-card-3d.speaking .pep-card-face {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
+}
+
+/* 卡片正面：高清大插图 + 超大显眼单词 */
+.pep-card-front {
+  background: var(--card);
+}
 .pvc-illustration-box {
   width: 100%;
-  height: 84px;
+  height: 110px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--card);
-  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 14px;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 .pep-svg-word {
   width: 100%;
@@ -3173,60 +3301,274 @@ body.standalone-active .main {
 }
 .pvc-floating-speaker {
   position: absolute;
-  right: 6px;
-  bottom: 6px;
-  width: 30px;
-  height: 30px;
+  right: 8px;
+  bottom: 8px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid rgba(59, 130, 246, 0.25);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   transition: transform 0.12s ease, background 0.12s ease;
   user-select: none;
 }
 .pvc-floating-speaker:active {
-  transform: scale(0.86);
+  transform: scale(0.88);
 }
 .pvc-card-body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding-top: 2px;
+  gap: 3px;
+  padding-top: 6px;
+  align-items: center;
+  text-align: center;
 }
 .pvc-word-row {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 6px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 4px;
 }
 .pvc-en {
   display: block;
-  font-size: 16px;
+  font-size: clamp(24px, 5.2vw, 32px);
   font-weight: 900;
-  color: var(--ink);
-  letter-spacing: -0.2px;
+  color: #0f172a;
+  letter-spacing: 0.5px;
+  line-height: 1.15;
+  text-align: center;
 }
 .pvc-ipa {
-  display: block;
-  font-size: 11.5px;
-  color: var(--ink-2);
-  margin-top: 1px;
+  display: inline-block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  background: rgba(100, 116, 139, 0.08);
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-top: 2px;
 }
 .pvc-cn {
-  font-size: 13.5px;
+  font-size: clamp(16px, 3.8vw, 19px);
   font-weight: 800;
   color: #2563eb;
+  margin: 3px 0;
+  text-align: center;
 }
-.pvc-tip {
-  font-size: 11px;
+.pvc-phonics-chips {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin: 4px 0 6px;
+}
+.pvc-pchip {
+  font-size: 13px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 7px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1.5px solid #bfdbfe;
+  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.08);
+}
+.pvc-flip-btn {
+  margin-top: auto;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1.5px solid #fcd34d;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #b45309;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.12);
+}
+.pvc-flip-btn:hover {
+  background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+  transform: translateY(-1px);
+}
+
+/* 卡片反面：1秒巧记与TPR动作 */
+.pep-card-back {
+  background: linear-gradient(145deg, #fffbeb 0%, #fef3c7 100%);
+  border-color: #fde68a;
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+  gap: 8px;
+  padding: 12px;
+}
+.pvc-back-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 2px solid #fde68a;
+  padding-bottom: 6px;
+}
+.pbh-word {
+  font-size: clamp(22px, 5vw, 28px);
+  font-weight: 900;
+  color: #92400e;
+  letter-spacing: 0.5px;
+}
+.pbh-cn {
+  font-size: 15px;
+  font-weight: 800;
+  color: #b45309;
+}
+.pvc-magic-box {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1.5px solid #fef08a;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pmb-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #d97706;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pmb-body {
+  font-size: 14px;
+  font-weight: 700;
+  color: #78350f;
+  line-height: 1.45;
+}
+.pvc-tpr-box {
+  background: #ecfdf5;
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1.5px solid #a7f3d0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ptb-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #059669;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ptb-body {
+  font-size: 14px;
+  font-weight: 700;
+  color: #065f46;
+  line-height: 1.45;
+}
+.pvc-back-bottom {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+}
+.pvc-back-bottom .btn {
+  flex: 1;
+  padding: 8px 6px;
+  font-size: 12.5px;
+  font-weight: 800;
+  border-radius: 12px;
+  justify-content: center;
+}
+
+/* ---------------- 沉浸式单卡学习模式 (Hero Flashcard Deck) ---------------- */
+.pep-hero-deck {
+  width: 100%;
+  max-width: 520px;
+  margin: 10px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.pep-hero-card {
+  min-height: 420px;
+}
+.pep-hero-card .pep-card-inner {
+  min-height: 420px;
+}
+.pep-hero-card .pvc-illustration-box {
+  height: 170px;
+  border-radius: 16px;
+}
+.pep-hero-card .pvc-floating-speaker {
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  right: 12px;
+  bottom: 12px;
+}
+.pep-hero-card .pvc-en {
+  font-size: clamp(34px, 8vw, 48px);
+  margin-top: 6px;
+}
+.pep-hero-card .pvc-ipa {
+  font-size: 16px;
+  padding: 3px 12px;
+}
+.pep-hero-card .pvc-cn {
+  font-size: 22px;
+  margin: 6px 0;
+}
+.pep-hero-card .pvc-pchip {
+  font-size: 15px;
+  padding: 4px 12px;
+  border-radius: 9px;
+}
+.pep-hero-card .pvc-flip-btn {
+  padding: 11px 16px;
+  font-size: 14px;
+  border-radius: 14px;
+}
+.pep-hero-card .pbh-word {
+  font-size: 34px;
+}
+.pep-hero-card .pbh-cn {
+  font-size: 20px;
+}
+.pep-hero-card .pmb-body,
+.pep-hero-card .ptb-body {
+  font-size: 15.5px;
+  line-height: 1.55;
+}
+.pep-hero-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--card);
+  padding: 10px 16px;
+  border-radius: 16px;
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow);
+}
+.pep-hero-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 800;
   color: var(--ink-2);
-  line-height: 1.35;
+}
+.pep-hero-progress b {
+  color: var(--primary);
+  font-size: 17px;
 }
 
 /* ---------------- 趣味歌谣律动横幅 (Chant Banner) ---------------- */
@@ -3448,4 +3790,151 @@ body.standalone-active .main {
 .prsg-icon { font-size: 26px; line-height: 1; }
 .prsg-val { font-size: 24px; font-weight: 900; color: var(--ink); line-height: 1.1; }
 .prsg-lbl { font-size: 11px; font-weight: 700; color: var(--ink-2); }
+
+/* ============================================================
+   4 大沉浸式交互舞台样式规范 (Stage Archetypes)
+   ============================================================ */
+.stage-viewport {
+  width: 100%; transition: all 0.25s ease;
+}
+
+/* 舞台 1: 棋弈舞台 (Classic Board) */
+.stage-board .stage-viewport {
+  max-width: 680px; margin: 0 auto;
+}
+
+/* 舞台 2: 逻辑解谜舞台 (Puzzle Stage) */
+.stage-puzzle .stage-viewport {
+  max-width: 720px; margin: 0 auto;
+}
+
+/* 舞台 3: 动感感官舞台 (Arcade Stage) */
+.stage-arcade .play-body {
+  grid-template-columns: 1fr;
+}
+.stage-arcade .stage-viewport {
+  max-width: 860px; margin: 0 auto;
+}
+
+/* 舞台 4: 情景伴学舞台 (Story Stage) - 彻底释放全屏留白 */
+.stage-story .play-body {
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
+}
+.stage-story #stage-viewport,
+.stage-story .stage-viewport {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.stage-story #board-host {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  height: auto !important;
+  min-height: unset !important;
+}
+
+/* ---------- 底部设置半屏抽屉 (Bottom Drawer) ---------- */
+.drawer-overlay {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  z-index: 140; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.drawer-overlay.open { opacity: 1; pointer-events: auto; }
+.drawer-overlay.hidden { display: none !important; }
+
+.settings-drawer {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 145;
+  background: var(--card); border-top-left-radius: 24px; border-top-right-radius: 24px;
+  border-top: 1.5px solid var(--line);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.25);
+  padding: 16px 20px calc(24px + env(safe-area-inset-bottom));
+  max-height: 80vh; overflow-y: auto;
+  transform: translateY(105%); transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.settings-drawer.open { transform: translateY(0); }
+.settings-drawer.hidden { display: none !important; }
+
+.drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--line);
+}
+.drawer-head h3 { margin: 0; font-size: 17px; font-weight: 800; }
+.drawer-game-info {
+  background: var(--card-2); border-radius: 14px; padding: 10px 14px;
+  margin-bottom: 14px; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px;
+}
+.drawer-game-info b { font-size: 15px; color: var(--ink); }
+.drawer-field {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 12px; font-size: 14px; font-weight: 700;
+}
+.drawer-select {
+  font-family: inherit; font-size: 14px; font-weight: 700; padding: 8px 12px;
+  border-radius: 12px; border: 1.5px solid var(--line);
+  background: var(--card-2); color: var(--ink); min-width: 140px;
+}
+.drawer-btn-row { display: flex; gap: 10px; margin-top: 16px; }
+.drawer-btn-row .btn { flex: 1; min-height: 44px; border-radius: 14px; font-weight: 700; }
+
+/* ---------- 动效微引擎扩展 (Combo & Float) ---------- */
+.fx-combo-badge {
+  position: fixed; z-index: 135; pointer-events: none;
+  font-size: clamp(28px, 6vw, 46px); font-weight: 900;
+  color: #ffb02e; text-shadow: 0 4px 18px rgba(255, 120, 0, 0.45);
+  animation: fxComboBounce 1.05s cubic-bezier(0.16, 1.4, 0.3, 1) forwards;
+  letter-spacing: 1px;
+}
+@keyframes fxComboBounce {
+  0% { transform: scale(0.4) rotate(-8deg); opacity: 0; }
+  30% { transform: scale(1.22) rotate(4deg); opacity: 1; }
+  60% { transform: scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-40px) scale(0.9); opacity: 0; }
+}
+
+.fx-float-score {
+  position: fixed; z-index: 134; pointer-events: none;
+  font-size: 24px; font-weight: 900; color: var(--good);
+  text-shadow: 0 2px 10px rgba(57, 184, 120, 0.3);
+  animation: fxFloatUp 0.85s ease-out forwards;
+}
+@keyframes fxFloatUp {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(0.6); }
+  25% { opacity: 1; transform: translate(-50%, -10px) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -55px) scale(1); }
+}
+
+/* ---------- 响应式多端断点优化 (iPad 7:3 & 手机 Thumb Zone) ---------- */
+@media (min-width: 769px) and (orientation: landscape) {
+  .stage-board .play-body,
+  .stage-puzzle .play-body {
+    grid-template-columns: 7fr 3fr; gap: 20px;
+  }
+  .stage-arcade .play-body,
+  .stage-story .play-body {
+    grid-template-columns: 1fr;
+  }
+  .board-host {
+    height: clamp(400px, 72vh, 720px);
+  }
+}
+
+@media (max-width: 768px) {
+  #btn-settings-drawer { display: inline-flex !important; }
+  .side-panel { display: none !important; }
+  .play-body { grid-template-columns: 1fr; }
+  .stage-viewport { padding: 10px; border-radius: 18px; }
+  .board-quick-actions .q-btn { min-height: 46px; font-size: 14px; }
+}
+
+@media (min-width: 769px) {
+  #btn-settings-drawer { display: none; }
+}
+
 

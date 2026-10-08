@@ -270,6 +270,7 @@
 
   global.Games = global.Games || {};
   global.Games.game24 = {
+    stageType: 'puzzle',
     cat: 'number',
     emoji: '🎯',
     name: '24 点',

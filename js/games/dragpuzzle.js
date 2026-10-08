@@ -259,6 +259,9 @@
 
   global.Games = global.Games || {};
   global.Games.dragpuzzle = {
+    stageType: 'arcade',
+    hasHint: true,
+    noUndo: true,
     id: 'dragpuzzle', cat: 'kids', emoji: '🧸',
     name: '拖拖拼图',
     desc: '用手指把打散的图画小块拖进轮廓底板，放对就"咔哒"吸住！最经典的幼儿拼图玩法，锻炼手眼协调。',

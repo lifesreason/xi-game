@@ -78,11 +78,18 @@
         s.x += Math.sin(Date.now() / 700 + i) * 0.0012;
         if (s.y >= 0.9 && Math.abs(s.x - basketX) < 0.14) {
           stars.splice(i, 1);
-          G.score += s.gold ? 2 : 1;
+          var pts = s.gold ? 2 : 1;
+          G.score += pts;
           G.caught++;
           G.flashT = Date.now();
           if (Sfx.coin) Sfx.coin(); else Sfx.pop();
           Fx.vibrate(12);
+          if (G.caught >= 3 && G.caught % 3 === 0 && global.Fx && global.Fx.combo) {
+            global.Fx.combo(Math.floor(G.caught / 3) + 1);
+          }
+          if (global.Fx && global.Fx.floatScore) {
+            global.Fx.floatScore('+' + pts, (s.x || 0.5) * window.innerWidth, window.innerHeight * 0.72);
+          }
           update();
           continue;
         }
@@ -214,6 +221,8 @@
 
   global.Games = global.Games || {};
   global.Games.catch = {
+    stageType: 'arcade',
+    noUndo: true,
     id: 'catch', cat: 'kids', emoji: '⭐',
     name: '快乐接星星',
     desc: '滑动手指移动小篮子，接住天上掉下来的小星星！锻炼视觉追踪与手眼协调，适合 3-6 岁。',

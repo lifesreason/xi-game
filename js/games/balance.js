@@ -231,7 +231,8 @@
 
   global.Games = global.Games || {};
   global.Games.balance = {
-    id: 'balance', cat: 'brain', emoji: '⚖️',
+    stageType: 'puzzle',
+    id: 'balance', cat: 'puzzle', emoji: '⚖️',
     name: '平衡天平',
     desc: '代数思维启蒙！左盘是目标重量，挑砝码放进右盘让天平平衡。看得见的等式，适合 5-9 岁。',
     tags: ['等式启蒙', '加法凑数', '5-9 岁'],

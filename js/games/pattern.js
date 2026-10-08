@@ -174,6 +174,9 @@
 
   global.Games = global.Games || {};
   global.Games.pattern = {
+    stageType: 'arcade',
+    hasHint: true,
+    noUndo: true,
     id: 'pattern', cat: 'kids', emoji: '🐣',
     name: '规律排排看',
     desc: '给小宝贝的找规律游戏！看一排小图案，猜猜问号处是谁。全程鼓励式引导，适合 3-6 岁。',

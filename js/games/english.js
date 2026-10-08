@@ -5889,12 +5889,18 @@
     "book": "人教版 3A 上册 (2024新课标版)",
     "title": "Unit 1 · Making friends 结交朋友",
     "sub": "见面问候 · 肢体礼仪 · 友好分享",
-    "target": "熟练使用 Hello / Hi / I'm... / My name is... 互相打招呼与自我介绍；学会用 Nice to meet you 礼貌问候；掌握 ear, eye, mouth, hand, arm 等身体交友动作；树立友好倾听与乐于分享(share)的好品格。",
+    "acts": [
+      { "id": 0, "title": "第1幕 · 校门问候", "desc": "清晨校园校门口，阳光灿烂，Mike 与吴斌斌相遇挥手打招呼", "range": [0, 1] },
+      { "id": 1, "title": "第2幕 · 礼貌握手", "desc": "绿茵草坪上，新朋友微笑握手，表达 Nice to meet you 相识的喜悦", "range": [2, 3] },
+      { "id": 2, "title": "第3幕 · 教室新朋", "desc": "明亮教室黑板前，Sarah 与 John 自我介绍相识", "range": [4, 5] },
+      { "id": 3, "title": "第4幕 · 课桌分享", "desc": "课桌前忘带文具，Sarah 主动分享彩色文具，好朋友互相帮助", "range": [6, 9] }
+    ],
     "dialogues": [
       {
         "role": "Mike",
         "speaker": "迈克",
         "avatar": "🧑",
+        "act": 0,
         "en": "Hello! I'm Mike Black.",
         "cn": "你好！我是迈克·布莱克。"
       },
@@ -5902,6 +5908,7 @@
         "role": "Wu Binbin",
         "speaker": "吴斌斌",
         "avatar": "👦",
+        "act": 0,
         "en": "Hi! My name is Wu Binbin.",
         "cn": "嗨！我叫吴斌斌。"
       },
@@ -5909,6 +5916,7 @@
         "role": "Mike",
         "speaker": "迈克",
         "avatar": "🧑",
+        "act": 1,
         "en": "Nice to meet you.",
         "cn": "见到你很高兴。"
       },
@@ -5916,6 +5924,7 @@
         "role": "Wu Binbin",
         "speaker": "吴斌斌",
         "avatar": "👦",
+        "act": 1,
         "en": "Nice to meet you, too.",
         "cn": "见到你我也很高兴。"
       },
@@ -5923,6 +5932,7 @@
         "role": "Sarah",
         "speaker": "萨拉",
         "avatar": "👧",
+        "act": 2,
         "en": "Hello! My name is Sarah.",
         "cn": "你好！我叫萨拉。"
       },
@@ -5930,6 +5940,7 @@
         "role": "John",
         "speaker": "约翰",
         "avatar": "👦",
+        "act": 2,
         "en": "Hi! I'm John.",
         "cn": "嗨！我是约翰。"
       },
@@ -5937,6 +5948,7 @@
         "role": "Chen Jie",
         "speaker": "陈杰",
         "avatar": "👧",
+        "act": 3,
         "en": "Oh no!",
         "cn": "噢，不！（我的玩具/文具忘带了）"
       },
@@ -5944,6 +5956,7 @@
         "role": "Sarah",
         "speaker": "萨拉",
         "avatar": "👧",
+        "act": 3,
         "en": "It's OK, Chen Jie. We can share.",
         "cn": "没关系，陈杰。我们可以一起分享。"
       },
@@ -5951,6 +5964,7 @@
         "role": "Chen Jie",
         "speaker": "陈杰",
         "avatar": "👧",
+        "act": 3,
         "en": "Thank you, Sarah!",
         "cn": "谢谢你，萨拉！"
       },
@@ -5958,6 +5972,7 @@
         "role": "Sarah",
         "speaker": "萨拉",
         "avatar": "👧",
+        "act": 3,
         "en": "You're welcome. Friends help each other.",
         "cn": "不客气。好朋友互相帮助。"
       }
@@ -7016,6 +7031,8 @@
         unit: unitKey,
         mainMode: mainMode,
         lessonTab: lessonTab,
+        vocabMode: (S && S.vocabMode) || 'grid',
+        vocabHeroIdx: (S && S.vocabHeroIdx) || 0,
         phonicsTab: phonicsTab,
         practiceTab: practiceTab,
         words: wordList,
@@ -7139,7 +7156,9 @@
       }
 
       /* 1. 单元情景大图 (Scene Illustrations) */
-      function getSceneSvg(unitKey) {
+      /* 1. 单元情景大图 (Scene Illustrations) - 支持语意多幕分镜剧场 */
+      function getSceneSvg(unitKey, actIdx) {
+        actIdx = typeof actIdx === 'number' ? actIdx : 0;
         var defs = '<defs>' +
           '<linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#bae6fd"/><stop offset="100%" stop-color="#e0f2fe"/></linearGradient>' +
           '<linearGradient id="grassGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#86efac"/><stop offset="100%" stop-color="#22c55e"/></linearGradient>' +
@@ -7151,81 +7170,229 @@
 
         var c = '';
         if (unitKey === 'u1') {
-          // Unit 1: 校园相遇交友 (Mike & Wu Binbin 打招呼，Sarah & Chen Jie 分享文具)
-          c = defs +
-            '<rect width="600" height="240" rx="16" fill="url(#skyGrad)"/>' +
-            '<circle cx="80" cy="50" r="36" fill="url(#sunGrad)" opacity="0.9"/>' +
-            '<circle cx="80" cy="50" r="48" fill="#fef08a" opacity="0.3"/>' +
-            '<path d="M 120 180 A 180 130 0 0 1 480 180" fill="none" stroke="url(#rainbowGrad)" stroke-width="8" opacity="0.35"/>' +
-            '<path d="M 220 50 Q 235 35 255 45 Q 275 35 290 50 Q 305 60 285 75 Q 260 80 230 75 Q 210 65 220 50 Z" fill="#ffffff" opacity="0.85"/>' +
-            '<rect x="250" y="80" width="100" height="90" fill="#fca5a5" rx="4"/>' +
-            '<polygon points="250,80 300,45 350,80" fill="#dc2626"/>' +
-            '<rect x="285" y="55" width="30" height="25" fill="#f87171"/>' +
-            '<circle cx="300" cy="67" r="7" fill="#ffffff"/>' +
-            '<rect x="265" y="100" width="20" height="25" fill="#e0f2fe" rx="2"/>' +
-            '<rect x="315" y="100" width="20" height="25" fill="#e0f2fe" rx="2"/>' +
-            '<rect x="290" y="140" width="20" height="30" fill="#78350f" rx="3"/>' +
-            '<path d="M 0 170 Q 150 145 300 165 Q 450 180 600 160 L 600 240 L 0 240 Z" fill="url(#grassGrad)"/>' +
-            // Mike
-            '<g transform="translate(90, 95)" filter="url(#softShadow)">' +
-              '<rect x="0" y="38" width="14" height="28" rx="5" fill="#2563eb"/>' +
-              '<rect x="10" y="32" width="28" height="42" rx="8" fill="#38bdf8"/>' +
-              '<rect x="14" y="74" width="8" height="35" rx="4" fill="#1e3a8a"/>' +
-              '<rect x="26" y="74" width="8" height="35" rx="4" fill="#1e3a8a"/>' +
-              '<ellipse cx="17" cy="110" rx="7" ry="4" fill="#475569"/>' +
-              '<ellipse cx="31" cy="110" rx="7" ry="4" fill="#475569"/>' +
-              '<ellipse cx="24" cy="18" rx="14" ry="15" fill="#fde047"/>' +
-              '<ellipse cx="24" cy="20" rx="12" ry="13" fill="#fed7aa"/>' +
-              '<path d="M 12 18 Q 24 6 36 18 Q 30 10 24 11 Q 18 10 12 18 Z" fill="#eab308"/>' +
-              '<circle cx="20" cy="18" r="2" fill="#0f172a"/><circle cx="28" cy="18" r="2" fill="#0f172a"/>' +
-              '<path d="M 21 24 Q 24 28 27 24" stroke="#e11d48" stroke-width="2" fill="none" stroke-linecap="round"/>' +
-              '<path d="M 36 36 Q 48 20 54 8" stroke="#fed7aa" stroke-width="6" stroke-linecap="round" fill="none"/>' +
-              '<circle cx="55" cy="7" r="5" fill="#fed7aa"/>' +
-              '<g transform="translate(45, -20)">' +
-                '<rect x="0" y="0" width="88" height="26" rx="8" fill="#ffffff" stroke="#38bdf8" stroke-width="2"/>' +
-                '<polygon points="8,26 14,33 18,26" fill="#ffffff"/>' +
-                '<polygon points="8,26 14,33 18,26" stroke="#38bdf8" stroke-width="2" fill="none"/>' +
-                '<text x="44" y="17" font-size="11" font-weight="bold" fill="#0369a1" text-anchor="middle">Hello! I\'m Mike</text>' +
+          // Unit 1 分镜剧场 (4幕语意画卷)
+          if (actIdx === 0) {
+            // 第1幕：校门清晨相遇问候 (Mike & Wu Binbin 打招呼)
+            c = defs +
+              '<rect width="600" height="240" rx="16" fill="url(#skyGrad)"/>' +
+              '<circle cx="80" cy="50" r="36" fill="url(#sunGrad)" opacity="0.95"/>' +
+              '<circle cx="80" cy="50" r="48" fill="#fef08a" opacity="0.35"/>' +
+              '<path d="M 60 180 A 240 160 0 0 1 540 180" fill="none" stroke="url(#rainbowGrad)" stroke-width="6" opacity="0.4"/>' +
+              '<path d="M 180 50 Q 200 35 225 45 Q 250 35 270 50 Q 290 60 265 75 Q 235 80 200 75 Q 170 65 180 50 Z" fill="#ffffff" opacity="0.85"/>' +
+              '<rect x="230" y="70" width="140" height="100" fill="#fca5a5" rx="6"/>' +
+              '<polygon points="220,70 300,30 380,70" fill="#dc2626"/>' +
+              '<rect x="280" y="42" width="40" height="28" fill="#f87171" rx="4"/>' +
+              '<circle cx="300" cy="56" r="10" fill="#ffffff"/>' +
+              '<line x1="300" y1="56" x2="300" y2="50" stroke="#0f172a" stroke-width="2"/>' +
+              '<line x1="300" y1="56" x2="305" y2="56" stroke="#0f172a" stroke-width="2"/>' +
+              '<rect x="250" y="90" width="24" height="30" fill="#e0f2fe" rx="3"/>' +
+              '<rect x="326" y="90" width="24" height="30" fill="#e0f2fe" rx="3"/>' +
+              '<rect x="282" y="125" width="36" height="45" fill="#78350f" rx="4"/>' +
+              '<rect x="240" y="170" width="120" height="14" rx="4" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>' +
+              '<text x="300" y="181" font-size="9" font-weight="900" fill="#b45309" text-anchor="middle">🏫 PEP PRIMARY SCHOOL</text>' +
+              '<path d="M 0 165 Q 150 145 300 165 Q 450 180 600 160 L 600 240 L 0 240 Z" fill="url(#grassGrad)"/>' +
+              '<g transform="translate(80, 85)" filter="url(#softShadow)">' +
+                '<rect x="-8" y="40" width="16" height="30" rx="5" fill="#2563eb"/>' +
+                '<rect x="10" y="32" width="30" height="45" rx="8" fill="#38bdf8"/>' +
+                '<rect x="14" y="77" width="9" height="38" rx="4" fill="#1e3a8a"/>' +
+                '<rect x="27" y="77" width="9" height="38" rx="4" fill="#1e3a8a"/>' +
+                '<ellipse cx="18" cy="116" rx="8" ry="4" fill="#475569"/><ellipse cx="32" cy="116" rx="8" ry="4" fill="#475569"/>' +
+                '<ellipse cx="25" cy="18" rx="14" ry="15" fill="#fde047"/>' +
+                '<ellipse cx="25" cy="20" rx="13" ry="14" fill="#fed7aa"/>' +
+                '<path d="M 12 18 Q 25 5 38 18 Q 32 9 25 10 Q 18 9 12 18 Z" fill="#eab308"/>' +
+                '<circle cx="21" cy="18" r="2.5" fill="#0f172a"/><circle cx="29" cy="18" r="2.5" fill="#0f172a"/>' +
+                '<path d="M 22 25 Q 25 29 28 25" stroke="#e11d48" stroke-width="2.2" fill="none" stroke-linecap="round"/>' +
+                '<path d="M 38 38 Q 55 18 62 4" stroke="#fed7aa" stroke-width="7" stroke-linecap="round" fill="none"/>' +
+                '<circle cx="63" cy="3" r="5" fill="#fed7aa"/>' +
+                '<g transform="translate(45, -24)">' +
+                  '<rect x="0" y="0" width="112" height="28" rx="8" fill="#ffffff" stroke="#38bdf8" stroke-width="2"/>' +
+                  '<polygon points="8,28 14,35 18,28" fill="#ffffff"/>' +
+                  '<polygon points="8,28 14,35 18,28" stroke="#38bdf8" stroke-width="2" fill="none"/>' +
+                  '<text x="56" y="18" font-size="11" font-weight="bold" fill="#0369a1" text-anchor="middle">Hello! I\'m Mike</text>' +
+                '</g>' +
               '</g>' +
-            '</g>' +
-            // Wu Binbin
-            '<g transform="translate(230, 95)" filter="url(#softShadow)">' +
-              '<rect x="34" y="38" width="14" height="28" rx="5" fill="#10b981"/>' +
-              '<rect x="10" y="32" width="28" height="42" rx="8" fill="#f97316"/>' +
-              '<rect x="14" y="74" width="8" height="35" rx="4" fill="#334155"/>' +
-              '<rect x="26" y="74" width="8" height="35" rx="4" fill="#334155"/>' +
-              '<ellipse cx="17" cy="110" rx="7" ry="4" fill="#0f172a"/>' +
-              '<ellipse cx="31" cy="110" rx="7" ry="4" fill="#0f172a"/>' +
-              '<ellipse cx="24" cy="20" rx="12" ry="13" fill="#fed7aa"/>' +
-              '<path d="M 12 18 Q 24 5 36 18 Q 33 11 24 11 Q 15 11 12 18 Z" fill="#1e293b"/>' +
-              '<circle cx="20" cy="18" r="2" fill="#0f172a"/><circle cx="28" cy="18" r="2" fill="#0f172a"/>' +
-              '<path d="M 21 24 Q 24 28 27 24" stroke="#e11d48" stroke-width="2" fill="none" stroke-linecap="round"/>' +
-              '<path d="M 12 36 Q -2 22 -6 10" stroke="#fed7aa" stroke-width="6" stroke-linecap="round" fill="none"/>' +
-              '<circle cx="-7" cy="9" r="5" fill="#fed7aa"/>' +
-              '<g transform="translate(-50, -20)">' +
-                '<rect x="0" y="0" width="94" height="26" rx="8" fill="#ffffff" stroke="#f97316" stroke-width="2"/>' +
-                '<polygon points="76,26 82,33 86,26" fill="#ffffff"/>' +
-                '<polygon points="76,26 82,33 86,26" stroke="#f97316" stroke-width="2" fill="none"/>' +
-                '<text x="47" y="17" font-size="11" font-weight="bold" fill="#c2410c" text-anchor="middle">Hi! Wu Binbin</text>' +
+              '<g transform="translate(420, 85)" filter="url(#softShadow)">' +
+                '<rect x="42" y="40" width="16" height="30" rx="5" fill="#10b981"/>' +
+                '<rect x="10" y="32" width="30" height="45" rx="8" fill="#f97316"/>' +
+                '<rect x="14" y="77" width="9" height="38" rx="4" fill="#334155"/>' +
+                '<rect x="27" y="77" width="9" height="38" rx="4" fill="#334155"/>' +
+                '<ellipse cx="18" cy="116" rx="8" ry="4" fill="#0f172a"/><ellipse cx="32" cy="116" rx="8" ry="4" fill="#0f172a"/>' +
+                '<ellipse cx="25" cy="20" rx="13" ry="14" fill="#fed7aa"/>' +
+                '<path d="M 12 18 Q 25 4 38 18 Q 34 10 25 10 Q 16 10 12 18 Z" fill="#1e293b"/>' +
+                '<circle cx="21" cy="18" r="2.5" fill="#0f172a"/><circle cx="29" cy="18" r="2.5" fill="#0f172a"/>' +
+                '<path d="M 22 25 Q 25 29 28 25" stroke="#e11d48" stroke-width="2.2" fill="none" stroke-linecap="round"/>' +
+                '<path d="M 12 38 Q -6 20 -12 6" stroke="#fed7aa" stroke-width="7" stroke-linecap="round" fill="none"/>' +
+                '<circle cx="-13" cy="5" r="5" fill="#fed7aa"/>' +
+                '<g transform="translate(-75, -24)">' +
+                  '<rect x="0" y="0" width="118" height="28" rx="8" fill="#ffffff" stroke="#f97316" stroke-width="2"/>' +
+                  '<polygon points="98,28 104,35 108,28" fill="#ffffff"/>' +
+                  '<polygon points="98,28 104,35 108,28" stroke="#f97316" stroke-width="2" fill="none"/>' +
+                  '<text x="59" y="18" font-size="11" font-weight="bold" fill="#c2410c" text-anchor="middle">Hi! Wu Binbin</text>' +
+                '</g>' +
+              '</g>';
+          } else if (actIdx === 1) {
+            // 第2幕：草坪树荫礼貌握手 (Nice to meet you)
+            c = defs +
+              '<rect width="600" height="240" rx="16" fill="url(#skyGrad)"/>' +
+              '<circle cx="510" cy="50" r="32" fill="url(#sunGrad)" opacity="0.9"/>' +
+              '<circle cx="70" cy="100" r="55" fill="#86efac" opacity="0.7"/>' +
+              '<circle cx="530" cy="110" r="60" fill="#86efac" opacity="0.7"/>' +
+              '<path d="M 0 150 Q 200 130 400 145 Q 520 135 600 145 L 600 240 L 0 240 Z" fill="url(#grassGrad)"/>' +
+              '<g transform="translate(40, 180)"><circle cx="10" cy="10" r="6" fill="#f43f5e"/><circle cx="10" cy="10" r="2.5" fill="#fef08a"/></g>' +
+              '<g transform="translate(90, 195)"><circle cx="10" cy="10" r="5" fill="#a855f7"/><circle cx="10" cy="10" r="2" fill="#fef08a"/></g>' +
+              '<g transform="translate(480, 185)"><circle cx="10" cy="10" r="6" fill="#fbbf24"/><circle cx="10" cy="10" r="2.5" fill="#ffffff"/></g>' +
+              '<g transform="translate(540, 195)"><circle cx="10" cy="10" r="5" fill="#38bdf8"/><circle cx="10" cy="10" r="2" fill="#ffffff"/></g>' +
+              '<g transform="translate(190, 75)" filter="url(#softShadow)">' +
+                '<rect x="6" y="42" width="34" height="52" rx="10" fill="#38bdf8"/>' +
+                '<rect x="11" y="94" width="10" height="42" rx="5" fill="#1e3a8a"/>' +
+                '<rect x="25" y="94" width="10" height="42" rx="5" fill="#1e3a8a"/>' +
+                '<ellipse cx="15" cy="138" rx="9" ry="5" fill="#475569"/><ellipse cx="30" cy="138" rx="9" ry="5" fill="#475569"/>' +
+                '<ellipse cx="23" cy="22" rx="15" ry="16" fill="#fde047"/>' +
+                '<ellipse cx="23" cy="24" rx="14" ry="15" fill="#fed7aa"/>' +
+                '<path d="M 10 21 Q 23 7 36 21 Q 30 11 23 12 Q 16 11 10 21 Z" fill="#eab308"/>' +
+                '<circle cx="19" cy="21" r="2.5" fill="#0f172a"/><circle cx="27" cy="21" r="2.5" fill="#0f172a"/>' +
+                '<path d="M 19 28 Q 23 33 27 28" stroke="#e11d48" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+                '<path d="M 36 56 L 68 68" stroke="#fed7aa" stroke-width="8" stroke-linecap="round"/>' +
+                '<g transform="translate(-60, -25)">' +
+                  '<rect x="0" y="0" width="128" height="28" rx="10" fill="#ffffff" stroke="#38bdf8" stroke-width="2"/>' +
+                  '<polygon points="70,28 76,36 82,28" fill="#ffffff"/>' +
+                  '<polygon points="70,28 76,36 82,28" stroke="#38bdf8" stroke-width="2" fill="none"/>' +
+                  '<text x="64" y="19" font-size="11.5" font-weight="bold" fill="#0369a1" text-anchor="middle">Nice to meet you.</text>' +
+                '</g>' +
               '</g>' +
-            '</g>' +
-            // Share Bench
-            '<g transform="translate(410, 130)">' +
-              '<rect x="0" y="45" width="130" height="10" rx="3" fill="#b45309"/>' +
-              '<rect x="15" y="55" width="6" height="30" fill="#78350f"/>' +
-              '<rect x="110" y="55" width="6" height="30" fill="#78350f"/>' +
-              '<rect x="45" y="36" width="36" height="10" rx="3" fill="#ec4899"/>' +
-              '<circle cx="30" cy="20" r="10" fill="#fed7aa"/>' +
-              '<circle cx="22" cy="18" r="5" fill="#facc15"/><circle cx="38" cy="18" r="5" fill="#facc15"/>' +
-              '<rect x="22" y="30" width="16" height="24" rx="4" fill="#f43f5e"/>' +
-              '<circle cx="98" cy="20" r="10" fill="#fed7aa"/>' +
-              '<path d="M 88 18 Q 98 8 108 18" fill="#0f172a"/>' +
-              '<rect x="90" y="30" width="16" height="24" rx="4" fill="#8b5cf6"/>' +
-              '<g transform="translate(15, -12)">' +
-                '<rect x="0" y="0" width="100" height="20" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5"/>' +
-                '<text x="50" y="14" font-size="10" font-weight="bold" fill="#047857" text-anchor="middle">🤝 We can share!</text>' +
+              '<g transform="translate(340, 75)" filter="url(#softShadow)">' +
+                '<rect x="6" y="42" width="34" height="52" rx="10" fill="#f97316"/>' +
+                '<rect x="11" y="94" width="10" height="42" rx="5" fill="#334155"/>' +
+                '<rect x="25" y="94" width="10" height="42" rx="5" fill="#334155"/>' +
+                '<ellipse cx="15" cy="138" rx="9" ry="5" fill="#0f172a"/><ellipse cx="30" cy="138" rx="9" ry="5" fill="#0f172a"/>' +
+                '<ellipse cx="23" cy="24" rx="14" ry="15" fill="#fed7aa"/>' +
+                '<path d="M 10 20 Q 23 6 36 20 Q 31 12 23 12 Q 15 12 10 20 Z" fill="#1e293b"/>' +
+                '<circle cx="19" cy="21" r="2.5" fill="#0f172a"/><circle cx="27" cy="21" r="2.5" fill="#0f172a"/>' +
+                '<path d="M 19 28 Q 23 33 27 28" stroke="#e11d48" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+                '<path d="M 8 56 L -24 68" stroke="#fed7aa" stroke-width="8" stroke-linecap="round"/>' +
+                '<g transform="translate(-10, -25)">' +
+                  '<rect x="0" y="0" width="144" height="28" rx="10" fill="#ffffff" stroke="#f97316" stroke-width="2"/>' +
+                  '<polygon points="40,28 46,36 52,28" fill="#ffffff"/>' +
+                  '<polygon points="40,28 46,36 52,28" stroke="#f97316" stroke-width="2" fill="none"/>' +
+                  '<text x="72" y="19" font-size="11.5" font-weight="bold" fill="#c2410c" text-anchor="middle">Nice to meet you, too.</text>' +
+                '</g>' +
               '</g>' +
-            '</g>';
+              '<g transform="translate(290, 138)">' +
+                '<circle cx="0" cy="0" r="16" fill="#fde047" opacity="0.6"/>' +
+                '<text x="0" y="7" font-size="22" text-anchor="middle">🤝</text>' +
+                '<path d="M -12 -12 L -6 -6 M 12 -12 L 6 -6 M -12 12 L -6 6 M 12 12 L 6 6" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>' +
+              '</g>';
+          } else if (actIdx === 2) {
+            // 第3幕：教室新朋自我介绍 (Sarah & John)
+            c = defs +
+              '<rect width="600" height="240" rx="16" fill="url(#warmWallGrad)"/>' +
+              '<rect x="0" y="180" width="600" height="60" fill="#b45309"/>' +
+              '<line x1="0" y1="180" x2="600" y2="180" stroke="#78350f" stroke-width="3"/>' +
+              '<rect x="30" y="30" width="90" height="110" rx="6" fill="#e0f2fe" stroke="#0284c7" stroke-width="4"/>' +
+              '<line x1="75" y1="30" x2="75" y2="140" stroke="#0284c7" stroke-width="2"/>' +
+              '<line x1="30" y1="85" x2="120" y2="85" stroke="#0284c7" stroke-width="2"/>' +
+              '<circle cx="55" cy="55" r="14" fill="url(#sunGrad)"/>' +
+              '<rect x="150" y="25" width="300" height="120" rx="10" fill="#1e3a1e" stroke="#78350f" stroke-width="6"/>' +
+              '<rect x="156" y="31" width="288" height="108" rx="6" fill="#14532d"/>' +
+              '<text x="300" y="62" font-size="14" font-weight="900" fill="#fef08a" text-anchor="middle">🌟 Welcome New Friends! 🌟</text>' +
+              '<text x="300" y="86" font-size="11" font-weight="700" fill="#bbf7d0" text-anchor="middle">PEP Grade 3 · 认识新同学</text>' +
+              '<path d="M 180 115 L 420 115" stroke="#86efac" stroke-width="1.5" stroke-dasharray="4,4"/>' +
+              '<text x="300" y="110" font-size="10" font-weight="bold" fill="#ffffff" text-anchor="middle">A  B  C  D  E  F  G</text>' +
+              '<circle cx="490" cy="45" r="18" fill="#ffffff" stroke="#d97706" stroke-width="2.5"/>' +
+              '<circle cx="490" cy="45" r="2" fill="#0f172a"/>' +
+              '<line x1="490" y1="45" x2="490" y2="35" stroke="#0f172a" stroke-width="2"/>' +
+              '<line x1="490" y1="45" x2="498" y2="45" stroke="#0f172a" stroke-width="2"/>' +
+              '<g transform="translate(130, 95)" filter="url(#softShadow)">' +
+                '<rect x="10" y="36" width="28" height="42" rx="8" fill="#f43f5e"/>' +
+                '<rect x="14" y="78" width="8" height="34" rx="4" fill="#fed7aa"/>' +
+                '<rect x="26" y="78" width="8" height="34" rx="4" fill="#fed7aa"/>' +
+                '<ellipse cx="17" cy="113" rx="7" ry="4" fill="#ec4899"/><ellipse cx="31" cy="113" rx="7" ry="4" fill="#ec4899"/>' +
+                '<circle cx="24" cy="20" r="13" fill="#fed7aa"/>' +
+                '<path d="M 11 18 Q 24 5 37 18" fill="#fde047"/>' +
+                '<circle cx="9" cy="16" r="6" fill="#f43f5e"/><circle cx="39" cy="16" r="6" fill="#f43f5e"/>' +
+                '<circle cx="20" cy="19" r="2" fill="#0f172a"/><circle cx="28" cy="19" r="2" fill="#0f172a"/>' +
+                '<path d="M 21 24 Q 24 28 27 24" stroke="#e11d48" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+                '<path d="M 10 40 Q -4 25 -6 12" stroke="#fed7aa" stroke-width="6" stroke-linecap="round" fill="none"/>' +
+                '<g transform="translate(-40, -22)">' +
+                  '<rect x="0" y="0" width="128" height="26" rx="8" fill="#ffffff" stroke="#f43f5e" stroke-width="2"/>' +
+                  '<polygon points="40,26 46,33 50,26" fill="#ffffff"/>' +
+                  '<polygon points="40,26 46,33 50,26" stroke="#f43f5e" stroke-width="2" fill="none"/>' +
+                  '<text x="64" y="17" font-size="11" font-weight="bold" fill="#be123c" text-anchor="middle">Hello! My name is Sarah.</text>' +
+                '</g>' +
+              '</g>' +
+              '<g transform="translate(380, 95)" filter="url(#softShadow)">' +
+                '<rect x="10" y="36" width="28" height="42" rx="8" fill="#2563eb"/>' +
+                '<rect x="14" y="78" width="8" height="34" rx="4" fill="#1e293b"/>' +
+                '<rect x="26" y="78" width="8" height="34" rx="4" fill="#1e293b"/>' +
+                '<ellipse cx="17" cy="113" rx="7" ry="4" fill="#0f172a"/><ellipse cx="31" cy="113" rx="7" ry="4" fill="#0f172a"/>' +
+                '<circle cx="24" cy="20" r="13" fill="#fed7aa"/>' +
+                '<path d="M 11 18 Q 24 5 37 18" fill="#78350f"/>' +
+                '<circle cx="20" cy="19" r="2" fill="#0f172a"/><circle cx="28" cy="19" r="2" fill="#0f172a"/>' +
+                '<path d="M 21 24 Q 24 28 27 24" stroke="#e11d48" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+                '<path d="M 38 40 Q 52 25 54 12" stroke="#fed7aa" stroke-width="6" stroke-linecap="round" fill="none"/>' +
+                '<g transform="translate(10, -22)">' +
+                  '<rect x="0" y="0" width="85" height="26" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>' +
+                  '<polygon points="12,26 18,33 22,26" fill="#ffffff"/>' +
+                  '<polygon points="12,26 18,33 22,26" stroke="#2563eb" stroke-width="2" fill="none"/>' +
+                  '<text x="42" y="17" font-size="11" font-weight="bold" fill="#1d4ed8" text-anchor="middle">Hi! I\'m John.</text>' +
+                '</g>' +
+              '</g>';
+          } else {
+            // 第4幕：课桌文具温暖分享 (We can share)
+            c = defs +
+              '<rect width="600" height="240" rx="16" fill="#fef2f2"/>' +
+              '<path d="M 0 0 L 600 0 L 600 130 L 0 130 Z" fill="#fff7ed"/>' +
+              '<rect x="30" y="125" width="540" height="95" rx="12" fill="#fde68a" stroke="#d97706" stroke-width="3"/>' +
+              '<rect x="40" y="135" width="520" height="80" rx="8" fill="#fef3c7"/>' +
+              '<g transform="translate(240, 142)">' +
+                '<rect x="0" y="10" width="115" height="42" rx="12" fill="#38bdf8" stroke="#0284c7" stroke-width="2"/>' +
+                '<line x1="0" y1="26" x2="115" y2="26" stroke="#ffffff" stroke-width="3"/>' +
+                '<rect x="15" y="4" width="12" height="32" rx="2" fill="#ef4444" transform="rotate(-15 15 4)"/>' +
+                '<rect x="35" y="6" width="12" height="30" rx="2" fill="#eab308" transform="rotate(-8 35 6)"/>' +
+                '<rect x="55" y="8" width="12" height="28" rx="2" fill="#10b981" transform="rotate(5 55 8)"/>' +
+                '<rect x="75" y="4" width="12" height="32" rx="2" fill="#a855f7" transform="rotate(12 75 4)"/>' +
+                '<rect x="15" y="48" width="80" height="14" rx="2" fill="#facc15" stroke="#ca8a04" stroke-width="1.5"/>' +
+                '<line x1="25" y1="48" x2="25" y2="54" stroke="#78350f" stroke-width="1"/>' +
+                '<line x1="35" y1="48" x2="35" y2="54" stroke="#78350f" stroke-width="1"/>' +
+                '<line x1="45" y1="48" x2="45" y2="54" stroke="#78350f" stroke-width="1"/>' +
+                '<line x1="55" y1="48" x2="55" y2="54" stroke="#78350f" stroke-width="1"/>' +
+                '<line x1="65" y1="48" x2="65" y2="54" stroke="#78350f" stroke-width="1"/>' +
+                '<line x1="75" y1="48" x2="75" y2="54" stroke="#78350f" stroke-width="1"/>' +
+                '<rect x="98" y="48" width="24" height="15" rx="3" fill="#f43f5e"/>' +
+              '</g>' +
+              '<g transform="translate(90, 45)" filter="url(#softShadow)">' +
+                '<circle cx="30" cy="30" r="18" fill="#fed7aa"/>' +
+                '<path d="M 12 28 Q 30 12 48 28" fill="#1e293b"/>' +
+                '<circle cx="24" cy="28" r="2.5" fill="#0f172a"/><circle cx="36" cy="28" r="2.5" fill="#0f172a"/>' +
+                '<path d="M 25 36 Q 30 42 35 36" stroke="#e11d48" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+                '<rect x="12" y="48" width="36" height="42" rx="8" fill="#8b5cf6"/>' +
+                '<path d="M 46 58 Q 70 65 95 62" stroke="#fed7aa" stroke-width="7" stroke-linecap="round" fill="none"/>' +
+                '<g transform="translate(-20, -32)">' +
+                  '<rect x="0" y="0" width="130" height="26" rx="8" fill="#ffffff" stroke="#8b5cf6" stroke-width="2"/>' +
+                  '<polygon points="40,26 46,33 50,26" fill="#ffffff"/>' +
+                  '<polygon points="40,26 46,33 50,26" stroke="#8b5cf6" stroke-width="2" fill="none"/>' +
+                  '<text x="65" y="17" font-size="11" font-weight="bold" fill="#6d28d9" text-anchor="middle">Thank you, Sarah! ❤️</text>' +
+                '</g>' +
+              '</g>' +
+              '<g transform="translate(420, 45)" filter="url(#softShadow)">' +
+                '<circle cx="30" cy="30" r="18" fill="#fed7aa"/>' +
+                '<path d="M 12 28 Q 30 12 48 28" fill="#fde047"/>' +
+                '<circle cx="24" cy="28" r="2.5" fill="#0f172a"/><circle cx="36" cy="28" r="2.5" fill="#0f172a"/>' +
+                '<path d="M 25 36 Q 30 42 35 36" stroke="#e11d48" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+                '<rect x="12" y="48" width="36" height="42" rx="8" fill="#f43f5e"/>' +
+                '<path d="M 14 58 Q -10 65 -35 62" stroke="#fed7aa" stroke-width="7" stroke-linecap="round" fill="none"/>' +
+                '<g transform="translate(-30, -32)">' +
+                  '<rect x="0" y="0" width="150" height="26" rx="8" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>' +
+                  '<polygon points="80,26 86,33 90,26" fill="#ecfdf5"/>' +
+                  '<polygon points="80,26 86,33 90,26" stroke="#10b981" stroke-width="2" fill="none"/>' +
+                  '<text x="75" y="17" font-size="11" font-weight="bold" fill="#047857" text-anchor="middle">It\'s OK. We can share!</text>' +
+                '</g>' +
+              '</g>' +
+              '<g transform="translate(160, 205)">' +
+                '<rect x="0" y="0" width="280" height="26" rx="13" fill="#10b981" filter="url(#softShadow)"/>' +
+                '<text x="140" y="17" font-size="11.5" font-weight="900" fill="#ffffff" text-anchor="middle">🤝 Friends help each other · 好朋友互相帮助</text>' +
+              '</g>';
+          }
         } else if (unitKey === 'u2') {
           // Unit 2: 温馨家庭客厅与全家福大合影金相框
           c = defs +
@@ -8152,14 +8319,29 @@
 
       // 4. 按选中的子模块精准独立渲染
       if (curTab === 'dialogue') {
-        // 子模块 1: 💬 Let's talk · 课文情景对话领读 (包含教材真实情景大插画)
+        // 子模块 1: 💬 Let's talk · 课文情景分镜剧场 (语意联动 4 幕动态矢量大画卷)
+        var acts = les.acts || [{ id: 0, title: '情景大图', desc: les.sub + ' · ' + les.title, range: [0, les.dialogues.length - 1] }];
+        var curActIdx = typeof S.dialogueAct === 'number' ? S.dialogueAct : 0;
+        if (curActIdx >= acts.length) curActIdx = 0;
+        var currentAct = acts[curActIdx] || acts[0];
+
         h += '<div class="pep-scene-card">' +
-          '<div class="psc-media">' +
-            PepIllustrations.getSceneSvg(S.unit) +
+          '<div class="pep-scene-acts-bar">' +
+            '<div class="psab-title">🎬 <b>情景分镜剧场</b> <span class="badge">' + acts.length + ' 幕画卷</span></div>' +
+            '<div class="pep-act-pills" id="pepActPills">';
+        acts.forEach(function (act, aIdx) {
+          h += '<button type="button" class="pep-act-btn ' + (aIdx === curActIdx ? 'active' : '') + '" data-act="' + aIdx + '">' +
+            esc(act.title) +
+          '</button>';
+        });
+        h += '</div>' +
+          '</div>' +
+          '<div class="psc-media" id="pepSceneMedia">' +
+            PepIllustrations.getSceneSvg(S.unit, curActIdx) +
           '</div>' +
           '<div class="psc-caption">' +
-            '<span class="psc-badge">🏫 课文情景大图 · Textbook Scene</span>' +
-            '<span class="psc-text">' + esc(les.sub) + ' · ' + esc(les.title) + '</span>' +
+            '<span class="psc-badge">🎬 ' + esc(currentAct.title) + '</span>' +
+            '<span class="psc-text" id="pepSceneDesc">' + esc(currentAct.desc) + '</span>' +
           '</div>' +
         '</div>';
 
@@ -8173,7 +8355,8 @@
           '</div>' +
           '<div class="pep-dialogue-list" id="pepDialogueList">';
         les.dialogues.forEach(function (d, dIdx) {
-          h += '<div class="pep-dialogue-item" data-didx="' + dIdx + '" data-en="' + esc(d.en) + '">' +
+          var dAct = typeof d.act === 'number' ? d.act : 0;
+          h += '<div class="pep-dialogue-item" data-didx="' + dIdx + '" data-act="' + dAct + '" data-en="' + esc(d.en) + '">' +
             '<div class="pdi-avatar" title="' + esc(d.role) + '">' + d.avatar + '</div>' +
             '<div class="pdi-body">' +
               '<div class="pdi-speaker">' + esc(d.role) + ' (' + esc(d.speaker) + '):</div>' +
@@ -8191,39 +8374,136 @@
         '</div>';
 
       } else if (curTab === 'vocab') {
-        // 子模块 2: 🔤 Let's learn · 单元核心生词库 (图文结合闪卡 + 100% 巧记与TPR)
+        // 子模块 2: 🔤 Let's learn · 3D 拟物翻转记忆闪卡流 (100% 图文+巧记+TPR动一动)
+        var vocabMode = S.vocabMode || 'grid';
+        var heroIdx = typeof S.vocabHeroIdx === 'number' ? S.vocabHeroIdx : 0;
+        if (heroIdx >= unitWords.length) heroIdx = 0;
+        if (heroIdx < 0) heroIdx = Math.max(0, unitWords.length - 1);
+        S.vocabHeroIdx = heroIdx;
+
         h += '<div class="pep-section-card">' +
           '<div class="psc-head">' +
-            '<div class="psc-title">🔤 <b>Let\'s learn · 单元核心生词库 (' + unitWords.length + ' 词)</b> <span class="badge">100% 图文+巧记+动作</span></div>' +
+            '<div class="psc-title">🔤 <b>Let\'s learn · 单元核心生词库 (' + unitWords.length + ' 词)</b> <span class="badge">3D 翻转闪卡 · 100% 巧记+动作</span></div>' +
             '<div class="psc-actions">' +
-              '<button type="button" class="btn small ghost" id="btnPlayAllVocab">🎧 连播全部单词</button>' +
+              '<button type="button" class="btn small ' + (vocabMode === 'hero' ? 'primary' : 'ghost') + '" id="btnToggleCardMode">' +
+                (vocabMode === 'hero' ? '▦ 平铺网格模式' : '🃏 单卡沉浸学习') +
+              '</button>' +
+              (vocabMode === 'grid' ? (
+                '<button type="button" class="btn small ghost" id="btnPlayAllVocab">🎧 连播单词</button>' +
+                '<button type="button" class="btn small ghost" id="btnFlipAllVocab">🔄 全部翻面看巧记</button>'
+              ) : '') +
               '<button type="button" class="btn small ghost" id="btnGoSoundout">🧩 开启音素拆读</button>' +
             '</div>' +
-          '</div>' +
-          '<div class="pep-vocab-grid">';
-        unitWords.forEach(function (w, wIdx) {
-          h += '<div class="pep-vocab-card" data-word="' + esc(w.word) + '" data-widx="' + wIdx + '">' +
-            '<div class="pvc-illustration-box">' +
-              PepIllustrations.getWordSvg(w) +
-              '<button type="button" class="pvc-floating-speaker" data-word="' + esc(w.word) + '" title="听单词发音">🔊</button>' +
+          '</div>';
+
+        if (vocabMode === 'hero' && unitWords.length > 0) {
+          // 沉浸式单卡模式 (超大字体 + 聚焦记忆)
+          var curWord = unitWords[heroIdx] || unitWords[0];
+          var curChips = (curWord.phonics || [curWord.word]).map(function (p) {
+            return '<span class="pvc-pchip">' + esc(p) + '</span>';
+          }).join('');
+
+          h += '<div class="pep-hero-deck">' +
+            '<div class="pep-card-3d pep-hero-card" data-word="' + esc(curWord.word) + '" data-widx="' + heroIdx + '">' +
+              '<div class="pep-card-inner">' +
+                // 正面: 巨大化生词、音标与自然拼读拆解
+                '<div class="pep-card-face pep-card-front">' +
+                  '<div class="pvc-illustration-box">' +
+                    PepIllustrations.getWordSvg(curWord) +
+                    '<button type="button" class="pvc-floating-speaker" data-word="' + esc(curWord.word) + '" title="听单词发音">🔊</button>' +
+                  '</div>' +
+                  '<div class="pvc-word-row">' +
+                    '<span class="pvc-en">' + esc(curWord.word) + '</span>' +
+                    '<span class="pvc-ipa">' + esc(curWord.ipa || '') + '</span>' +
+                  '</div>' +
+                  '<div class="pvc-cn">' + esc(curWord.cn) + '</div>' +
+                  '<div class="pvc-phonics-chips">' + curChips + '</div>' +
+                  '<button type="button" class="pvc-flip-btn" data-act="flip">🔄 点击翻看 1秒巧记秘籍</button>' +
+                '</div>' +
+                // 反面: 3D 翻转 · 1秒形象巧记与TPR身体记忆
+                '<div class="pep-card-face pep-card-back">' +
+                  '<div class="pvc-back-head">' +
+                    '<span class="pbh-word">' + esc(curWord.word) + '</span>' +
+                    '<span class="pbh-cn">' + esc(curWord.cn) + '</span>' +
+                  '</div>' +
+                  '<div class="pvc-magic-box">' +
+                    '<div class="pmb-title">💡 1秒形象巧记</div>' +
+                    '<div class="pmb-body">' + esc(curWord.magicTip || curWord.tip || '观察字母形状与发音，大声读三遍！') + '</div>' +
+                  '</div>' +
+                  (curWord.tpr ? (
+                    '<div class="pvc-tpr-box">' +
+                      '<div class="ptb-title">🏃 动一动 TPR 身体记忆</div>' +
+                      '<div class="ptb-body">' + esc(curWord.tpr) + '</div>' +
+                    '</div>'
+                  ) : '') +
+                  '<div class="pvc-back-bottom">' +
+                    '<button type="button" class="btn small ghost pvc-soundout-btn" data-widx="' + heroIdx + '">🧩 音素拆读</button>' +
+                    '<button type="button" class="btn small primary pvc-flip-back" data-act="flip">🔄 翻回正面</button>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
             '</div>' +
-            '<div class="pvc-card-body">' +
-              '<div class="pvc-word-row">' +
-                '<span class="pvc-en">' + esc(w.word) + '</span>' +
-                '<span class="pvc-ipa">' + esc(w.ipa || '') + '</span>' +
+            // 沉浸模式专属前后翻页与发音操作栏
+            '<div class="pep-hero-nav">' +
+              '<button type="button" class="btn ghost" id="btnHeroPrev" ' + (heroIdx === 0 ? 'disabled' : '') + '>◀ 上一个</button>' +
+              '<div class="pep-hero-progress">' +
+                '<span>生词 <b>' + (heroIdx + 1) + '</b> / ' + unitWords.length + '</span>' +
+                '<button type="button" class="btn small ghost" id="btnHeroSpeak">🔊 读此词</button>' +
               '</div>' +
-              '<div class="pvc-cn">' + esc(w.cn) + '</div>' +
-              (w.magicTip ? '<div class="pvc-magic">💡 <b>1秒巧记：</b>' + esc(w.magicTip) + '</div>' : (w.tip ? '<div class="pvc-tip">💡 ' + esc(w.tip) + '</div>' : '')) +
-              (w.tpr ? '<div class="pvc-tpr">🏃 <b>动一动：</b>' + esc(w.tpr) + '</div>' : '') +
-              '<div class="pvc-actions">' +
-                '<button type="button" class="btn small ghost pvc-soundout-btn" data-widx="' + wIdx + '">🧩 音素拆读</button>' +
-                (w.pair ? '<span class="pvc-pair-badge">⚡ 反义: ' + esc(w.pair) + '</span>' : '') +
-              '</div>' +
+              '<button type="button" class="btn primary" id="btnHeroNext" ' + (heroIdx === unitWords.length - 1 ? 'disabled' : '') + '>下一个 ▶</button>' +
             '</div>' +
           '</div>';
-        });
-        h += '</div>' +
-          '<div class="pep-tab-footer-guide split">' +
+        } else {
+          // 平铺全宽网格模式
+          h += '<div class="pep-vocab-grid" id="pepVocabGrid">';
+          unitWords.forEach(function (w, wIdx) {
+            var pchips = (w.phonics || [w.word]).map(function (p) {
+              return '<span class="pvc-pchip">' + esc(p) + '</span>';
+            }).join('');
+            h += '<div class="pep-card-3d" data-word="' + esc(w.word) + '" data-widx="' + wIdx + '">' +
+              '<div class="pep-card-inner">' +
+                // 正面: 认识与发音
+                '<div class="pep-card-face pep-card-front">' +
+                  '<div class="pvc-illustration-box">' +
+                    PepIllustrations.getWordSvg(w) +
+                    '<button type="button" class="pvc-floating-speaker" data-word="' + esc(w.word) + '" title="听单词发音">🔊</button>' +
+                  '</div>' +
+                  '<div class="pvc-word-row">' +
+                    '<span class="pvc-en">' + esc(w.word) + '</span>' +
+                    '<span class="pvc-ipa">' + esc(w.ipa || '') + '</span>' +
+                  '</div>' +
+                  '<div class="pvc-cn">' + esc(w.cn) + '</div>' +
+                  '<div class="pvc-phonics-chips">' + pchips + '</div>' +
+                  '<button type="button" class="pvc-flip-btn" data-act="flip">🔄 点击翻看 1秒巧记秘籍</button>' +
+                '</div>' +
+                // 反面: 3D 翻转 · 1秒巧记与TPR动一动
+                '<div class="pep-card-face pep-card-back">' +
+                  '<div class="pvc-back-head">' +
+                    '<span class="pbh-word">' + esc(w.word) + '</span>' +
+                    '<span class="pbh-cn">' + esc(w.cn) + '</span>' +
+                  '</div>' +
+                  '<div class="pvc-magic-box">' +
+                    '<div class="pmb-title">💡 1秒形象巧记</div>' +
+                    '<div class="pmb-body">' + esc(w.magicTip || w.tip || '观察字母形状与发音，大声读三遍！') + '</div>' +
+                  '</div>' +
+                  (w.tpr ? (
+                    '<div class="pvc-tpr-box">' +
+                      '<div class="ptb-title">🏃 动一动 TPR 身体记忆</div>' +
+                      '<div class="ptb-body">' + esc(w.tpr) + '</div>' +
+                    '</div>'
+                  ) : '') +
+                  '<div class="pvc-back-bottom">' +
+                    '<button type="button" class="btn small ghost pvc-soundout-btn" data-widx="' + wIdx + '">🧩 音素拆读</button>' +
+                    '<button type="button" class="btn small primary pvc-flip-back" data-act="flip">🔄 翻回正面</button>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+          });
+          h += '</div>';
+        }
+
+        h += '<div class="pep-tab-footer-guide split">' +
             '<button type="button" class="btn ghost small" id="btnBackDlgFromVocab">← 返回课文情景对话</button>' +
             '<button type="button" class="btn primary small" id="btnGoChantFromVocab">👉 去练趣味歌谣与金句 (Let\'s chant) ➔</button>' +
           '</div>' +
@@ -8343,19 +8623,63 @@
       }
 
       if (curTab === 'dialogue') {
-        // 单句点读
+        // 剧场分镜幕次切换
+        host.querySelectorAll('.pep-act-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            if (isDebounced(150)) return;
+            var actIdx = parseInt(btn.getAttribute('data-act'), 10) || 0;
+            S.dialogueAct = actIdx;
+            var acts = les.acts || [];
+            var currentAct = acts[actIdx] || acts[0];
+            host.querySelectorAll('.pep-act-btn').forEach(function (b) {
+              b.classList.toggle('active', parseInt(b.getAttribute('data-act'), 10) === actIdx);
+            });
+            var media = $('pepSceneMedia');
+            if (media) {
+              media.style.opacity = '0.3';
+              setTimeout(function () {
+                media.innerHTML = PepIllustrations.getSceneSvg(S.unit, actIdx);
+                media.style.opacity = '1';
+              }, 120);
+            }
+            var desc = $('pepSceneDesc');
+            if (desc && currentAct) desc.textContent = currentAct.desc;
+            var badge = host.querySelector('.psc-caption .psc-badge');
+            if (badge && currentAct) badge.innerHTML = '🎬 ' + esc(currentAct.title);
+            Sfx.click();
+            var targetItem = host.querySelector('.pep-dialogue-item[data-act="' + actIdx + '"]');
+            if (targetItem) targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          });
+        });
+
+        // 单句点读 (同步驱动剧场大画卷)
         host.querySelectorAll('.pep-dialogue-item').forEach(function (item) {
           item.addEventListener('click', function () {
             if (isDebounced(250)) return;
             startSequence();
             var en = item.getAttribute('data-en');
-            item.classList.add('speaking');
-            setTimeout(function () { item.classList.remove('speaking'); }, 1200);
+            var dAct = parseInt(item.getAttribute('data-act'), 10) || 0;
+            if (typeof S.dialogueAct !== 'number' || S.dialogueAct !== dAct) {
+              S.dialogueAct = dAct;
+              host.querySelectorAll('.pep-act-btn').forEach(function (b) {
+                b.classList.toggle('active', parseInt(b.getAttribute('data-act'), 10) === dAct);
+              });
+              var media = $('pepSceneMedia');
+              if (media) media.innerHTML = PepIllustrations.getSceneSvg(S.unit, dAct);
+              var acts = les.acts || [];
+              var currentAct = acts[dAct] || acts[0];
+              var desc = $('pepSceneDesc');
+              if (desc && currentAct) desc.textContent = currentAct.desc;
+              var badge = host.querySelector('.psc-caption .psc-badge');
+              if (badge && currentAct) badge.innerHTML = '🎬 ' + esc(currentAct.title);
+            }
+            item.classList.add('speaking', 'karaoke-active');
+            setTimeout(function () { item.classList.remove('speaking', 'karaoke-active'); }, 1400);
             speakWord(en, speechRate);
           });
         });
 
-        // 连续角色对话跟读
+        // 连续角色对话跟读 (动态联动多幕分镜)
         var playDlgBtn = $('btnPlayDialogues');
         if (playDlgBtn) {
           playDlgBtn.addEventListener('click', function () {
@@ -8374,12 +8698,29 @@
                 playDlgBtn.innerHTML = origTxt;
                 return;
               }
-              items.forEach(function (it) { it.classList.remove('speaking'); });
+              items.forEach(function (it) { it.classList.remove('speaking', 'karaoke-active'); });
 
               if (idx < items.length) {
                 var curItem = items[idx];
-                curItem.classList.add('speaking');
+                curItem.classList.add('speaking', 'karaoke-active');
                 curItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                var dAct = parseInt(curItem.getAttribute('data-act'), 10) || 0;
+                if (typeof S.dialogueAct !== 'number' || S.dialogueAct !== dAct) {
+                  S.dialogueAct = dAct;
+                  host.querySelectorAll('.pep-act-btn').forEach(function (b) {
+                    b.classList.toggle('active', parseInt(b.getAttribute('data-act'), 10) === dAct);
+                  });
+                  var media = $('pepSceneMedia');
+                  if (media) media.innerHTML = PepIllustrations.getSceneSvg(S.unit, dAct);
+                  var acts = les.acts || [];
+                  var currentAct = acts[dAct] || acts[0];
+                  var desc = $('pepSceneDesc');
+                  if (desc && currentAct) desc.textContent = currentAct.desc;
+                  var badge = host.querySelector('.psc-caption .psc-badge');
+                  if (badge && currentAct) badge.innerHTML = '🎬 ' + esc(currentAct.title);
+                }
+
                 var en = curItem.getAttribute('data-en');
                 idx++;
                 speakWord(en, speechRate, function () {
@@ -8388,7 +8729,7 @@
               } else {
                 setTimeout(function () {
                   if (seqId !== sequenceToken) return;
-                  items.forEach(function (it) { it.classList.remove('speaking'); });
+                  items.forEach(function (it) { it.classList.remove('speaking', 'karaoke-active'); });
                   playDlgBtn.disabled = false;
                   playDlgBtn.innerHTML = origTxt;
                 }, 400);
@@ -8422,24 +8763,102 @@
         }
 
       } else if (curTab === 'vocab') {
-        // 单词卡片点击发音
-        host.querySelectorAll('.pep-vocab-card').forEach(function (card) {
-          card.addEventListener('click', function () {
+        var unitWords = S.words || [];
+
+        // 沉浸单卡 / 全部平铺 视图切换
+        var btnToggleMode = $('btnToggleCardMode');
+        if (btnToggleMode) {
+          btnToggleMode.addEventListener('click', function () {
+            if (isDebounced(150)) return;
+            Sfx.click();
+            S.vocabMode = S.vocabMode === 'hero' ? 'grid' : 'hero';
+            render();
+          });
+        }
+
+        // 沉浸式单卡导航与发音
+        var btnHeroPrev = $('btnHeroPrev');
+        if (btnHeroPrev) {
+          btnHeroPrev.addEventListener('click', function () {
+            if (isDebounced(150)) return;
+            if (S.vocabHeroIdx > 0) {
+              S.vocabHeroIdx--;
+              Sfx.click();
+              render();
+              if (unitWords[S.vocabHeroIdx]) speakWord(unitWords[S.vocabHeroIdx].word, speechRate);
+            }
+          });
+        }
+        var btnHeroNext = $('btnHeroNext');
+        if (btnHeroNext) {
+          btnHeroNext.addEventListener('click', function () {
+            if (isDebounced(150)) return;
+            if (S.vocabHeroIdx < unitWords.length - 1) {
+              S.vocabHeroIdx++;
+              Sfx.click();
+              render();
+              if (unitWords[S.vocabHeroIdx]) speakWord(unitWords[S.vocabHeroIdx].word, speechRate);
+            }
+          });
+        }
+        var btnHeroSpeak = $('btnHeroSpeak');
+        if (btnHeroSpeak) {
+          btnHeroSpeak.addEventListener('click', function () {
+            if (isDebounced(200)) return;
+            var curWord = unitWords[S.vocabHeroIdx];
+            if (curWord) {
+              Sfx.click();
+              speakWord(curWord.word, speechRate);
+            }
+          });
+        }
+
+        // 3D 拟物翻转闪卡交互
+        host.querySelectorAll('.pep-card-3d').forEach(function (card) {
+          card.addEventListener('click', function (e) {
+            if (e.target.closest('.pvc-floating-speaker') || e.target.closest('.pvc-soundout-btn')) return;
+            if (isDebounced(150)) return;
+            Sfx.click();
+            card.classList.toggle('flipped');
+          });
+        });
+
+        // 听单词发音 (阻止翻转冒泡)
+        host.querySelectorAll('.pvc-floating-speaker').forEach(function (spk) {
+          spk.addEventListener('click', function (e) {
+            e.stopPropagation();
             if (isDebounced(250)) return;
             startSequence();
-            var word = card.getAttribute('data-word');
-            card.classList.add('speaking');
-            setTimeout(function () { card.classList.remove('speaking'); }, 600);
+            var word = spk.getAttribute('data-word');
+            var card = spk.closest('.pep-card-3d');
+            if (card) {
+              card.classList.add('speaking');
+              setTimeout(function () { card.classList.remove('speaking'); }, 700);
+            }
             speakWord(word, speechRate);
           });
         });
+
+        // 全部翻面看巧记
+        var btnFlipAll = $('btnFlipAllVocab');
+        if (btnFlipAll) {
+          var allFlipped = false;
+          btnFlipAll.addEventListener('click', function () {
+            allFlipped = !allFlipped;
+            btnFlipAll.innerHTML = allFlipped ? '🔄 全部翻回正面' : '🔄 全部翻面看巧记';
+            Sfx.click();
+            host.querySelectorAll('.pep-card-3d').forEach(function (card) {
+              card.classList.toggle('flipped', allFlipped);
+            });
+          });
+        }
 
         // 连播全部单词
         var playAllVocabBtn = $('btnPlayAllVocab');
         if (playAllVocabBtn) {
           playAllVocabBtn.addEventListener('click', function () {
             if (isDebounced(350)) return;
-            var cards = host.querySelectorAll('.pep-vocab-card');
+            var cards = host.querySelectorAll('.pep-card-3d');
             if (!cards.length) return;
             playAllVocabBtn.disabled = true;
             var origTxt = playAllVocabBtn.innerHTML;
@@ -9583,6 +10002,7 @@
   /* ---------------- 注册游戏与配置 ---------------- */
   global.Games = global.Games || {};
   global.Games.english = {
+    stageType: 'story',
     cat: 'kids',
     emoji: '🔤',
     name: '人教版英语 · 课本同步与自然拼读',
@@ -9595,6 +10015,9 @@
     single: true,
     noLevel: true,
     dom: true,
+    noUndo: true,
+    noResign: true,
+    noQuickActions: true,
     mount: mount
   };
 })(window);

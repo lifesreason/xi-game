@@ -657,6 +657,7 @@
 
   global.Games = global.Games || {};
   global.Games.xiangqi = {
+    stageType: 'board',
     cat: 'board',
     id: 'xiangqi', name: '象棋', emoji: '♟️',
     desc: '中国象棋完整规则：马腿、象眼、炮翻山、兵过河、将帅不能照面，将死或困毙即负。',

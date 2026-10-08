@@ -300,6 +300,7 @@
 
   global.Games = global.Games || {};
   global.Games.hanoi = {
+    stageType: 'puzzle',
     cat: 'puzzle',
     emoji: '🗼',
     name: '魔法汉诺塔',

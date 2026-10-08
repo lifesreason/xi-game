@@ -286,6 +286,7 @@
 
   global.Games = global.Games || {};
   global.Games.lightsout = {
+    stageType: 'puzzle',
     cat: 'puzzle',
     emoji: '💡',
     name: '奇妙点灯',

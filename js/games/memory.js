@@ -200,6 +200,9 @@
 
   global.Games = global.Games || {};
   global.Games.memory = {
+    stageType: 'arcade',
+    hasHint: true,
+    noUndo: true,
     cat: 'puzzle',
     emoji: '🃏',
     name: '记忆翻牌',

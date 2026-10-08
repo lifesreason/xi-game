@@ -351,6 +351,7 @@
 
   global.Games = global.Games || {};
   global.Games.nonogram = {
+    stageType: 'puzzle',
     cat: 'puzzle',
     id: 'nonogram', emoji: '🦊',
     name: '像素数织',

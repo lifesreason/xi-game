@@ -77,22 +77,35 @@
       tSpawn = global.setTimeout(popOne, g[0] + ri(g[1] - g[0]));
     }
 
+    var lastWhackTime = 0, currentCombo = 0;
     function whack(i, btn, cx, cy) {
       if (G.over || !btn.classList.contains('up')) {
         Fx.vibrate(6);
+        currentCombo = 0;
         return;
       }
       btn.classList.remove('up');
       upIdx = -1;
       G.score++;
       G.whacks++;
+
+      var now = Date.now();
+      if (now - lastWhackTime < 1400) currentCombo++;
+      else currentCombo = 1;
+      lastWhackTime = now;
+
       Sfx.pop();
       Fx.vibrate(20);
       Fx.burst(btn, ['💥', '⭐', '🌟'][ri(3)], 4);
+      if (currentCombo >= 2 && global.Fx && global.Fx.combo) {
+        global.Fx.combo(currentCombo);
+      }
+      if (cx != null && global.Fx && global.Fx.floatScore) {
+        global.Fx.floatScore('+' + currentCombo, cx, cy);
+      }
       if (cx != null) Fx.ripple(wrap.querySelector('.mole-grid'), cx, cy, 'rgba(255,176,46,.6)');
       refreshBar();
       if (G.score >= LEVELS[G.level].goal && !G.over) {
-        /* 提前达成目标也继续到时间结束，让小朋友尽兴 */
         refreshBar();
       }
       clearTimeout(tHide);
@@ -186,6 +199,8 @@
 
   global.Games = global.Games || {};
   global.Games.mole = {
+    stageType: 'arcade',
+    noUndo: true,
     id: 'mole', cat: 'kids', emoji: '🐹',
     name: '开心打地鼠',
     desc: '经典手眼协调游戏！小地鼠冒出来就快点它，30 秒看谁敲得多。锻炼反应力与小手灵活性。',

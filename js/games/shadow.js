@@ -134,6 +134,8 @@
 
   global.Games = global.Games || {};
   global.Games.shadow = {
+    stageType: 'arcade',
+    noUndo: true,
     id: 'shadow', cat: 'kids', emoji: '🐰',
     name: '影子找朋友',
     desc: '观察力小挑战！看黑影子找彩色好朋友，锻炼形状辨识与专注力，适合 3-6 岁。',

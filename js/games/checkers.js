@@ -481,6 +481,7 @@
 
   global.Games = global.Games || {};
   global.Games.checkers = {
+    stageType: 'board',
     cat: 'board',
     id: 'checkers', name: '跳棋', emoji: '🔺',
     desc: '六角星盘，双方各 10 枚。走一步或连跳，最先把全部棋子送进对面三角星算赢。',

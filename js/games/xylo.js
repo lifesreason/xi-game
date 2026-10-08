@@ -213,6 +213,9 @@
 
   global.Games = global.Games || {};
   global.Games.xylo = {
+    stageType: 'arcade',
+    noQuickActions: true,
+    noUndo: true,
     id: 'xylo', cat: 'create', emoji: '🎵',
     name: '叮咚小木琴',
     desc: '8 音小木琴！自由弹奏随便敲，跟弹模式照着亮起的琴键弹会三首儿歌。音乐启蒙 + 听觉记忆。',

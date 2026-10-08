@@ -251,6 +251,9 @@
 
   global.Games = global.Games || {};
   global.Games.slidepic = {
+    stageType: 'arcade',
+    hasHint: true,
+    noUndo: true,
     id: 'slidepic', cat: 'kids', emoji: '🚂',
     name: '移动拼图',
     desc: '经典"空一格"滑块拼图！图画切成小块，只能滑向空格，一步步复原小火车图画。锻炼空间推理。',

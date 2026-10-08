@@ -210,6 +210,9 @@
 
   global.Games = global.Games || {};
   global.Games.simon = {
+    stageType: 'arcade',
+    hasHint: true,
+    noUndo: true,
     id: 'simon', cat: 'kids', emoji: '💡',
     name: '记忆亮灯',
     desc: '经典序列记忆游戏！彩灯按顺序闪，照着按一遍，一轮多一步。答错灯会重新教你，适合 3-8 岁。',

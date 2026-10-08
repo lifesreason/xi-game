@@ -241,6 +241,9 @@
 
   global.Games = global.Games || {};
   global.Games.diff = {
+    stageType: 'arcade',
+    hasHint: true,
+    noUndo: true,
     id: 'diff', cat: 'kids', emoji: '🔍',
     name: '火眼找不同',
     desc: '两幅完整场景画找不同：换了图案、挪了位置、少了东西！六套场景自动出题，每一轮都新鲜，适合 4-8 岁。',

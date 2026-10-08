@@ -286,6 +286,8 @@
 
   global.Games = global.Games || {};
   global.Games.paint = {
+    stageType: 'arcade',
+    noQuickActions: true,
     id: 'paint', cat: 'create', emoji: '🎨',
     name: '魔法小画板',
     desc: '自由涂鸦创作！12 色 + 3 种笔粗细 + emoji 印章 + 橡皮撤销，作品可保存到相册。没有输赢，尽情画！',

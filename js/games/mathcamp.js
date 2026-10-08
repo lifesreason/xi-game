@@ -294,6 +294,10 @@
         S.flash = 'good';
         if (S.streak >= 3 && Sfx.combo) Sfx.combo(S.streak);
         else Sfx.pop();
+        if (global.Fx) {
+          if (S.streak >= 2) global.Fx.combo(S.streak);
+          global.Fx.floatScore('+1', undefined, undefined, 'good');
+        }
         if (S.streak >= 5 && global.Store) global.Store.unlockBadge('math_streak');
       } else {
         S.streak = 0;
@@ -444,6 +448,7 @@
 
   global.Games = global.Games || {};
   global.Games.mathcamp = {
+    stageType: 'story',
     cat: 'number',
     emoji: '🧮',
     name: '口算训练营',
@@ -455,6 +460,9 @@
     single: true,
     noLevel: true,
     dom: true,
+    noUndo: true,
+    noResign: true,
+    noQuickActions: true,
     sideOptions: [
       ['1', '启蒙 · 10 以内加减'],
       ['2', '基础 · 20 以内加减'],

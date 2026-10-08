@@ -240,7 +240,8 @@
 
   global.Games = global.Games || {};
   global.Games.pipes = {
-    id: 'pipes', cat: 'brain', emoji: '🚇',
+    stageType: 'puzzle',
+    id: 'pipes', cat: 'puzzle', emoji: '🚇',
     name: '旋转水管',
     desc: '点击管道旋转 90°，把水接到每一根管子且不能漏水！空间旋转推理，生成器保证必有解。',
     tags: ['空间推理', '连通问题', '6-10 岁'],

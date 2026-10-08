@@ -559,7 +559,8 @@
 
   global.Games = global.Games || {};
   global.Games.sokoban = {
-    id: 'sokoban', cat: 'brain', emoji: '🚜',
+    stageType: 'puzzle',
+    id: 'sokoban', cat: 'puzzle', emoji: '🚜',
     name: '推箱子',
     desc: '经典推箱子儿童版！25 关五大难度（萌新到史诗），把箱子推到圆圈上。所有关卡经求解器验证必定可解。',
     tags: ['空间规划', '回溯思维', '6-10 岁'],
