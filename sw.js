@@ -2,16 +2,21 @@
    【更新策略】改代码时只需把 CACHE 版本号 +1：
    - 导航请求（页面本身）走网络优先：联网打开就是最新版，断网才回退缓存
    - 新 SW 装好后 skipWaiting + clients.claim，页面端检测到即自动保存进度并刷新 */
-var CACHE = 'kidboard-v43';
+var CACHE = 'kidboard-v53';
 var ASSETS = [
   './',
   './index.html',
+  './name-cards.html',
   './manifest.webmanifest',
   './css/style.css',
   './js/store.js',
   './js/sfx.js',
   './js/fx.js',
   './js/boardkit.js',
+  './js/names-data.js',
+  './js/names-audio-data.js',
+  './js/name-cards.js',
+  './audio/names-sprite.mp3',
   './js/games/gomoku.js',
   './js/games/go.js',
   './js/games/checkers.js',
@@ -21,6 +26,7 @@ var ASSETS = [
   './js/games/memory.js',
   './js/games/game24.js',
   './js/games/mathcamp.js',
+  './js/games/english.js',
   './js/games/hanoi.js',
   './js/games/lightsout.js',
   './js/games/nonogram.js',

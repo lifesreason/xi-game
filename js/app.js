@@ -1,6 +1,6 @@
 /* 应用外壳：视图路由、对局控制、战绩、设置、离线缓存 */
 (function (global) {
-  var GAMES = ['gomoku', 'go', 'checkers', 'xiangqi', 'sudoku', 'slide', 'memory', 'game24', 'mathcamp', 'hanoi', 'lightsout', 'nonogram', 'mastermind', 'pattern', 'shadow', 'mole', 'catch', 'puzzle', 'diff', 'simon', 'slidepic', 'dragpuzzle', 'sokoban', 'pipes', 'mines', 'balance', 'xylo', 'paint'];
+  var GAMES = ['gomoku', 'go', 'checkers', 'xiangqi', 'sudoku', 'slide', 'memory', 'game24', 'mathcamp', 'english', 'hanoi', 'lightsout', 'nonogram', 'mastermind', 'pattern', 'shadow', 'mole', 'catch', 'puzzle', 'diff', 'simon', 'slidepic', 'dragpuzzle', 'sokoban', 'pipes', 'mines', 'balance', 'xylo', 'paint'];
   /* 首页分类筛选：对弈 / 益智 / 数字 / 启蒙 */
   var CATS = [
     { key: 'all', label: '全部' },
@@ -53,6 +53,25 @@
     });
     if (name === 'home') renderHome();
     if (name === 'records') renderRecords();
+    /* 离开游戏视图时恢复独立工作台样式 */
+    if (name !== 'play') {
+      var viewPlayEl = $('view-play');
+      if (viewPlayEl) viewPlayEl.classList.remove('standalone-mode');
+      var playBodyEl = document.querySelector('.play-body');
+      if (playBodyEl) playBodyEl.classList.remove('standalone-mode');
+      var quickActionsEl = $('board-quick-actions');
+      if (quickActionsEl) quickActionsEl.style.display = '';
+      var sidePanelEl = document.querySelector('.side-panel');
+      if (sidePanelEl) sidePanelEl.style.display = '';
+      var playStatusEl = $('play-status');
+      if (playStatusEl) playStatusEl.style.display = '';
+      var turnTipEl = $('turn-tip');
+      if (turnTipEl) turnTipEl.style.display = '';
+      var boardFootEl = document.querySelector('.board-foot');
+      if (boardFootEl) boardFootEl.style.display = '';
+      var btnRulesEl = $('btn-rules');
+      if (btnRulesEl) btnRulesEl.textContent = '❓ 玩法';
+    }
     /* 计时类游戏：离开对局页自动暂停，回来继续 */
     if (name === 'play') { if (inst && inst.resume) inst.resume(); if (inst && inst.redraw) inst.redraw(); }
     else if (inst && inst.pause) inst.pause();
@@ -220,6 +239,25 @@
     els.selMode.value = settings.mode;
     els.selLevel.value = settings.levels[id] || 'normal';
     refreshSideOptions(id);
+
+    /* 独立沉浸式模块（如人教版英语）：彻底隐藏对弈操作（悔棋/认输/重开/提示/对局设置），全屏满幅 */
+    var isStandalone = !!(g && g.standalone);
+    var viewPlayEl = $('view-play');
+    if (viewPlayEl) viewPlayEl.classList.toggle('standalone-mode', isStandalone);
+    var playBodyEl = document.querySelector('.play-body');
+    if (playBodyEl) playBodyEl.classList.toggle('standalone-mode', isStandalone);
+    var quickActionsEl = $('board-quick-actions');
+    if (quickActionsEl) quickActionsEl.style.display = isStandalone ? 'none' : '';
+    var sidePanelEl = document.querySelector('.side-panel');
+    if (sidePanelEl) sidePanelEl.style.display = isStandalone ? 'none' : '';
+    var playStatusEl = $('play-status');
+    if (playStatusEl) playStatusEl.style.display = isStandalone ? 'none' : '';
+    var turnTipEl = $('turn-tip');
+    if (turnTipEl) turnTipEl.style.display = isStandalone ? 'none' : '';
+    var boardFootEl = document.querySelector('.board-foot');
+    if (boardFootEl) boardFootEl.style.display = isStandalone ? 'none' : '';
+    var btnRulesEl = $('btn-rules');
+    if (btnRulesEl) btnRulesEl.textContent = isStandalone ? '💡 拼读秘籍' : '❓ 玩法';
 
     showView('play');
     var panelEl = document.querySelector('.board-panel');
@@ -624,6 +662,16 @@
       $('result-modal').classList.add('hidden');
       showView('home');
     };
+
+    /* 首页人教版英语卡片入口 */
+    var pepCard = $('home-pep-card');
+    if (pepCard) {
+      pepCard.onclick = function (e) {
+        e.preventDefault();
+        Sfx.click();
+        openGame('english');
+      };
+    }
 
     /* 设置项 */
     $('set-theme').onchange = function () { settings.theme = this.value; applySettings(); };

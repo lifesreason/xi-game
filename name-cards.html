@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>认名字 · 我们班的好朋友</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* ===== 认名字模块专属样式，复用 style.css 的设计变量 ===== */
+  .nc-hero { text-align: center; margin: 4px 0 12px; }
+  .nc-hero h2 { margin: 0 0 4px; font-size: clamp(20px, 5.2vw, 24px); font-weight: 800; }
+  .nc-hero p { margin: 0; color: var(--ink-2); font-size: 13.5px; }
+
+  /* 顶栏自适应 */
+  .nc-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .nc-back { text-decoration: none; flex-shrink: 0; }
+  .nc-topbar-actions {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .voice-select-wrap { position: relative; }
+  #voiceSelect {
+    max-width: 140px; font-size: 12px; padding: 6px 8px;
+    border-radius: 12px; border: 1px solid var(--line);
+    background: var(--card); color: var(--ink);
+  }
+
+  /* 模式切换栏（手机端等分三栏网格） */
+  .nc-modes {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 640px) {
+    .nc-topbar { gap: 6px; margin-bottom: 8px; }
+    .nc-topbar-actions { gap: 5px; }
+    #voiceSelect { max-width: 110px; font-size: 11px; padding: 5px 4px; }
+    .nc-topbar .btn { padding: 6px 10px; font-size: 12.5px; }
+    .nc-modes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .nc-modes .btn {
+      padding: 9px 2px;
+      font-size: 12.5px;
+      white-space: nowrap;
+      justify-content: center;
+      text-align: center;
+    }
+  }
+
+  /* ---- 模式一：闪卡 ---- */
+  .flash-wrap { max-width: 420px; width: 100%; margin: 0 auto; box-sizing: border-box; }
+  .flash-card {
+    position: relative;
+    aspect-ratio: 4/3;
+    perspective: 1200px;
+    -webkit-perspective: 1200px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+  .flash-inner {
+    position: absolute; inset: 0;
+    transition: transform 0.48s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+  }
+  .flash-card.flipped .flash-inner {
+    transform: rotateY(180deg);
+    -webkit-transform: rotateY(180deg);
+  }
+  .flash-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translate3d(0,0,0);
+    -webkit-transform: translate3d(0,0,0);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    border-radius: var(--r);
+    box-shadow: var(--shadow);
+    border: 2px solid var(--line);
+    background: var(--card);
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  .flash-front {
+    background: linear-gradient(145deg, var(--card), var(--card-2));
+  }
+  .flash-front .fc-name {
+    font-size: clamp(34px, 10vw, 54px);
+    font-weight: 800;
+    letter-spacing: clamp(2px, 1.2vw, 4px);
+    color: var(--ink);
+    line-height: 1.15;
+    text-align: center;
+    word-break: keep-all;
+  }
+  .flash-front .fc-hint {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--ink-2);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .flash-back {
+    transform: rotateY(180deg) translate3d(0,0,0);
+    -webkit-transform: rotateY(180deg) translate3d(0,0,0);
+    background: linear-gradient(145deg, var(--primary), var(--primary-d));
+    color: #fff; border-color: transparent;
+  }
+  .flash-back .fc-pinyin {
+    font-size: clamp(17px, 5.2vw, 28px);
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-align: center;
+    line-height: 1.25;
+    max-width: 100%;
+    word-break: break-word;
+  }
+  .flash-back .fc-name-sm {
+    margin-top: 8px;
+    font-size: clamp(22px, 6.5vw, 32px);
+    font-weight: 800;
+    letter-spacing: 3px;
+    line-height: 1.1;
+  }
+  .flash-back .fc-surname {
+    margin-top: 10px;
+    font-size: clamp(12px, 3.8vw, 14px);
+    opacity: 0.94;
+    background: rgba(255,255,255,0.18);
+    padding: 4px 12px;
+    border-radius: 999px;
+    letter-spacing: 0.5px;
+  }
+
+  .flash-nav { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 14px; }
+  .flash-nav .btn { min-height: 42px; padding: 8px 16px; font-size: 14px; touch-action: manipulation; }
+  .flash-progress { font-size: 15px; font-weight: 700; color: var(--ink-2); min-width: 68px; text-align: center; }
+  .flash-star { text-align: center; margin-top: 8px; font-size: 13px; color: var(--good); font-weight: 700; min-height: 20px; }
+
+  /* ---- 模式二：姓氏分组 ---- */
+  .surname-group { margin-bottom: 20px; }
+  .surname-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 16px; font-weight: 800; margin: 0 0 10px;
+  }
+  .surname-badge {
+    display: inline-grid; place-items: center;
+    min-width: 38px; height: 38px; padding: 0 8px;
+    border-radius: 12px; font-size: 20px; font-weight: 800;
+    color: #fff; background: linear-gradient(135deg, var(--primary), var(--primary-d));
+    cursor: pointer; user-select: none; transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    touch-action: manipulation;
+  }
+  .surname-badge:active { transform: scale(0.92); }
+  .surname-py { font-size: 14px; color: var(--ink); font-weight: 700; }
+  .surname-count { font-size: 12.5px; color: var(--ink-2); font-weight: 700; }
+  .surname-tip { font-size: 11.5px; color: var(--ink-2); opacity: 0.8; font-weight: normal; margin-left: 2px; }
+
+  .name-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  @media (max-width: 640px) {
+    .name-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+  }
+  .name-chip {
+    background: var(--card); border: 1.5px solid var(--line);
+    border-radius: 14px; padding: 10px 8px; text-align: center;
+    cursor: pointer; transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    touch-action: manipulation;
+    user-select: none;
+  }
+  .name-chip:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.08); border-color: var(--primary); }
+  .name-chip:active { transform: scale(0.96); }
+  .name-chip .nc-name { font-size: clamp(17px, 5vw, 21px); font-weight: 800; letter-spacing: 1.5px; }
+  .name-chip .nc-py { margin-top: 4px; font-size: 11.5px; color: var(--ink-2); letter-spacing: 0.5px; }
+  .name-chip.speaking { border-color: var(--good); background: var(--card-2); transform: scale(1.02); }
+
+  /* ---- 模式三：连连看配对 ---- */
+  .match-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .match-stat { font-size: 13.5px; font-weight: 700; color: var(--ink-2); }
+  .match-stat b { color: var(--good); }
+  .match-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) {
+    .match-cols { gap: 8px; }
+  }
+  .match-col-title { text-align: center; font-size: 13px; font-weight: 700; color: var(--ink-2); margin-bottom: 8px; }
+  .match-list { display: flex; flex-direction: column; gap: 8px; }
+  .match-item {
+    border: 2px solid var(--line); background: var(--card);
+    border-radius: 13px; padding: 10px 6px; text-align: center;
+    min-height: 48px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-weight: 800; transition: all 0.15s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+    touch-action: manipulation;
+    user-select: none;
+    box-sizing: border-box;
+  }
+  .match-item.name-side { font-size: clamp(16px, 4.8vw, 19px); letter-spacing: 1.5px; }
+  .match-item.py-side { font-size: clamp(12px, 3.6vw, 14.5px); letter-spacing: 0.5px; line-height: 1.25; word-break: break-word; }
+  .match-item:hover { border-color: var(--primary); transform: translateY(-1px); }
+  .match-item:active { transform: scale(0.97); }
+  .match-item.selected { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .match-item.matched {
+    border-color: var(--good); background: var(--good); color: #fff;
+    pointer-events: none; opacity: 0.55;
+  }
+  .match-item.wrong { animation: shake 0.4s; border-color: var(--bad); }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .match-win {
+    text-align: center; padding: 20px; font-size: 18px; font-weight: 800; color: var(--good);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="nc-topbar">
+    <a class="btn ghost small nc-back" href="index.html">← 返回</a>
+    <div class="nc-topbar-actions">
+      <select id="voiceSelect" class="btn small" title="发音模式 / 嗓音选择">
+        <option value="__standard__" selected>🌟 标准播音（推荐）</option>
+      </select>
+      <button class="btn small" id="themeBtn">🎨 主题</button>
+      <button class="btn small" id="soundBtn">🔊 读音</button>
+    </div>
+  </div>
+
+  <div class="nc-hero">
+    <h2>👦👧 我们班的好朋友</h2>
+    <p>一共 <b id="totalCount">37</b> 位小朋友，一起来认名字吧！</p>
+  </div>
+
+  <div class="nc-modes">
+    <button class="btn primary" data-mode="flash">🃏 翻卡认字</button>
+    <button class="btn" data-mode="group">👨‍👩‍👧 按姓分组</button>
+    <button class="btn" data-mode="match">🔗 名字连连看</button>
+  </div>
+
+  <!-- 模式一：闪卡 -->
+  <div class="view" id="view-flash">
+    <div class="card flash-wrap">
+      <div class="flash-card" id="flashCard">
+        <div class="flash-inner">
+          <div class="flash-face flash-front">
+            <div class="fc-name" id="fcName">王</div>
+            <div class="fc-hint">👆 点一下，看拼音 / 听读音 🔊</div>
+          </div>
+          <div class="flash-face flash-back">
+            <div class="fc-pinyin" id="fcPinyin">wáng</div>
+            <div class="fc-name-sm" id="fcNameSm">王</div>
+            <div class="fc-surname" id="fcSurname"></div>
+          </div>
+        </div>
+      </div>
+      <div class="flash-star" id="flashStar"></div>
+      <div class="flash-nav">
+        <button class="btn" id="prevBtn">← 上一个</button>
+        <div class="flash-progress" id="flashProgress">1 / 37</div>
+        <button class="btn primary" id="nextBtn">下一个 →</button>
+      </div>
+      <div class="btn-row center" style="margin-top:12px">
+        <button class="btn small ghost" id="shuffleBtn">🔀 打乱顺序</button>
+        <button class="btn small ghost" id="speakBtn">🔊 读这个名字</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 模式二：姓氏分组 -->
+  <div class="view hidden" id="view-group">
+    <div class="card">
+      <p class="muted small" style="margin-top:0">💡 点击姓氏徽章或名字卡片，都可以听标准读音 🔊。相同姓氏的小朋友排在一起。</p>
+      <div id="groupContainer"></div>
+    </div>
+  </div>
+
+  <!-- 模式三：连连看 -->
+  <div class="view hidden" id="view-match">
+    <div class="card">
+      <div class="match-head">
+        <div class="match-stat">已配对 <b id="matchDone">0</b> / <span id="matchTotal">6</span></div>
+        <button class="btn small primary" id="matchNew">🔄 换一组</button>
+      </div>
+      <div id="matchBody"></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/names-data.js"></script>
+<script src="js/names-audio-data.js"></script>
+<script src="js/name-cards.js"></script>
+</body>
+</html>
