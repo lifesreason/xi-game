@@ -6992,6 +6992,9 @@
       unitKey = unitKey || (S ? S.unit : 'u1');
       mainMode = mainMode || (S ? S.mainMode : 'lesson');
 
+      var lessonTab = (mainMode === 'lesson')
+        ? (subTab || (S && S.lessonTab ? S.lessonTab : 'dialogue'))
+        : ((S && S.lessonTab) || 'dialogue');
       var phonicsTab = (mainMode === 'phonics') ? (subTab || (S && S.phonicsTab ? S.phonicsTab : 'train')) : (S ? S.phonicsTab : 'train');
       var practiceTab = (mainMode === 'practice') ? (subTab || (S && S.practiceTab ? S.practiceTab : 'quiz')) : (S ? S.practiceTab : 'quiz');
 
@@ -7012,6 +7015,7 @@
       S = {
         unit: unitKey,
         mainMode: mainMode,
+        lessonTab: lessonTab,
         phonicsTab: phonicsTab,
         practiceTab: practiceTab,
         words: wordList,
@@ -7063,23 +7067,8 @@
       if (!host || !S) return;
 
       var dueList = getReviewDueWords();
-      var hasDue = dueList.length > 0 && !(S.mainMode === 'practice' && S.practiceTab === 'review');
 
       var html = '<div class="pep-wrap">';
-
-      // 顶部温故唤醒醒目卡（若有隔天待复习或红旗生词）
-      if (hasDue) {
-        html += '<div class="pep-review-banner" id="pepReviewBanner">' +
-          '<div class="prb-left">' +
-            '<span class="prb-icon">🌅</span>' +
-            '<div class="prb-txt">' +
-              '<b>抗遗忘提醒：有 ' + dueList.length + ' 个昨日单词正在变模糊！</b>' +
-              '<span>花 2 分钟闪电唤醒，牢牢锁进长期记忆库 ➔</span>' +
-            '</div>' +
-          '</div>' +
-          '<button type="button" class="btn small primary prb-btn" id="btnStartReview">立即唤醒 ⚡</button>' +
-        '</div>';
-      }
 
       // 🌟 三大系统化核心主导航条 (大卡片式触控，杜绝小按钮拥挤)
       html += '<div class="pep-main-nav">' +
@@ -7114,19 +7103,6 @@
         '</div>';
       }
 
-      // 语速调谐器与单元指示（仅在课本课堂与音素拆读时显示）
-      if (S.mainMode === 'lesson' || (S.mainMode === 'phonics' && S.phonicsTab === 'soundout')) {
-        var curUnit = UNITS[S.unit] || UNITS['u1'];
-        html += '<div class="pep-bar">' +
-          '<div class="pep-bar-unit">' + esc(curUnit.label) + '</div>' +
-          '<div class="pep-rate-wrap">' +
-            '<span class="pep-rate-label">朗读语速：</span>' +
-            '<button type="button" class="pep-rate-btn ' + (speechRate <= 0.8 ? 'active' : '') + '" id="btnRateSlow">0.75x 教学慢速</button>' +
-            '<button type="button" class="pep-rate-btn ' + (speechRate > 0.8 ? 'active' : '') + '" id="btnRateNorm">1.0x 正常速度</button>' +
-          '</div>' +
-        '</div>';
-      }
-
       // 各自模式的主视图渲染
       if (S.mainMode === 'lesson') {
         html += renderLessonView();
@@ -7153,21 +7129,11 @@
     function renderLessonView() {
       var les = LESSON_DATA[S.unit] || LESSON_DATA['u1'];
       var unitWords = S.words || [];
+      var curTab = S.lessonTab || 'dialogue';
 
       var h = '<div class="pep-lesson-wrap">';
 
-      // 顶部人教版教材单元信息看板
-      h += '<div class="pep-lesson-header">' +
-        '<div class="plh-badge">' + esc(les.book) + '</div>' +
-        '<div class="plh-title-row">' +
-          '<h2 class="plh-title">' + esc(les.title) + '</h2>' +
-          '<button type="button" class="btn small primary" id="btnPlayAllLesson">🎧 连续朗读本课</button>' +
-        '</div>' +
-        '<p class="plh-sub">' + esc(les.sub) + '</p>' +
-        '<div class="plh-target">🎯 <b>课标教学目标：</b>' + esc(les.target) + '</div>' +
-      '</div>';
-
-      // 快捷单元切换药丸条 (17大单元一键直达)
+      // 1. 快捷单元切换药丸滑轨 (支持移动端平滑横向拖拽)
       h += '<div class="pep-lesson-units-bar">';
       var allUnitKeys = ['u1','u2','u3','u4','u5','u6','sa','se','si','so','su'];
       allUnitKeys.forEach(function (uk) {
@@ -7178,97 +7144,154 @@
       });
       h += '</div>';
 
-      // 板块 1: 💬 Let\'s talk · 课文情景对话领读
-      h += '<div class="pep-section-card">' +
-        '<div class="psc-head">' +
-          '<div class="psc-title">💬 <b>Let\'s talk · 课文情景对话领读</b> <span class="badge">情景模拟</span></div>' +
-          '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
-            '<button type="button" class="btn small ghost" id="btnToggleDialogCn">👁️ 隐藏中文</button>' +
-            '<button type="button" class="btn small ghost" id="btnPlayDialogues">▶️ 连续对话跟读</button>' +
+      // 2. 单元主题与目标信息看板 (整合朗读语速切换，节省纵向空间)
+      h += '<div class="pep-lesson-header">' +
+        '<div class="plh-top-row">' +
+          '<span class="plh-badge">' + esc(les.book) + '</span>' +
+          '<div class="pep-rate-wrap">' +
+            '<span class="pep-rate-label">朗读语速：</span>' +
+            '<button type="button" class="pep-rate-btn ' + (speechRate <= 0.8 ? 'active' : '') + '" id="btnRateSlow">0.75x 教学慢速</button>' +
+            '<button type="button" class="pep-rate-btn ' + (speechRate > 0.8 ? 'active' : '') + '" id="btnRateNorm">1.0x 标准速度</button>' +
           '</div>' +
         '</div>' +
-        '<div class="pep-dialogue-list" id="pepDialogueList">';
-      les.dialogues.forEach(function (d, dIdx) {
-        h += '<div class="pep-dialogue-item" data-didx="' + dIdx + '" data-en="' + esc(d.en) + '">' +
-          '<div class="pdi-avatar" title="' + esc(d.role) + '">' + d.avatar + '</div>' +
-          '<div class="pdi-body">' +
-            '<div class="pdi-speaker">' + esc(d.role) + ' (' + esc(d.speaker) + '):</div>' +
-            '<div class="pdi-en">' + esc(d.en) + '</div>' +
-            '<div class="pdi-cn">' + esc(d.cn) + '</div>' +
-          '</div>' +
-          '<button type="button" class="pdi-speak-btn" data-en="' + esc(d.en) + '" title="点我朗读此句">🔊</button>' +
-        '</div>';
-      });
-      h += '</div></div>';
+        '<h2 class="plh-title">' + esc(les.title) + '</h2>' +
+        '<p class="plh-sub">' + esc(les.sub) + '</p>' +
+        '<div class="plh-target">🎯 <b>课标核心教学目标：</b>' + esc(les.target) + '</div>' +
+      '</div>';
 
-      // 板块 2: 🔤 Let\'s learn · 本单元核心词汇表
-      h += '<div class="pep-section-card">' +
-        '<div class="psc-head">' +
-          '<div class="psc-title">🔤 <b>Let\'s learn · 单元核心词汇表 (' + unitWords.length + ' 词)</b> <span class="badge">课标必考</span></div>' +
-          '<button type="button" class="btn small ghost" id="btnGoSoundout">🧩 开启音素拆读</button>' +
-        '</div>' +
-        '<div class="pep-vocab-grid">';
-      unitWords.forEach(function (w, wIdx) {
-        h += '<div class="pep-vocab-card" data-word="' + esc(w.word) + '" data-widx="' + wIdx + '">' +
-          '<div class="pvc-top">' +
-            '<span class="pvc-emoji">' + (w.emoji || '📖') + '</span>' +
-            '<div class="pvc-word-info">' +
-              '<span class="pvc-en">' + esc(w.word) + '</span>' +
-              '<span class="pvc-ipa">' + esc(w.ipa || '') + '</span>' +
+      // 3. 🌟 课本同步三大子模块选项卡 (分段控制器，解耦长页面平铺)
+      h += '<div class="pep-lesson-subnav">' +
+        '<button type="button" class="pep-lsub-btn ' + (curTab === 'dialogue' ? 'active' : '') + '" data-lsub="dialogue">' +
+          '<span class="plsb-icon">💬</span>' +
+          '<span class="plsb-txt">课文情景对话</span>' +
+          '<span class="plsb-sub">Let\'s talk (' + les.dialogues.length + '轮)</span>' +
+        '</button>' +
+        '<button type="button" class="pep-lsub-btn ' + (curTab === 'vocab' ? 'active' : '') + '" data-lsub="vocab">' +
+          '<span class="plsb-icon">🔤</span>' +
+          '<span class="plsb-txt">单元核心生词</span>' +
+          '<span class="plsb-sub">Let\'s learn (' + unitWords.length + '词)</span>' +
+        '</button>' +
+        '<button type="button" class="pep-lsub-btn ' + (curTab === 'chant' ? 'active' : '') + '" data-lsub="chant">' +
+          '<span class="plsb-icon">🎵</span>' +
+          '<span class="plsb-txt">趣味歌谣金句</span>' +
+          '<span class="plsb-sub">Chant & Grammar</span>' +
+        '</button>' +
+      '</div>';
+
+      // 4. 按选中的子模块精准独立渲染
+      if (curTab === 'dialogue') {
+        // 子模块 1: 💬 Let's talk · 课文情景对话领读
+        h += '<div class="pep-section-card">' +
+          '<div class="psc-head">' +
+            '<div class="psc-title">💬 <b>Let\'s talk · 课文情景对话领读</b> <span class="badge">情景模拟 · ' + les.dialogues.length + '轮互动</span></div>' +
+            '<div class="psc-actions">' +
+              '<button type="button" class="btn small ghost" id="btnToggleDialogCn">👁️ 隐藏中文</button>' +
+              '<button type="button" class="btn small ghost" id="btnPlayDialogues">▶️ 连续角色跟读</button>' +
             '</div>' +
-            '<button type="button" class="pvc-speaker" data-word="' + esc(w.word) + '" title="听单词发音">🔊</button>' +
           '</div>' +
-          '<div class="pvc-cn">' + esc(w.cn) + '</div>' +
-          (w.magicTip ? '<div class="pvc-magic">💡 <b>1秒巧记：</b>' + esc(w.magicTip) + '</div>' : (w.tip ? '<div class="pvc-tip">💡 ' + esc(w.tip) + '</div>' : '')) +
-          (w.tpr ? '<div class="pvc-tpr">🏃 <b>动一动：</b>' + esc(w.tpr) + '</div>' : '') +
-          '<div class="pvc-actions">' +
-            '<button type="button" class="btn small ghost pvc-soundout-btn" data-widx="' + wIdx + '">🧩 音素拆读</button>' +
-            (w.pair ? '<span class="pvc-pair-badge">⚡ 反义: ' + esc(w.pair) + '</span>' : '') +
-          '</div>' +
-        '</div>';
-      });
-      h += '</div></div>';
-
-      // 板块 3: 🎵 Let\'s chant · 课本趣味韵律歌谣
-      h += '<div class="pep-section-card">' +
-        '<div class="psc-head">' +
-          '<div class="psc-title">🎵 <b>Let\'s chant · 课本趣味歌谣伴读</b> <span class="badge">语感律动</span></div>' +
-          '<button type="button" class="btn small ghost" id="btnPlayChant">▶️ 完整歌谣朗读</button>' +
-        '</div>' +
-        '<div class="pep-chant-list" id="pepChantList">';
-      les.chant.forEach(function (c, cIdx) {
-        h += '<div class="pep-chant-item" data-cidx="' + cIdx + '" data-en="' + esc(c.en) + '">' +
-          '<span class="pci-icon">🎶</span>' +
-          '<div class="pci-body">' +
-            '<div class="pci-en">' + esc(c.en) + '</div>' +
-            '<div class="pci-cn">' + esc(c.cn) + '</div>' +
-          '</div>' +
-          '<button type="button" class="pdi-speak-btn" data-en="' + esc(c.en) + '">🔊</button>' +
-        '</div>';
-      });
-      h += '</div></div>';
-
-      // 板块 4: ⭐ 单元课标金句秘籍
-      h += '<div class="pep-section-card">' +
-        '<div class="psc-head">' +
-          '<div class="psc-title">⭐ <b>单元课标金句秘籍</b> <span class="badge">背诵 & 考试提分</span></div>' +
-        '</div>' +
-        '<div class="pep-pattern-list">';
-      les.keyPatterns.forEach(function (kp) {
-        h += '<div class="pep-pattern-card">' +
-          '<div class="ppc-badge">必背句型</div>' +
-          '<div class="ppc-content">' +
-            '<div class="ppc-pattern"><b>公式：</b>' + esc(kp.pattern) + '</div>' +
-            '<div class="ppc-example-row">' +
-              '<span class="ppc-example"><b>例句：</b>' + esc(kp.example) + '</span>' +
-              '<button type="button" class="ppc-speaker" data-en="' + esc(kp.example) + '">🔊</button>' +
+          '<div class="pep-dialogue-list" id="pepDialogueList">';
+        les.dialogues.forEach(function (d, dIdx) {
+          h += '<div class="pep-dialogue-item" data-didx="' + dIdx + '" data-en="' + esc(d.en) + '">' +
+            '<div class="pdi-avatar" title="' + esc(d.role) + '">' + d.avatar + '</div>' +
+            '<div class="pdi-body">' +
+              '<div class="pdi-speaker">' + esc(d.role) + ' (' + esc(d.speaker) + '):</div>' +
+              '<div class="pdi-en">' + esc(d.en) + '</div>' +
+              '<div class="pdi-cn">' + esc(d.cn) + '</div>' +
             '</div>' +
-            '<div class="ppc-cn"><b>释义：</b>' + esc(kp.cn) + '</div>' +
-            '<div class="ppc-tip">💡 <b>秘籍：</b>' + esc(kp.tip) + '</div>' +
+            '<button type="button" class="pdi-speak-btn" data-en="' + esc(d.en) + '" title="点我朗读此句">🔊</button>' +
+          '</div>';
+        });
+        h += '</div>' +
+          '<div class="pep-tab-footer-guide">' +
+            '<span class="ptfg-tip">💡 课文对话读熟练了吗？点击下一步前往生词记忆：</span>' +
+            '<button type="button" class="btn primary small" id="btnGoVocabFromDlg">👉 前往学习本单元 ' + unitWords.length + ' 个核心生词 (Let\'s learn) ➔</button>' +
           '</div>' +
         '</div>';
-      });
-      h += '</div></div>';
+
+      } else if (curTab === 'vocab') {
+        // 子模块 2: 🔤 Let's learn · 单元核心生词库 (100% 巧记与TPR)
+        h += '<div class="pep-section-card">' +
+          '<div class="psc-head">' +
+            '<div class="psc-title">🔤 <b>Let\'s learn · 单元核心生词库 (' + unitWords.length + ' 词)</b> <span class="badge">100% 巧记+动作</span></div>' +
+            '<div class="psc-actions">' +
+              '<button type="button" class="btn small ghost" id="btnPlayAllVocab">🎧 连播全部单词</button>' +
+              '<button type="button" class="btn small ghost" id="btnGoSoundout">🧩 开启音素拆读</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="pep-vocab-grid">';
+        unitWords.forEach(function (w, wIdx) {
+          h += '<div class="pep-vocab-card" data-word="' + esc(w.word) + '" data-widx="' + wIdx + '">' +
+            '<div class="pvc-top">' +
+              '<span class="pvc-emoji">' + (w.emoji || '📖') + '</span>' +
+              '<div class="pvc-word-info">' +
+                '<span class="pvc-en">' + esc(w.word) + '</span>' +
+                '<span class="pvc-ipa">' + esc(w.ipa || '') + '</span>' +
+              '</div>' +
+              '<button type="button" class="pvc-speaker" data-word="' + esc(w.word) + '" title="听单词发音">🔊</button>' +
+            '</div>' +
+            '<div class="pvc-cn">' + esc(w.cn) + '</div>' +
+            (w.magicTip ? '<div class="pvc-magic">💡 <b>1秒巧记：</b>' + esc(w.magicTip) + '</div>' : (w.tip ? '<div class="pvc-tip">💡 ' + esc(w.tip) + '</div>' : '')) +
+            (w.tpr ? '<div class="pvc-tpr">🏃 <b>动一动：</b>' + esc(w.tpr) + '</div>' : '') +
+            '<div class="pvc-actions">' +
+              '<button type="button" class="btn small ghost pvc-soundout-btn" data-widx="' + wIdx + '">🧩 音素拆读</button>' +
+              (w.pair ? '<span class="pvc-pair-badge">⚡ 反义: ' + esc(w.pair) + '</span>' : '') +
+            '</div>' +
+          '</div>';
+        });
+        h += '</div>' +
+          '<div class="pep-tab-footer-guide split">' +
+            '<button type="button" class="btn ghost small" id="btnBackDlgFromVocab">← 返回课文情景对话</button>' +
+            '<button type="button" class="btn primary small" id="btnGoChantFromVocab">👉 去练趣味歌谣与金句 (Let\'s chant) ➔</button>' +
+          '</div>' +
+        '</div>';
+
+      } else if (curTab === 'chant') {
+        // 子模块 3: 🎵 Let's chant · 课本趣味韵律歌谣 + ⭐ 单元课标金句秘籍
+        h += '<div class="pep-section-card">' +
+          '<div class="psc-head">' +
+            '<div class="psc-title">🎵 <b>Let\'s chant · 课本趣味歌谣伴读</b> <span class="badge">语感律动</span></div>' +
+            '<button type="button" class="btn small ghost" id="btnPlayChant">▶️ 完整歌谣朗读</button>' +
+          '</div>' +
+          '<div class="pep-chant-list" id="pepChantList">';
+        les.chant.forEach(function (c, cIdx) {
+          h += '<div class="pep-chant-item" data-cidx="' + cIdx + '" data-en="' + esc(c.en) + '">' +
+            '<span class="pci-icon">🎶</span>' +
+            '<div class="pci-body">' +
+              '<div class="pci-en">' + esc(c.en) + '</div>' +
+              '<div class="pci-cn">' + esc(c.cn) + '</div>' +
+            '</div>' +
+            '<button type="button" class="pdi-speak-btn" data-en="' + esc(c.en) + '">🔊</button>' +
+          '</div>';
+        });
+        h += '</div></div>';
+
+        // 单元课标考点金句秘籍
+        h += '<div class="pep-section-card" style="margin-top:12px;">' +
+          '<div class="psc-head">' +
+            '<div class="psc-title">⭐ <b>单元课标金句秘籍</b> <span class="badge">必背 & 考试提分</span></div>' +
+          '</div>' +
+          '<div class="pep-pattern-list">';
+        les.keyPatterns.forEach(function (kp) {
+          h += '<div class="pep-pattern-card">' +
+            '<div class="ppc-badge">必背句型</div>' +
+            '<div class="ppc-content">' +
+              '<div class="ppc-pattern"><b>公式：</b>' + esc(kp.pattern) + '</div>' +
+              '<div class="ppc-example-row">' +
+                '<span class="ppc-example"><b>例句：</b>' + esc(kp.example) + '</span>' +
+                '<button type="button" class="ppc-speaker" data-en="' + esc(kp.example) + '">🔊</button>' +
+              '</div>' +
+              '<div class="ppc-cn"><b>释义：</b>' + esc(kp.cn) + '</div>' +
+              '<div class="ppc-tip">💡 <b>秘籍：</b>' + esc(kp.tip) + '</div>' +
+            '</div>' +
+          '</div>';
+        });
+        h += '</div>' +
+          '<div class="pep-tab-footer-guide split" style="margin-top:14px;">' +
+            '<button type="button" class="btn ghost small" id="btnBackVocabFromChant">← 返回单元词汇</button>' +
+            '<button type="button" class="btn good small" id="btnGoQuizFromChant">🎮 听音辨音大闯关 (测一测) ➔</button>' +
+          '</div>' +
+        '</div>';
+      }
 
       h += '</div>';
       return h;
@@ -7276,6 +7299,7 @@
 
     function bindLessonEvents() {
       var les = LESSON_DATA[S.unit] || LESSON_DATA['u1'];
+      var curTab = S.lessonTab || 'dialogue';
 
       // 切换单元药丸
       host.querySelectorAll('.pep-unit-pill-btn').forEach(function (btn) {
@@ -7284,183 +7308,301 @@
           startSequence();
           var u = btn.getAttribute('data-unit');
           Sfx.click();
-          newGame(u, 'lesson');
+          newGame(u, 'lesson', S.lessonTab || 'dialogue');
         });
       });
 
-      // 单句点读 (Let's talk 对话卡片与喇叭)
-      host.querySelectorAll('.pep-dialogue-item').forEach(function (item) {
-        item.addEventListener('click', function (e) {
-          if (isDebounced(250)) return;
+      // 切换子模式 (Segmented Switcher)
+      host.querySelectorAll('.pep-lsub-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (isDebounced(200)) return;
+          var tab = btn.getAttribute('data-lsub');
+          if (tab === S.lessonTab) return;
           startSequence();
-          var en = item.getAttribute('data-en');
-          item.classList.add('speaking');
-          setTimeout(function () { item.classList.remove('speaking'); }, 1200);
-          speakWord(en, 0.9);
+          Sfx.click();
+          S.lessonTab = tab;
+          render();
         });
       });
 
-      // 连续角色对话跟读
-      var playDlgBtn = $('btnPlayDialogues');
-      if (playDlgBtn) {
-        playDlgBtn.addEventListener('click', function () {
-          if (isDebounced(350)) return;
-          var items = host.querySelectorAll('.pep-dialogue-item');
-          if (!items.length) return;
-          playDlgBtn.disabled = true;
-          var origTxt = playDlgBtn.innerHTML;
-          playDlgBtn.innerHTML = '🔊 对话朗读中...';
+      // 语速切换
+      var btnSlow = $('btnRateSlow');
+      var btnNorm = $('btnRateNorm');
+      if (btnSlow && btnNorm) {
+        btnSlow.addEventListener('click', function () {
+          speechRate = 0.75;
+          Sfx.click();
+          render();
+        });
+        btnNorm.addEventListener('click', function () {
+          speechRate = 1.0;
+          Sfx.click();
+          render();
+        });
+      }
 
-          var seqId = startSequence();
-          var idx = 0;
-          function stepDlg() {
-            if (seqId !== sequenceToken) {
-              playDlgBtn.disabled = false;
-              playDlgBtn.innerHTML = origTxt;
-              return;
-            }
-            items.forEach(function (it) { it.classList.remove('speaking'); });
+      if (curTab === 'dialogue') {
+        // 单句点读
+        host.querySelectorAll('.pep-dialogue-item').forEach(function (item) {
+          item.addEventListener('click', function () {
+            if (isDebounced(250)) return;
+            startSequence();
+            var en = item.getAttribute('data-en');
+            item.classList.add('speaking');
+            setTimeout(function () { item.classList.remove('speaking'); }, 1200);
+            speakWord(en, speechRate);
+          });
+        });
 
-            if (idx < items.length) {
-              var curItem = items[idx];
-              curItem.classList.add('speaking');
-              var en = curItem.getAttribute('data-en');
-              idx++;
-              speakWord(en, 0.9, function () {
-                setTimeout(stepDlg, 400);
-              });
-            } else {
-              setTimeout(function () {
-                if (seqId !== sequenceToken) return;
-                items.forEach(function (it) { it.classList.remove('speaking'); });
+        // 连续角色对话跟读
+        var playDlgBtn = $('btnPlayDialogues');
+        if (playDlgBtn) {
+          playDlgBtn.addEventListener('click', function () {
+            if (isDebounced(350)) return;
+            var items = host.querySelectorAll('.pep-dialogue-item');
+            if (!items.length) return;
+            playDlgBtn.disabled = true;
+            var origTxt = playDlgBtn.innerHTML;
+            playDlgBtn.innerHTML = '🔊 对话朗读中...';
+
+            var seqId = startSequence();
+            var idx = 0;
+            function stepDlg() {
+              if (seqId !== sequenceToken) {
                 playDlgBtn.disabled = false;
                 playDlgBtn.innerHTML = origTxt;
-              }, 400);
+                return;
+              }
+              items.forEach(function (it) { it.classList.remove('speaking'); });
+
+              if (idx < items.length) {
+                var curItem = items[idx];
+                curItem.classList.add('speaking');
+                curItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                var en = curItem.getAttribute('data-en');
+                idx++;
+                speakWord(en, speechRate, function () {
+                  setTimeout(stepDlg, 400);
+                });
+              } else {
+                setTimeout(function () {
+                  if (seqId !== sequenceToken) return;
+                  items.forEach(function (it) { it.classList.remove('speaking'); });
+                  playDlgBtn.disabled = false;
+                  playDlgBtn.innerHTML = origTxt;
+                }, 400);
+              }
             }
-          }
-          stepDlg();
+            stepDlg();
+          });
+        }
+
+        // 隐藏/显示中文切换
+        var toggleCnBtn = $('btnToggleDialogCn');
+        if (toggleCnBtn) {
+          toggleCnBtn.addEventListener('click', function () {
+            var dlgList = $('pepDialogueList');
+            if (!dlgList) return;
+            var isHidden = dlgList.classList.toggle('hide-dialogue-cn');
+            toggleCnBtn.innerHTML = isHidden ? '👁️ 显示中文' : '👁️ 隐藏中文';
+            Sfx.click();
+          });
+        }
+
+        // 引导去词汇
+        var goVocabBtn = $('btnGoVocabFromDlg');
+        if (goVocabBtn) {
+          goVocabBtn.addEventListener('click', function () {
+            startSequence();
+            Sfx.click();
+            S.lessonTab = 'vocab';
+            render();
+          });
+        }
+
+      } else if (curTab === 'vocab') {
+        // 单词卡片点击发音
+        host.querySelectorAll('.pep-vocab-card').forEach(function (card) {
+          card.addEventListener('click', function () {
+            if (isDebounced(250)) return;
+            startSequence();
+            var word = card.getAttribute('data-word');
+            card.classList.add('speaking');
+            setTimeout(function () { card.classList.remove('speaking'); }, 600);
+            speakWord(word, speechRate);
+          });
         });
-      }
 
-      // 单词卡片点击发音
-      host.querySelectorAll('.pep-vocab-card').forEach(function (card) {
-        card.addEventListener('click', function () {
-          if (isDebounced(250)) return;
-          startSequence();
-          var word = card.getAttribute('data-word');
-          card.classList.add('speaking');
-          setTimeout(function () { card.classList.remove('speaking'); }, 500);
-          speakWord(word, 0.9);
-        });
-      });
+        // 连播全部单词
+        var playAllVocabBtn = $('btnPlayAllVocab');
+        if (playAllVocabBtn) {
+          playAllVocabBtn.addEventListener('click', function () {
+            if (isDebounced(350)) return;
+            var cards = host.querySelectorAll('.pep-vocab-card');
+            if (!cards.length) return;
+            playAllVocabBtn.disabled = true;
+            var origTxt = playAllVocabBtn.innerHTML;
+            playAllVocabBtn.innerHTML = '🔊 正在连播...';
 
-      // 隐藏/显示中文切换
-      var toggleCnBtn = $('btnToggleDialogCn');
-      if (toggleCnBtn) {
-        toggleCnBtn.addEventListener('click', function () {
-          var dlgList = $('pepDialogueList');
-          if (!dlgList) return;
-          var isHidden = dlgList.classList.toggle('hide-dialogue-cn');
-          toggleCnBtn.innerHTML = isHidden ? '👁️ 显示中文' : '👁️ 隐藏中文';
-          Sfx.click();
-        });
-      }
+            var seqId = startSequence();
+            var idx = 0;
+            function stepVocab() {
+              if (seqId !== sequenceToken) {
+                playAllVocabBtn.disabled = false;
+                playAllVocabBtn.innerHTML = origTxt;
+                return;
+              }
+              cards.forEach(function (c) { c.classList.remove('speaking'); });
 
-      // 卡片直达音素拆读机
-      host.querySelectorAll('.pvc-soundout-btn').forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-          e.stopPropagation();
-          var wIdx = parseInt(btn.getAttribute('data-widx'), 10) || 0;
-          startSequence();
-          Sfx.click();
-          newGame(S.unit, 'phonics', 'soundout', wIdx);
-        });
-      });
-
-      // 跳转音素拆读机
-      var goSoundBtn = $('btnGoSoundout');
-      if (goSoundBtn) {
-        goSoundBtn.addEventListener('click', function () {
-          if (isDebounced(250)) return;
-          startSequence();
-          Sfx.click();
-          newGame(S.unit, 'phonics', 'soundout', 0);
-        });
-      }
-
-      // 歌谣单句点读
-      host.querySelectorAll('.pep-chant-item').forEach(function (cItem) {
-        cItem.addEventListener('click', function () {
-          if (isDebounced(250)) return;
-          startSequence();
-          var en = cItem.getAttribute('data-en');
-          cItem.classList.add('speaking');
-          setTimeout(function () { cItem.classList.remove('speaking'); }, 1200);
-          speakWord(en, 0.9);
-        });
-      });
-
-      // 连续歌谣跟读
-      var playChantBtn = $('btnPlayChant');
-      if (playChantBtn) {
-        playChantBtn.addEventListener('click', function () {
-          if (isDebounced(350)) return;
-          var items = host.querySelectorAll('.pep-chant-item');
-          if (!items.length) return;
-          playChantBtn.disabled = true;
-          var origTxt = playChantBtn.innerHTML;
-          playChantBtn.innerHTML = '🎶 歌谣伴读中...';
-
-          var seqId = startSequence();
-          var idx = 0;
-          function stepChant() {
-            if (seqId !== sequenceToken) {
-              playChantBtn.disabled = false;
-              playChantBtn.innerHTML = origTxt;
-              return;
+              if (idx < cards.length) {
+                var curCard = cards[idx];
+                curCard.classList.add('speaking');
+                curCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                var word = curCard.getAttribute('data-word');
+                idx++;
+                speakWord(word, speechRate, function () {
+                  setTimeout(stepVocab, 500);
+                });
+              } else {
+                setTimeout(function () {
+                  if (seqId !== sequenceToken) return;
+                  cards.forEach(function (c) { c.classList.remove('speaking'); });
+                  playAllVocabBtn.disabled = false;
+                  playAllVocabBtn.innerHTML = origTxt;
+                }, 400);
+              }
             }
-            items.forEach(function (it) { it.classList.remove('speaking'); });
+            stepVocab();
+          });
+        }
 
-            if (idx < items.length) {
-              var curItem = items[idx];
-              curItem.classList.add('speaking');
-              var en = curItem.getAttribute('data-en');
-              idx++;
-              speakWord(en, 0.92, function () {
-                setTimeout(stepChant, 400);
-              });
-            } else {
-              setTimeout(function () {
-                if (seqId !== sequenceToken) return;
-                items.forEach(function (it) { it.classList.remove('speaking'); });
+        // 卡片直达音素拆读机
+        host.querySelectorAll('.pvc-soundout-btn').forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var wIdx = parseInt(btn.getAttribute('data-widx'), 10) || 0;
+            startSequence();
+            Sfx.click();
+            newGame(S.unit, 'phonics', 'soundout', wIdx);
+          });
+        });
+
+        // 跳转音素拆读机
+        var goSoundBtn = $('btnGoSoundout');
+        if (goSoundBtn) {
+          goSoundBtn.addEventListener('click', function () {
+            if (isDebounced(250)) return;
+            startSequence();
+            Sfx.click();
+            newGame(S.unit, 'phonics', 'soundout', 0);
+          });
+        }
+
+        // 底部引导
+        var backDlgBtn = $('btnBackDlgFromVocab');
+        if (backDlgBtn) {
+          backDlgBtn.addEventListener('click', function () {
+            startSequence();
+            Sfx.click();
+            S.lessonTab = 'dialogue';
+            render();
+          });
+        }
+        var goChantBtn = $('btnGoChantFromVocab');
+        if (goChantBtn) {
+          goChantBtn.addEventListener('click', function () {
+            startSequence();
+            Sfx.click();
+            S.lessonTab = 'chant';
+            render();
+          });
+        }
+
+      } else if (curTab === 'chant') {
+        // 歌谣单句点读
+        host.querySelectorAll('.pep-chant-item').forEach(function (cItem) {
+          cItem.addEventListener('click', function () {
+            if (isDebounced(250)) return;
+            startSequence();
+            var en = cItem.getAttribute('data-en');
+            cItem.classList.add('speaking');
+            setTimeout(function () { cItem.classList.remove('speaking'); }, 1200);
+            speakWord(en, speechRate);
+          });
+        });
+
+        // 连续歌谣跟读
+        var playChantBtn = $('btnPlayChant');
+        if (playChantBtn) {
+          playChantBtn.addEventListener('click', function () {
+            if (isDebounced(350)) return;
+            var items = host.querySelectorAll('.pep-chant-item');
+            if (!items.length) return;
+            playChantBtn.disabled = true;
+            var origTxt = playChantBtn.innerHTML;
+            playChantBtn.innerHTML = '🎶 歌谣伴读中...';
+
+            var seqId = startSequence();
+            var idx = 0;
+            function stepChant() {
+              if (seqId !== sequenceToken) {
                 playChantBtn.disabled = false;
                 playChantBtn.innerHTML = origTxt;
-              }, 400);
+                return;
+              }
+              items.forEach(function (it) { it.classList.remove('speaking'); });
+
+              if (idx < items.length) {
+                var curItem = items[idx];
+                curItem.classList.add('speaking');
+                curItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                var en = curItem.getAttribute('data-en');
+                idx++;
+                speakWord(en, speechRate, function () {
+                  setTimeout(stepChant, 400);
+                });
+              } else {
+                setTimeout(function () {
+                  if (seqId !== sequenceToken) return;
+                  items.forEach(function (it) { it.classList.remove('speaking'); });
+                  playChantBtn.disabled = false;
+                  playChantBtn.innerHTML = origTxt;
+                }, 400);
+              }
             }
-          }
-          stepChant();
-        });
-      }
+            stepChant();
+          });
+        }
 
-      // 金句发音
-      host.querySelectorAll('.ppc-speaker').forEach(function (spk) {
-        spk.addEventListener('click', function (e) {
-          e.stopPropagation();
-          if (isDebounced(250)) return;
-          startSequence();
-          var en = spk.getAttribute('data-en');
-          speakWord(en, 0.9);
+        // 金句发音
+        host.querySelectorAll('.ppc-speaker').forEach(function (spk) {
+          spk.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (isDebounced(250)) return;
+            startSequence();
+            var en = spk.getAttribute('data-en');
+            speakWord(en, speechRate);
+          });
         });
-      });
 
-      // 一键连续朗读全课 (标题 + 对话 + 歌谣)
-      var playAllBtn = $('btnPlayAllLesson');
-      if (playAllBtn) {
-        playAllBtn.addEventListener('click', function () {
-          if (isDebounced(350)) return;
-          var playDlg = $('btnPlayDialogues');
-          if (playDlg) playDlg.click();
-        });
+        // 底部引导
+        var backVocabBtn = $('btnBackVocabFromChant');
+        if (backVocabBtn) {
+          backVocabBtn.addEventListener('click', function () {
+            startSequence();
+            Sfx.click();
+            S.lessonTab = 'vocab';
+            render();
+          });
+        }
+        var goQuizBtn = $('btnGoQuizFromChant');
+        if (goQuizBtn) {
+          goQuizBtn.addEventListener('click', function () {
+            startSequence();
+            Sfx.click();
+            newGame(S.unit, 'practice', 'quiz');
+          });
+        }
       }
     }
 
@@ -7564,22 +7706,25 @@
       WORD_FAMILIES.forEach(function (wf) { totalTrainWords += wf.onsets.length; });
 
       var h = '<div class="pep-train-wrap">';
-      h += '<div class="pep-train-intro">' +
-        '<h3>🚂 拼读公式小火车 · 碰头拼读 (' + WORD_FAMILIES.length + ' 大核心词族 · ' + totalTrainWords + ' 组碰撞单词)</h3>' +
-        '<p class="muted">人教版核心拼读法则：首辅音碰上词尾公式，自己推导一整串新单词！</p>' +
+      h += '<div class="pep-train-header">' +
+        '<div class="pth-left">' +
+          '<h3 class="pth-title">🚂 拼读公式小火车 · 碰头拼读</h3>' +
+          '<span class="pth-sub">核心法则：首辅音碰上词尾，推导一整串新单词！</span>' +
+        '</div>' +
+        '<span class="pth-badge">' + WORD_FAMILIES.length + ' 核心词族 · ' + totalTrainWords + ' 词</span>' +
       '</div>';
 
-      // 短元音分类筛选药丸栏
+      // 短元音分类筛选药丸栏 (全部 / a / e / i / o / u)
       h += '<div class="pep-vowel-filter-row">' +
-        '<button type="button" class="pep-vowel-filter-btn ' + (curVowel === 'all' ? 'active' : '') + '" data-vowel="all">全部词族 (25)</button>' +
-        '<button type="button" class="pep-vowel-filter-btn ' + (curVowel === 'a' ? 'active' : '') + '" data-vowel="a">🌱 a 族群 (5)</button>' +
-        '<button type="button" class="pep-vowel-filter-btn ' + (curVowel === 'e' ? 'active' : '') + '" data-vowel="e">🌿 e 族群 (5)</button>' +
-        '<button type="button" class="pep-vowel-filter-btn ' + (curVowel === 'i' ? 'active' : '') + '" data-vowel="i">🌾 i 族群 (5)</button>' +
-        '<button type="button" class="pep-vowel-filter-btn ' + (curVowel === 'o' ? 'active' : '') + '" data-vowel="o">🍁 o 族群 (5)</button>' +
-        '<button type="button" class="pep-vowel-filter-btn ' + (curVowel === 'u' ? 'active' : '') + '" data-vowel="u">🌻 u 族群 (5)</button>' +
+        '<button type="button" class="pep-vowel-filter-btn ' + (curVowel === 'all' ? 'active' : '') + '" data-vowel="all">全部 (25)</button>' +
+        '<button type="button" class="pep-vowel-filter-btn ' + (curVowel === 'a' ? 'active' : '') + '" data-vowel="a">🌱 a (5)</button>' +
+        '<button type="button" class="pep-vowel-filter-btn ' + (curVowel === 'e' ? 'active' : '') + '" data-vowel="e">🌿 e (5)</button>' +
+        '<button type="button" class="pep-vowel-filter-btn ' + (curVowel === 'i' ? 'active' : '') + '" data-vowel="i">🌾 i (5)</button>' +
+        '<button type="button" class="pep-vowel-filter-btn ' + (curVowel === 'o' ? 'active' : '') + '" data-vowel="o">🍁 o (5)</button>' +
+        '<button type="button" class="pep-vowel-filter-btn ' + (curVowel === 'u' ? 'active' : '') + '" data-vowel="u">🌻 u (5)</button>' +
       '</div>';
 
-      // 词族选择标签（根据元音筛选）
+      // 词族选择标签（根据元音筛选，横向滑动轨）
       h += '<div class="pep-family-tabs">';
       WORD_FAMILIES.forEach(function (f, i) {
         if (curVowel !== 'all' && f.vowel !== curVowel) return;
@@ -8374,7 +8519,8 @@
       restore: function (d) {
         try {
           if (!d || d.kind !== 'english') return false;
-          newGame(d.unit || 'u1', d.mainMode || 'lesson', d.phonicsTab || d.practiceTab, d.idx || 0);
+          var subTab = (d.mainMode === 'lesson') ? (d.lessonTab || 'dialogue') : (d.phonicsTab || d.practiceTab);
+          newGame(d.unit || 'u1', d.mainMode || 'lesson', subTab, d.idx || 0);
           return true;
         } catch (e) {
           return false;
@@ -8383,8 +8529,9 @@
       serialize: function () {
         if (!S) return null;
         return {
-          v: 2, kind: 'english',
+          v: 3, kind: 'english',
           unit: S.unit, mainMode: S.mainMode,
+          lessonTab: S.lessonTab || 'dialogue',
           phonicsTab: S.phonicsTab, practiceTab: S.practiceTab,
           idx: S.idx, subMode: S.subMode,
           trainVowel: S.trainVowel || "all",

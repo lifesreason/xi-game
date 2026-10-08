@@ -55,6 +55,9 @@
     if (name === 'records') renderRecords();
     /* 离开游戏视图时恢复独立工作台样式 */
     if (name !== 'play') {
+      document.body.classList.remove('standalone-active');
+      var appEl = document.querySelector('.app');
+      if (appEl) appEl.classList.remove('standalone-active');
       var viewPlayEl = $('view-play');
       if (viewPlayEl) viewPlayEl.classList.remove('standalone-mode');
       var playBodyEl = document.querySelector('.play-body');
@@ -242,6 +245,9 @@
 
     /* 独立沉浸式模块（如人教版英语）：彻底隐藏对弈操作（悔棋/认输/重开/提示/对局设置），全屏满幅 */
     var isStandalone = !!(g && g.standalone);
+    document.body.classList.toggle('standalone-active', isStandalone);
+    var appEl = document.querySelector('.app');
+    if (appEl) appEl.classList.toggle('standalone-active', isStandalone);
     var viewPlayEl = $('view-play');
     if (viewPlayEl) viewPlayEl.classList.toggle('standalone-mode', isStandalone);
     var playBodyEl = document.querySelector('.play-body');
