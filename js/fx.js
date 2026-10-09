@@ -146,6 +146,31 @@
     setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 1200);
   }
 
+  /* ---------- 星星喷泉 ---------- */
+  /* 注意：下面导出表里有 starFountain，这里必须保留同名函数定义。
+     一旦漏掉，global.Fx = {...} 会抛 ReferenceError，整个 Fx 模块全部失效
+     （彩带 / 涟漪 / 横幅 / 震动 / 连击浮字 一起没），且只在控制台报一行错。 */
+  function starFountain(x, y, count) {
+    if (reduce) return;
+    count = count || 12;
+    var emojis = ['⭐', '✨', '🌟', '💫', '🎉'];
+    for (var i = 0; i < count; i++) {
+      (function (i) {
+        var s = document.createElement('span');
+        s.className = 'fx-emoji';
+        s.textContent = emojis[(Math.random() * emojis.length) | 0];
+        s.style.left = (x || (global.innerWidth / 2)) + 'px';
+        s.style.top = (y || (global.innerHeight / 2)) + 'px';
+        s.style.fontSize = (22 + Math.random() * 16) + 'px';
+        s.style.setProperty('--dx', (-90 + Math.random() * 180) + 'px');
+        s.style.setProperty('--rot', (-60 + Math.random() * 120) + 'deg');
+        s.style.animationDelay = (i * 35) + 'ms';
+        document.body.appendChild(s);
+        setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 1300 + i * 35);
+      })(i);
+    }
+  }
+
   /* ---------- 连击浮字系统 (Combo Floater) ---------- */
   function combo(count, x, y) {
     if (reduce || count < 2) return;
