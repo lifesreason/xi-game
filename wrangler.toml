@@ -5,3 +5,14 @@ compatibility_date = "2024-09-23"
 # 静态资源目录配置 (Workers Static Assets)
 # 当在 Cloudflare Workers 控制台直接连接 Git 仓库或使用 wrangler deploy 时生效
 assets = { directory = "." }
+
+# ------------------------------------------------------------
+# Worker Previews（预览环境）配置
+# 新版 Workers Builds 在预览分支上默认执行 `npx wrangler preview`，
+# 该命令要求配置文件中必须存在 previews 块 —— 块本身可以为空。
+# 若预览环境需要独立的变量/资源（例如测试用 KV / R2 / D1），
+# 在 [previews] 下添加 previews.vars、previews.r2_buckets 等子键。
+# 注意：assets、compatibility_date、compatibility_flags 必须保留在顶层，
+# 不要写进 previews 块里。
+# ------------------------------------------------------------
+[previews]
