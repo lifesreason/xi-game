@@ -1,4 +1,5 @@
-# Cloudflare Pages 自定义响应头
+# Cloudflare 自定义响应头（Pages 与 Workers Static Assets 均生效）
+# 注意：_headers 不会作用于 Worker 脚本自己生成的响应，只作用于静态资源。
 # Service Worker 必须不缓存，否则更新无法触达已访问过的用户
 /sw.js
   Cache-Control: no-cache, no-store, must-revalidate
@@ -10,11 +11,17 @@
 /manifest.webmanifest
   Cache-Control: no-cache
 
-# 静态资源可稍长缓存（内容变更时靠 sw.js 版本号兜底）
+# 静态资源：不强缓存，交给 ETag 协商缓存（Cloudflare 默认行为）
+# 浏览器每次带 If-None-Match 问一下：没变回 304（几乎零成本），变了立刻拿新文件。
+#
+# ⚠️ 这里原来写的是 max-age=86400（强缓存一天），是「改了代码、刷新还是旧版」的元凶：
+#    只要 URL 没变（index.html 里的 ?v= 忘了同步 bump），浏览器 24 小时内直接用本地旧副本，
+#    连 Service Worker 里的 fetch() 也会命中这个 HTTP 缓存，于是新 SW 照样把旧文件装进新缓存。
+#    —— 想再开强缓存，必须保证每次发布 ?v= 一起变（见 scripts/bump_version.py）。
 /css/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=0, must-revalidate
 /js/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=0, must-revalidate
 
 # 安全响应头
 /*
