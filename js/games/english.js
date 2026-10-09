@@ -8366,17 +8366,17 @@
         '<button type="button" class="pep-lsub-btn ' + (curTab === 'dialogue' ? 'active' : '') + '" data-lsub="dialogue">' +
           '<span class="plsb-icon">💬</span>' +
           '<span class="plsb-txt">课文情景对话</span>' +
-          '<span class="plsb-sub">Let\'s talk (' + les.dialogues.length + '轮)</span>' +
+          '<span class="plsb-sub"><span class="plsb-sub-en">Let\'s talk </span>(' + les.dialogues.length + '轮)</span>' +
         '</button>' +
         '<button type="button" class="pep-lsub-btn ' + (curTab === 'vocab' ? 'active' : '') + '" data-lsub="vocab">' +
           '<span class="plsb-icon">🔤</span>' +
           '<span class="plsb-txt">单元核心生词</span>' +
-          '<span class="plsb-sub">Let\'s learn (' + unitWords.length + '词)</span>' +
+          '<span class="plsb-sub"><span class="plsb-sub-en">Let\'s learn </span>(' + unitWords.length + '词)</span>' +
         '</button>' +
         '<button type="button" class="pep-lsub-btn ' + (curTab === 'chant' ? 'active' : '') + '" data-lsub="chant">' +
           '<span class="plsb-icon">🎵</span>' +
           '<span class="plsb-txt">趣味歌谣金句</span>' +
-          '<span class="plsb-sub">Chant & Grammar</span>' +
+          '<span class="plsb-sub"><span class="plsb-sub-en">Chant & </span>Grammar</span>' +
         '</button>' +
       '</div>';
 
@@ -8432,7 +8432,7 @@
         h += '</div>' +
           '<div class="pep-tab-footer-guide">' +
             '<span class="ptfg-tip">💡 课文对话读熟练了吗？点击下一步前往生词记忆：</span>' +
-            '<button type="button" class="btn primary small" id="btnGoVocabFromDlg">👉 前往学习本单元 ' + unitWords.length + ' 个核心生词 (Let\'s learn) ➔</button>' +
+            '<button type="button" class="btn primary small" id="btnGoVocabFromDlg">👉 前往生词记忆 (Let\'s learn · ' + unitWords.length + '词) ➔</button>' +
           '</div>' +
         '</div>';
 
@@ -8568,7 +8568,7 @@
 
         h += '<div class="pep-tab-footer-guide split">' +
             '<button type="button" class="btn ghost small" id="btnBackDlgFromVocab">← 返回课文情景对话</button>' +
-            '<button type="button" class="btn primary small" id="btnGoChantFromVocab">👉 去练趣味歌谣与金句 (Let\'s chant) ➔</button>' +
+            '<button type="button" class="btn primary small" id="btnGoChantFromVocab">👉 趣味歌谣与金句 (Let\'s chant) ➔</button>' +
           '</div>' +
         '</div>';
 
