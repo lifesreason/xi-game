@@ -362,7 +362,7 @@ xi-game/
 ├── index.html                   # 主程序单页入口 (HTML5 语义化结构)
 ├── name-cards.html              # 独立模块: 认名字班级大卡片
 ├── manifest.webmanifest         # PWA 桌面安装清单与主题色配置
-├── sw.js                        # Service Worker 离线强缓存引擎 (v58)
+├── sw.js                        # Service Worker 离线强缓存引擎 (v59)
 ├── _headers                     # 静态服务器缓存控制与安全响应头
 ├── css/
 │   └── style.css                # 全局样式库: 4大舞台样式、Fluid排版、3D动效

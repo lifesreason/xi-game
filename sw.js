@@ -2,7 +2,7 @@
    【更新策略】改代码时只需把 CACHE 版本号 +1：
    - 导航请求（页面本身）走网络优先：联网打开就是最新版，断网才回退缓存
    - 新 SW 装好后 skipWaiting + clients.claim，页面端检测到即自动保存进度并刷新 */
-var CACHE = 'kidboard-v58';
+var CACHE = 'kidboard-v59';
 var ASSETS = [
   './',
   './index.html',

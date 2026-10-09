@@ -641,6 +641,22 @@
       box.appendChild(d);
     });
 
+    /* 人教版英语专属设置：语速 */
+    var setEngRate = $('set-english-rate');
+    if (setEngRate) {
+      var curEngRate = Store.get('pep_rate_level', 'medium');
+      setEngRate.value = curEngRate;
+      setEngRate.onchange = function () {
+        var lvl = this.value;
+        Store.set('pep_rate_level', lvl);
+        if (currentId === 'english' && inst && inst.setSpeechRate) {
+          inst.setSpeechRate(lvl);
+        }
+        var labelMap = { slow: '慢速跟读', medium: '课本伴学', normal: '流利原速' };
+        toast('人教英语语速已设为「' + (labelMap[lvl] || lvl) + '」');
+      };
+    }
+
     var tips = $('tips-list');
     tips.innerHTML = '';
     GAMES.forEach(function (id) {
@@ -683,6 +699,38 @@
     var headWrap = el('div', 'drawer-game-info');
     headWrap.innerHTML = '<b>' + g.emoji + ' ' + g.name + '</b><span class="muted small">' + (g.desc || '') + '</span>';
     db.appendChild(headWrap);
+
+    /* 英语小游戏专属设置：朗读语速 */
+    if (currentId === 'english') {
+      var rateGroup = el('div', 'drawer-field');
+      rateGroup.innerHTML = '<label>英语朗读语速</label>';
+      var rateSelect = el('select', 'drawer-select');
+      var curRateLvl = Store.get('pep_rate_level', 'medium');
+      [
+        ['slow', '🐢 慢速跟读 (约75~85词/分)'],
+        ['medium', '📖 课本伴学 (约90~105词/分)'],
+        ['normal', '🐰 流利原速 (约125~135词/分)']
+      ].forEach(function (opt) {
+        var op = el('option', null, opt[1]);
+        op.value = opt[0];
+        if (opt[0] === curRateLvl) op.selected = true;
+        rateSelect.appendChild(op);
+      });
+      rateSelect.onchange = function () {
+        var lvl = this.value;
+        Store.set('pep_rate_level', lvl);
+        if (inst && inst.setSpeechRate) {
+          inst.setSpeechRate(lvl);
+        } else if (inst && inst.redraw) {
+          inst.redraw();
+        }
+        closeDrawer();
+        var labelMap = { slow: '慢速跟读', medium: '课本伴学', normal: '流利原速' };
+        toast('英语语速已设置为「' + (labelMap[lvl] || lvl) + '」');
+      };
+      rateGroup.appendChild(rateSelect);
+      db.appendChild(rateGroup);
+    }
 
     /* 棋类/对弈设置 */
     if (stageType === 'board' && !g.single) {

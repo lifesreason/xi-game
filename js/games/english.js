@@ -10045,6 +10045,13 @@
           render();
         }
       },
+      setSpeechRate: function (lvl) {
+        if (!lvl || !RATE_PROFILES[lvl]) return;
+        speechRateLevel = lvl;
+        speechRate = lvl;
+        if (typeof Store !== 'undefined' && Store.set) Store.set('pep_rate_level', lvl);
+        if (S) render();
+      },
       redraw: function () {
         if (S) render();
       },
