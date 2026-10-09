@@ -21,8 +21,8 @@ echo "==> [1/2] 收集部署文件到 $STAGING/ ..."
 rm -rf "$STAGING"
 mkdir -p "$STAGING"
 # 只发布运行所需的文件（.workbuddy、.shots 等一律不发布）
-cp index.html manifest.webmanifest sw.js _headers "$STAGING/"
-cp -r css js "$STAGING/"
+cp index.html name-cards.html manifest.webmanifest sw.js _headers "$STAGING/"
+cp -r css js audio "$STAGING/"
 
 echo "==> [2/2] 部署到 Cloudflare Pages (项目: $PROJECT) ..."
 npx wrangler pages deploy "$STAGING" --project-name "$PROJECT" --commit-dirty=true "$@"

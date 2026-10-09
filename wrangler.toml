@@ -1,0 +1,7 @@
+# Cloudflare 配置文件 (Cloudflare Workers & Pages)
+name = "kidboard"
+compatibility_date = "2024-09-23"
+
+# 静态资源目录配置 (Workers Static Assets)
+# 当在 Cloudflare Workers 控制台直接连接 Git 仓库或使用 wrangler deploy 时生效
+assets = { directory = "." }
