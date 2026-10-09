@@ -113,7 +113,7 @@
     _voicesLoaded = true;
 
     // 优选优先级：Edge Natural (Jenny, Aria), Google US English, Samantha, Ava, Alex, en-US / en-GB
-    var targets = ['jenny', 'aria', 'natural', 'google us english', 'samantha', 'ava', 'allison', 'alex', 'victoria', 'karen', 'daniel'];
+    var targets = ['jenny', 'aria', 'natural', 'google us english', 'google english', 'samantha', 'ava', 'allison', 'alex', 'victoria', 'karen', 'daniel', 'serena', 'zira', 'david'];
     for (var i = 0; i < targets.length; i++) {
       for (var j = 0; j < all.length; j++) {
         var v = all[j];
@@ -169,6 +169,51 @@
     }
   }
 
+  // 针对移动端 Web Speech API 对中文拼音/人名的发音优化：
+  // 许多手机 TTS（如 iOS Safari / 安卓 Chrome / 小爱 / 讯飞 / 华为语音）
+  // 在英文朗读模式遇到中式拼音人名（如 Wu, Binbin, BinBin, Jie, Qiqi, Duoduo）时，
+  // 因为不是原生英文词汇或由于大写/驼峰结构，会降级为一个一个字母拼读（如 W-U, B-I-N-B-I-N, J-I-E）。
+  // 此处将拼音人名转化为英语 TTS 引擎 100% 能够自然连读的拟音词串，同时在屏幕 UI 上保持纯正教材原貌。
+  function prepareSpeechText(text) {
+    if (!text) return '';
+    var s = String(text);
+
+    // 1. 拆分复合驼峰词（例如 Wu BinBin -> Wu Bin Bin, MingMing -> Ming Ming），避免移动端引擎识别为未知缩写而逐字母拼读
+    s = s.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+    // 2. 教材常见人名核心拟音映射表 (确保英语 TTS 发出纯正流畅的词汇级连读音)
+    // - Wu Binbin -> Woo Bin bin (Woo=/wuː/, Bin=/bɪn/，两个高频英语词，连贯读出“吴斌斌”)
+    s = s.replace(/\bWu\s+Bin\s*bin\b/gi, 'Woo Bin bin');
+    s = s.replace(/\bBin\s*bin\b/gi, 'Bin bin');
+    s = s.replace(/\bWu\b/g, 'Woo'); // 孤立的 Wu 姓氏读 Woo，防止被读成字母 W-U
+
+    // - Chen Jie -> Chen Jay (Jie 在英文无对应发音常被读成 J-I-E，Jay 还原标准教材课标磁带外教读音)
+    s = s.replace(/\bChen\s+Jie\b/gi, 'Chen Jay');
+    s = s.replace(/\bJie\b/g, 'Jay');
+
+    // - Zhang Peng -> Jang Peng (Zhang 常被英语引擎逐字母拼读为 Z-H-A-N-G)
+    s = s.replace(/\bZhang\s+Peng\b/gi, 'Jang Peng');
+
+    // - Duoduo -> Duo duo (duo 为现成英文单词，拆开后自然读出“多多”)
+    s = s.replace(/\bDuo\s*duo\b/gi, 'Duo duo');
+
+    // - Qiqi -> Chee chee (英文无 qi 单字，易被拼为 Q-I-Q-I，Chee chee 准确发出“琪琪”)
+    s = s.replace(/\bQi\s*qi\b/gi, 'Chee chee');
+
+    // 扩充全国小学常用教材人物（李明、韩梅梅等）
+    s = s.replace(/\bLi\s+Ming\b/gi, 'Lee Ming');
+    s = s.replace(/\bLi\s+Lei\b/gi, 'Lee Lay');
+    s = s.replace(/\bHan\s+Mei\s*mei\b/gi, 'Hahn May may');
+    s = s.replace(/\bMei\s*mei\b/gi, 'May may');
+    s = s.replace(/\bLing\s*ling\b/gi, 'Ling ling');
+    s = s.replace(/\bDa\s*ming\b/gi, 'Dah ming');
+    s = s.replace(/\bXiao\s*ming\b/gi, 'Xiao ming');
+    s = s.replace(/\bXiao\s*hua\b/gi, 'Xiao hua');
+    s = s.replace(/\bTian\s*tian\b/gi, 'Tian tian');
+
+    return s;
+  }
+
   // 纯正朗读英文单词 (带 Token 唯一有效锁，彻底杜绝发两次音与语速失控)
   function speakWord(text, customRate, onEnd) {
     if (!('speechSynthesis' in window) || !text) {
@@ -180,7 +225,7 @@
 
     try {
       var synth = window.speechSynthesis;
-      var cleanText = String(text).trim();
+      var cleanText = prepareSpeechText(String(text).trim());
       var u = new SpeechSynthesisUtterance(cleanText);
       u.lang = 'en-US';
       u.rate = getCalibratedRate(customRate);
