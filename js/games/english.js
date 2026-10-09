@@ -7194,22 +7194,19 @@
 
       var html = '<div class="pep-wrap">';
 
-      // 🌟 三大系统化核心主导航条 (大卡片式触控，杜绝小按钮拥挤)
+      // 🌟 三大核心主导航（紧凑单行 tab，触控热区 ≥48px）
       html += '<div class="pep-main-nav">' +
         '<button type="button" class="pep-main-tab ' + (S.mainMode === 'lesson' ? 'active' : '') + '" data-main="lesson">' +
           '<span class="pmt-icon">📖</span>' +
-          '<span class="pmt-title">课本同步课堂</span>' +
-          '<span class="pmt-sub">人教 3A 课文点读</span>' +
+          '<span class="pmt-title">课本同步</span>' +
         '</button>' +
         '<button type="button" class="pep-main-tab ' + (S.mainMode === 'phonics' ? 'active' : '') + '" data-main="phonics">' +
           '<span class="pmt-icon">🚂</span>' +
-          '<span class="pmt-title">自然拼读小火车</span>' +
-          '<span class="pmt-sub">碰头拼读 · 音素拆解</span>' +
+          '<span class="pmt-title">拼读训练</span>' +
         '</button>' +
         '<button type="button" class="pep-main-tab ' + (S.mainMode === 'practice' ? 'active' : '') + '" data-main="practice">' +
           '<span class="pmt-icon">🎯</span>' +
-          '<span class="pmt-title">闯关与抗遗忘</span>' +
-          '<span class="pmt-sub">听音辨音 · 昨日温故</span>' +
+          '<span class="pmt-title">闯关复习</span>' +
           (dueList.length > 0 ? '<span class="pmt-badge">' + dueList.length + '</span>' : '') +
         '</button>' +
       '</div>';
@@ -7217,13 +7214,13 @@
       // 针对自然拼读 / 闯关模式的次级工具分段条
       if (S.mainMode === 'phonics') {
         html += '<div class="pep-sub-nav">' +
-          '<button type="button" class="pep-sub-btn ' + (S.phonicsTab === 'train' ? 'active' : '') + '" data-sub="train">🚂 碰头拼读小火车 (词族公式推导)</button>' +
-          '<button type="button" class="pep-sub-btn ' + (S.phonicsTab === 'soundout' ? 'active' : '') + '" data-sub="soundout">🧩 单词音素拆读机 (逐音拆解自测)</button>' +
+          '<button type="button" class="pep-sub-btn ' + (S.phonicsTab === 'train' ? 'active' : '') + '" data-sub="train">🚂 拼读小火车</button>' +
+          '<button type="button" class="pep-sub-btn ' + (S.phonicsTab === 'soundout' ? 'active' : '') + '" data-sub="soundout">🧩 音素拆读</button>' +
         '</div>';
       } else if (S.mainMode === 'practice') {
         html += '<div class="pep-sub-nav">' +
-          '<button type="button" class="pep-sub-btn ' + (S.practiceTab === 'quiz' ? 'active' : '') + '" data-sub="quiz">🎮 听音辨音大闯关 (易混听力测验)</button>' +
-          '<button type="button" class="pep-sub-btn ' + (S.practiceTab === 'review' ? 'active' : '') + '" data-sub="review">🌅 昨日温故唤醒舱 (' + dueList.length + ' 词待温故)</button>' +
+          '<button type="button" class="pep-sub-btn ' + (S.practiceTab === 'quiz' ? 'active' : '') + '" data-sub="quiz">🎮 听音闯关</button>' +
+          '<button type="button" class="pep-sub-btn ' + (S.practiceTab === 'review' ? 'active' : '') + '" data-sub="review">🌅 温故 ' + dueList.length + ' 词</button>' +
         '</div>';
       }
 
@@ -8390,38 +8387,35 @@
       });
       h += '</div>';
 
-      // 2. 单元主题与目标信息看板 (整合跨端智能语速切换，节省纵向空间)
+      // 2. 单元主题与目标信息看板 (语速切换收为紧凑分段控件)
       h += '<div class="pep-lesson-header">' +
         '<div class="plh-top-row">' +
           '<span class="plh-badge">' + esc(les.book) + '</span>' +
-          '<div class="pep-rate-wrap">' +
-            '<span class="pep-rate-label">语速：</span>' +
-            '<button type="button" class="pep-rate-btn ' + (speechRateLevel === 'slow' ? 'active' : '') + '" data-rate="slow" id="btnRateSlow" title="适合初学跟读，逐音极清晰">🐢 慢速跟读</button>' +
-            '<button type="button" class="pep-rate-btn ' + (speechRateLevel === 'medium' ? 'active' : '') + '" data-rate="medium" id="btnRateMed" title="人教版课标磁带伴学标准节奏（推荐）">📖 课本伴学</button>' +
-            '<button type="button" class="pep-rate-btn ' + (speechRateLevel === 'normal' ? 'active' : '') + '" data-rate="normal" id="btnRateNorm" title="流利原速">🐰 流利原速</button>' +
+          '<div class="pep-rate-wrap" role="group" aria-label="朗读语速">' +
+            '<span class="pep-rate-label">语速</span>' +
+            '<button type="button" class="pep-rate-btn ' + (speechRateLevel === 'slow' ? 'active' : '') + '" data-rate="slow" id="btnRateSlow" title="慢速跟读 · 适合初学逐音跟读">🐢 慢</button>' +
+            '<button type="button" class="pep-rate-btn ' + (speechRateLevel === 'medium' ? 'active' : '') + '" data-rate="medium" id="btnRateMed" title="课本伴学 · 课标标准节奏（推荐）">📖 课</button>' +
+            '<button type="button" class="pep-rate-btn ' + (speechRateLevel === 'normal' ? 'active' : '') + '" data-rate="normal" id="btnRateNorm" title="流利原速">🐰 快</button>' +
           '</div>' +
         '</div>' +
         '<h2 class="plh-title">' + esc(les.title) + '</h2>' +
         '<p class="plh-sub">' + esc(les.sub) + '</p>' +
-        '<div class="plh-target">🎯 <b>课标核心教学目标：</b>' + esc(les.target) + '</div>' +
+        '<div class="plh-target"><b>本课目标：</b>' + esc(les.target) + '</div>' +
       '</div>';
 
-      // 3. 🌟 课本同步三大子模块选项卡 (分段控制器，解耦长页面平铺)
+      // 3. 课本同步三大子模块选项卡（单行紧凑分段）
       h += '<div class="pep-lesson-subnav">' +
         '<button type="button" class="pep-lsub-btn ' + (curTab === 'dialogue' ? 'active' : '') + '" data-lsub="dialogue">' +
           '<span class="plsb-icon">💬</span>' +
-          '<span class="plsb-txt">课文情景对话</span>' +
-          '<span class="plsb-sub"><span class="plsb-sub-en">Let\'s talk </span>(' + les.dialogues.length + '轮)</span>' +
+          '<span class="plsb-txt">课文对话</span>' +
         '</button>' +
         '<button type="button" class="pep-lsub-btn ' + (curTab === 'vocab' ? 'active' : '') + '" data-lsub="vocab">' +
           '<span class="plsb-icon">🔤</span>' +
-          '<span class="plsb-txt">单元核心生词</span>' +
-          '<span class="plsb-sub"><span class="plsb-sub-en">Let\'s learn </span>(' + unitWords.length + '词)</span>' +
+          '<span class="plsb-txt">生词卡</span>' +
         '</button>' +
         '<button type="button" class="pep-lsub-btn ' + (curTab === 'chant' ? 'active' : '') + '" data-lsub="chant">' +
           '<span class="plsb-icon">🎵</span>' +
-          '<span class="plsb-txt">趣味歌谣金句</span>' +
-          '<span class="plsb-sub"><span class="plsb-sub-en">Chant & </span>Grammar</span>' +
+          '<span class="plsb-txt">歌谣金句</span>' +
         '</button>' +
       '</div>';
 
@@ -8477,7 +8471,7 @@
         h += '</div>' +
           '<div class="pep-tab-footer-guide">' +
             '<span class="ptfg-tip">💡 课文对话读熟练了吗？点击下一步前往生词记忆：</span>' +
-            '<button type="button" class="btn primary small" id="btnGoVocabFromDlg">👉 前往生词记忆 (Let\'s learn · ' + unitWords.length + '词) ➔</button>' +
+            '<button type="button" class="btn primary small" id="btnGoVocabFromDlg">👉 去学生词 (' + unitWords.length + ' 词) ➔</button>' +
           '</div>' +
         '</div>';
 
@@ -8491,7 +8485,7 @@
 
         h += '<div class="pep-section-card">' +
           '<div class="psc-head">' +
-            '<div class="psc-title">🔤 <b>Let\'s learn · 单元核心生词库 (' + unitWords.length + ' 词)</b> <span class="badge">3D 翻转闪卡 · 100% 巧记+动作</span></div>' +
+            '<div class="psc-title">🔤 <b>Let\'s learn · 单元生词 (' + unitWords.length + ' 词)</b> <span class="badge">3D 翻转闪卡</span></div>' +
             '<div class="psc-actions">' +
               '<button type="button" class="btn small ' + (vocabMode === 'hero' ? 'primary' : 'ghost') + '" id="btnToggleCardMode">' +
                 (vocabMode === 'hero' ? '▦ 平铺网格模式' : '🃏 单卡沉浸学习') +
@@ -9189,7 +9183,7 @@
       // 拼读连线滑轨 (Blend Bar)
       h += '<div class="pep-blend-row">' +
         '<button type="button" class="btn primary pep-blend-btn" id="btnBlendSound">' +
-          '🚂 开动小火车 · 拼读连线 (Blend ➔ ' + esc(w.word) + '!)' +
+          '🚂 拼读连线 ➔ ' + esc(w.word) + '!' +
         '</button>' +
         '<button type="button" class="btn ghost pep-mask-btn" id="btnToggleMask">' +
           (S.hidden ? '👁️ 揭晓答案' : '🙈 遮挡自测') +
@@ -9235,10 +9229,10 @@
       var h = '<div class="pep-train-wrap">';
       h += '<div class="pep-train-header">' +
         '<div class="pth-left">' +
-          '<h3 class="pth-title">🚂 拼读公式小火车 · 碰头拼读</h3>' +
-          '<span class="pth-sub">核心法则：首辅音碰上词尾，推导一整串新单词！</span>' +
+          '<h3 class="pth-title">🚂 碰头拼读小火车</h3>' +
+          '<span class="pth-sub">首音碰词尾，拼出一串新单词！</span>' +
         '</div>' +
-        '<span class="pth-badge">' + WORD_FAMILIES.length + ' 核心词族 · ' + totalTrainWords + ' 词</span>' +
+        '<span class="pth-badge">' + WORD_FAMILIES.length + ' 词族 · ' + totalTrainWords + ' 词</span>' +
       '</div>';
 
       // 短元音分类筛选药丸栏 (全部 / a / e / i / o / u)
@@ -9467,22 +9461,22 @@
         '<div class="prsg-card gold">' +
           '<span class="prsg-icon">🥇</span>' +
           '<span class="prsg-val">' + totalGold + '</span>' +
-          '<span class="prsg-lbl">黄金掌握 (永久记忆)</span>' +
+          '<span class="prsg-lbl">黄金掌握</span>' +
         '</div>' +
         '<div class="prsg-card silver">' +
           '<span class="prsg-icon">🥈</span>' +
           '<span class="prsg-val">' + totalSilver + '</span>' +
-          '<span class="prsg-lbl">形成记忆 (已巩固2次)</span>' +
+          '<span class="prsg-lbl">巩固中</span>' +
         '</div>' +
         '<div class="prsg-card bronze">' +
           '<span class="prsg-icon">🥉</span>' +
           '<span class="prsg-val">' + totalBronze + '</span>' +
-          '<span class="prsg-lbl">初学稳固 (待复习)</span>' +
+          '<span class="prsg-lbl">学习中</span>' +
         '</div>' +
         '<div class="prsg-card flag">' +
           '<span class="prsg-icon">🚩</span>' +
           '<span class="prsg-val">' + totalFlag + '</span>' +
-          '<span class="prsg-lbl">易错攻坚生词</span>' +
+          '<span class="prsg-lbl">易错词</span>' +
         '</div>' +
       '</div>';
 
@@ -9490,10 +9484,10 @@
       if (dueList.length > 0) {
         h += '<div class="pep-section-card" style="margin-top:14px;">' +
           '<div class="psc-head">' +
-            '<div class="psc-title">🌅 <b>今日艾宾浩斯待温故单词 (' + dueList.length + ' 词)</b> <span class="badge" style="background:#fee2e2;color:#dc2626;">即将遗忘</span></div>' +
-            '<button type="button" class="btn primary small" id="btnRunReviewSeq">⚡ 开启今日闪电唤醒 (2分钟)</button>' +
+            '<div class="psc-title">🌅 <b>今日待温故 (' + dueList.length + ' 词)</b> <span class="badge" style="background:#fee2e2;color:#dc2626;">快忘了</span></div>' +
+            '<button type="button" class="btn primary small" id="btnRunReviewSeq">⚡ 开始复习 (2分钟)</button>' +
           '</div>' +
-          '<p class="muted" style="margin:0 0 10px;font-size:12.5px;">根据人类大脑遗忘曲线，在单词变模糊前温故一次，记忆持久度提升 300%！</p>' +
+          '<p class="muted" style="margin:0 0 10px;font-size:12.5px;">在快要忘记前再读一遍，记得更牢！</p>' +
           '<div class="pep-vocab-grid">';
         dueList.forEach(function (w, wIdx) {
           h += '<div class="pep-vocab-card" data-word="' + esc(w.word) + '">' +

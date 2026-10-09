@@ -13,7 +13,7 @@
       （./js/app.js），而页面引用的是带版本参数的 URL（js/app.js?v=v61）。
       两者不归一就永远匹配不上，预缓存形同虚设、断网会缺文件打不开。
       —— 归一后「离线可用」才真正有保障。 */
-var CACHE = 'kidboard-v64';
+var CACHE = 'kidboard-v65';
 var ASSETS = [
   './',
   './index.html',

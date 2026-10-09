@@ -2418,6 +2418,14 @@ body.standalone-active .main {
   box-sizing: border-box; padding-bottom: 24px;
 }
 
+/* 儿童触控热区基线：模块内所有按钮 ≥48px（儿童级人体工程学） */
+.pep-wrap button {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* 顶部温故唤醒醒目卡 */
 .pep-review-banner {
   display: flex; align-items: center; justify-content: space-between;
@@ -2432,27 +2440,28 @@ body.standalone-active .main {
 .prb-txt span { font-size: 12px; color: #b45309; }
 .prb-btn { flex-shrink: 0; white-space: nowrap; font-size: 13px; padding: 8px 14px; border-radius: 10px; }
 
-/* 🌟 三大核心主模式导航条 (📖 课本同步 / 🚂 自然拼读 / 🎯 闯关抗遗忘) */
+/* 🌟 三大核心主模式导航（紧凑单行 tab，触控热区 ≥48px） */
 .pep-main-nav {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 4px;
   background: var(--card);
-  padding: 6px;
-  border-radius: 20px;
+  padding: 5px;
+  border-radius: 16px;
   border: 2px solid var(--line);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 .pep-main-tab {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 12px 6px;
+  gap: 7px;
+  min-height: 48px;
+  padding: 0 8px;
   background: transparent;
   border: none;
-  border-radius: 14px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
@@ -2469,45 +2478,29 @@ body.standalone-active .main {
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
 }
 .pmt-icon {
-  font-size: 24px;
-  line-height: 1.1;
+  font-size: 18px;
+  line-height: 1;
 }
 .pmt-title {
   font-size: 14.5px;
   font-weight: 900;
   color: var(--ink);
-  line-height: 1.2;
+  line-height: 1;
+  white-space: nowrap;
 }
 .pep-main-tab.active .pmt-title {
   color: #ffffff;
 }
-.pmt-sub {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ink-2);
-  line-height: 1.2;
-}
-.pep-main-tab.active .pmt-sub {
-  color: rgba(255, 255, 255, 0.88);
-}
 .pmt-badge {
-  position: absolute;
-  top: 4px;
-  right: 8px;
   background: #ef4444;
   color: #fff;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 900;
-  padding: 2px 6px;
+  padding: 1px 7px;
   border-radius: 999px;
+  line-height: 1.6;
+  flex-shrink: 0;
   box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
-}
-
-@media (max-width: 520px) {
-  .pep-main-tab { padding: 9px 3px; gap: 2px; }
-  .pmt-icon { font-size: 20px; }
-  .pmt-title { font-size: 13px; }
-  .pmt-sub { display: none; }
 }
 
 /* 次级工具分段条 (Segmented Control) */
@@ -2521,11 +2514,15 @@ body.standalone-active .main {
 }
 .pep-sub-btn {
   flex: 1;
-  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 10px;
   background: transparent;
   border: none;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 800;
   color: var(--ink-2);
   cursor: pointer;
@@ -2542,9 +2539,6 @@ body.standalone-active .main {
   color: var(--primary-d, #1d4ed8);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
-@media (max-width: 480px) {
-  .pep-sub-btn { font-size: 11.5px; padding: 7px 4px; }
-}
 
 /* 单元与语速控制条 */
 .pep-bar {
@@ -2553,12 +2547,14 @@ body.standalone-active .main {
   padding: 0 4px;
 }
 .pep-bar-unit { color: var(--ink); font-weight: 800; }
-.pep-rate-wrap { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-.pep-rate-label { font-size: 11.5px; font-weight: 800; color: var(--ink-2); }
+.pep-rate-wrap { display: flex; align-items: center; gap: 4px; }
+.pep-rate-label { font-size: 12px; font-weight: 800; color: var(--ink-2); flex-shrink: 0; }
 .pep-rate-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 48px;
   background: var(--card); border: 1.5px solid var(--line);
-  color: var(--ink-2); border-radius: 999px; padding: 4px 8px;
-  font-size: 11px; font-weight: 800; cursor: pointer; white-space: nowrap;
+  color: var(--ink-2); border-radius: 999px; padding: 0 12px;
+  font-size: 12.5px; font-weight: 800; cursor: pointer; white-space: nowrap;
   transition: all 0.15s ease;
 }
 .pep-rate-btn:hover {
@@ -2935,33 +2931,19 @@ body.standalone-active .main {
     border-radius: 16px;
   }
   .plh-top-row {
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: nowrap;
     gap: 8px;
   }
   .plh-badge {
-    align-self: flex-start;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .plh-title {
     font-size: 16px;
   }
-  .pep-rate-wrap {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    flex-wrap: nowrap;
-  }
-  .pep-rate-label {
-    flex-shrink: 0;
-    font-size: 11px;
-  }
   .pep-rate-btn {
-    flex: 1;
-    text-align: center;
-    padding: 4px 2px;
-    font-size: 11px;
-    border-radius: 8px;
+    padding: 0 10px;
   }
 }
 
@@ -2978,11 +2960,12 @@ body.standalone-active .main {
 }
 .pep-lsub-btn {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: 10px 4px;
+  gap: 6px;
+  min-height: 48px;
+  padding: 0 6px;
   background: transparent;
   border: none;
   border-radius: 12px;
@@ -3001,57 +2984,31 @@ body.standalone-active .main {
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
 }
 .plsb-icon {
-  font-size: 20px;
+  font-size: 17px;
   line-height: 1;
+  flex-shrink: 0;
 }
 .plsb-txt {
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 900;
   color: var(--ink);
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .pep-lsub-btn.active .plsb-txt {
   color: #1d4ed8;
-}
-.plsb-sub {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ink-2);
-  line-height: 1.2;
-}
-.pep-lsub-btn.active .plsb-sub {
-  color: #2563eb;
 }
 @media (max-width: 520px) {
   .pep-lesson-subnav {
     gap: 4px;
     padding: 4px;
   }
-  .pep-lsub-btn {
-    padding: 7px 2px;
-  }
-  .plsb-icon {
-    font-size: 17px;
-  }
   .plsb-txt {
-    font-size: 11.5px;
+    font-size: 13px;
     letter-spacing: -0.2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
   }
-  .plsb-sub {
-    font-size: 9.5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    opacity: 0.85;
-  }
-}
-@media (max-width: 480px) {
-  .plsb-sub-en { display: none; }
 }
 
 /* 选项卡底部步骤引导卡 */
@@ -3134,11 +3091,15 @@ body.standalone-active .main {
 }
 .pep-unit-pill-btn {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
   background: var(--card);
   border: 1.5px solid var(--line);
   color: var(--ink);
   border-radius: 999px;
-  padding: 7px 14px;
+  padding: 0 14px;
   font-size: 12.5px;
   font-weight: 800;
   cursor: pointer;
@@ -3159,8 +3120,8 @@ body.standalone-active .main {
 }
 @media (max-width: 520px) {
   .pep-unit-pill-btn {
-    padding: 6px 11px;
-    font-size: 11.5px;
+    padding: 0 11px;
+    font-size: 12px;
   }
 }
 
@@ -3419,7 +3380,8 @@ body.standalone-active .main {
 .pdi-cn { font-size: 12.5px; color: var(--ink-2); margin-top: 2px; word-break: break-word; }
 .pdi-speak-btn {
   background: transparent; border: none; font-size: 18px;
-  cursor: pointer; padding: 4px; border-radius: 8px; flex-shrink: 0;
+  cursor: pointer; padding: 0; border-radius: 12px; flex-shrink: 0;
+  width: 48px; height: 48px;
   transition: transform 0.1s ease;
 }
 .pdi-speak-btn:active { transform: scale(0.85); }
@@ -3530,8 +3492,8 @@ body.standalone-active .main {
   position: absolute;
   right: 8px;
   bottom: 8px;
-  width: 36px;
-  height: 36px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.95);
   border: 1.5px solid rgba(59, 130, 246, 0.25);
@@ -3747,8 +3709,8 @@ body.standalone-active .main {
   border-radius: 16px;
 }
 .pep-hero-card .pvc-floating-speaker {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   font-size: 20px;
   right: 12px;
   bottom: 12px;
@@ -3963,8 +3925,16 @@ body.standalone-active .main {
   margin-top: 5px; padding-top: 5px; border-top: 1px dashed rgba(0,0,0,0.06);
 }
 .pvc-soundout-btn {
-  font-size: 11px !important; padding: 3px 8px !important; border-radius: 6px !important;
+  font-size: 12.5px !important; border-radius: 10px !important;
 }
+.pvc-speaker {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 1.5px solid var(--line); background: var(--card-2);
+  font-size: 18px; cursor: pointer; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.pvc-speaker:hover { background: var(--primary); color: #fff; }
 .pvc-pair-badge {
   font-size: 10px; font-weight: 800; color: #7c3aed; background: #f5f3ff;
   padding: 2px 6px; border-radius: 4px; border: 1px solid #ddd6fe;
