@@ -1,6 +1,6 @@
 /* 应用外壳：视图路由、对局控制、战绩、设置、离线缓存 */
 (function (global) {
-  var GAMES = ['gomoku', 'go', 'checkers', 'xiangqi', 'sudoku', 'slide', 'memory', 'game24', 'mathcamp', 'english', 'hanoi', 'lightsout', 'nonogram', 'mastermind', 'pattern', 'shadow', 'mole', 'catch', 'puzzle', 'diff', 'simon', 'slidepic', 'dragpuzzle', 'sokoban', 'pipes', 'mines', 'balance', 'xylo', 'paint'];
+  var GAMES = ['gomoku', 'go', 'checkers', 'xiangqi', 'sudoku', 'slide', 'memory', 'game24', 'mathcamp', 'english', 'hanoi', 'lightsout', 'nonogram', 'mastermind', 'pattern', 'shadow', 'mole', 'catch', 'puzzle', 'diff', 'simon', 'slidepic', 'dragpuzzle', 'sokoban', 'pipes', 'mines', 'balance', 'xylo', 'paint', 'writing'];
   /* 首页分类筛选：对弈 / 益智 / 数字 / 启蒙 */
   var CATS = [
     { key: 'all', label: '全部' },
@@ -247,7 +247,7 @@
     mole: 'arcade', catch: 'arcade', xylo: 'arcade', paint: 'arcade',
     diff: 'arcade', puzzle: 'arcade', slidepic: 'arcade', dragpuzzle: 'arcade',
     shadow: 'arcade', pattern: 'arcade', simon: 'arcade', memory: 'arcade',
-    english: 'story', mathcamp: 'story'
+    english: 'story', mathcamp: 'story', writing: 'story'
   };
 
   function applyStage(stageType, g, id) {

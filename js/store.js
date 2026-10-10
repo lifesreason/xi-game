@@ -38,6 +38,11 @@
     { id: 'balance_angel', name: '天平小法官', emoji: '⚖️', desc: '连续平衡 5 道天平题' },
     { id: 'music_star', name: '小小音乐家', emoji: '🎵', desc: '完整弹完一首儿歌' },
     { id: 'paint_master', name: '神笔小画家', emoji: '🎨', desc: '保存第一幅画作' },
+    { id: 'writing_doctor', name: '啄木鸟医生', emoji: '🐦', desc: '捉虫关判胜 3 轮' },
+    { id: 'writing_eye', name: '捉虫神眼', emoji: '🔍', desc: '清空错字本 1 次' },
+    { id: 'writing_alchemy', name: '炼金术士', emoji: '⚗️', desc: '收集 10 张词卡' },
+    { id: 'writing_master', name: '图鉴大师', emoji: '📖', desc: '收集 40 张词卡' },
+    { id: 'writing_police', name: '断句小交警', emoji: '🚦', desc: '标点关判胜 1 轮' },
     { id: 'win_10', name: '常胜小将军', emoji: '🏆', desc: '累计获胜达到 10 局' },
     { id: 'win_30', name: '棋坛小霸王', emoji: '🎖️', desc: '累计获胜达到 30 局' }
   ];
