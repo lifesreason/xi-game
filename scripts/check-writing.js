@@ -98,4 +98,45 @@ CJ.forEach(c => {
   } else errs.push(c.id + ' t非法');
 });
 
+/* ---------- ②c 五期对账：L2 听声断句 breaks / 标点小课堂 pclass（家长补题后必须重跑） ---------- */
+const BR = D.breaks || [], CLS = D.pclass || [], bids = {};
+console.log('数量: breaks', BR.length, 'pclass', CLS.length);
+const bt = { 1: 0, 2: 0, 3: 0 }, bu = {};
+BR.forEach(b => {
+  if (bids[b.id]) errs.push(b.id + ' break id重复'); bids[b.id] = 1;
+  if (![1, 2, 3].includes(b.t)) errs.push(b.id + ' t非法');
+  bt[b.t] = (bt[b.t] || 0) + 1; bu[b.u] = (bu[b.u] || 0) + 1;
+  if (b.parts.length !== b.marks.length) errs.push(b.id + ' 段数' + b.parts.length + '!=标点数' + b.marks.length);
+  b.parts.forEach((p, i) => {
+    if (!p) errs.push(b.id + ' 空段' + i);
+    if (/[，。？！、：；“”‘’]/.test(p)) errs.push(b.id + ' 段内含标点: ' + p);
+  });
+  b.marks.forEach((m, i) => {
+    const end = i === b.marks.length - 1;
+    if (end) { if ('。？！'.indexOf(m) < 0) errs.push(b.id + ' 句末非法:' + m); }
+    else if (b.t === 1) { if ('。？！'.indexOf(m) < 0) errs.push(b.id + ' t1 双句中间须是句末符:' + m); }
+    else { if ('，、'.indexOf(m) < 0) errs.push(b.id + ' 句中非法:' + m); }
+  });
+  if (b.t === 1 && b.marks.some(m => '，、'.indexOf(m) >= 0)) errs.push(b.id + ' t1 不应含句中标点');
+  if (b.t === 2 && b.marks.indexOf('、') >= 0) errs.push(b.id + ' t2 不应含顿号');
+  if (b.t === 3 && b.marks.indexOf('、') < 0) errs.push(b.id + ' t3 应含顿号');
+});
+console.log('breaks 按档:', JSON.stringify(bt), '| 按单元:', JSON.stringify(bu));
+const clids = {}, marksSeen = [];
+CLS.forEach(c => {
+  if (clids[c.id]) errs.push(c.id + ' pclass id重复'); clids[c.id] = 1;
+  marksSeen.push(c.mark);
+  if (!c.mark || !c.emoji || !c.name || !c.talk) errs.push(c.id + ' 角色字段缺失');
+  if (!Array.isArray(c.rhyme) || c.rhyme.length < 2) errs.push(c.id + ' 口诀缺失');
+  if (!Array.isArray(c.listens) || c.listens.length !== 5) errs.push(c.id + ' 听例应为5');
+  (c.listens || []).forEach((s, i) => { if (!s || !/[，。？！、]/.test(s)) errs.push(c.id + '听例' + i + ' 缺标点'); });
+  if (!Array.isArray(c.quiz) || c.quiz.length !== 4) errs.push(c.id + ' 小测应为4题');
+  (c.quiz || []).forEach((q, i) => {
+    if (!Array.isArray(q.opts) || q.opts.length !== 3) errs.push(c.id + 'q' + i + ' 选项须3个');
+    if (typeof q.a !== 'number' || q.a < 0 || q.a > 2) errs.push(c.id + 'q' + i + ' a非法');
+    if (!q.why) errs.push(c.id + 'q' + i + ' 缺why');
+  });
+});
+['。', '？', '！', '，', '、'].forEach(m => { if (marksSeen.indexOf(m) < 0) errs.push('小课堂缺角色: ' + m); });
+
 console.log('数据问题:', errs.length ? errs.join(' | ') : '无');

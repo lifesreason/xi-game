@@ -24,6 +24,7 @@
   var HIST4_KEY = 'writing.hist4';
   var SEEN_KEY = 'writing.seen';     /* {t1:[id],t2:[id],t3:[id],t4:[id]} 近期题面 */
   var COUNT_KEY = 'writing.counts';  /* 徽章计数 */
+  var PCLASS_KEY = 'writing.pclass'; /* 标点小课堂通关 { done: { pc1: true } } */
 
   /* 复习间隔（天），按星级递进 —— §14.2 螺旋 */
   var GAP = [1, 3, 7, 14];
@@ -198,6 +199,15 @@
       return { kind: c.t === 1 ? 'match' : c.t === 2 ? 'conjfill' : 'rethen', d: c, variant: 'conj' };
     });
   }
+  /* L2 听声断句：按档取题（t1 句末 / t2 换气 / t3 全面），与停车题共用 t2 seen 去重池 */
+  function pickBreaks(tier) {
+    var t = TIERS[tier].t;
+    var pool = (D.breaks || []).filter(function (b) { return b.t === t; });
+    var seen = getSeen()['t2'] || [];
+    var fresh = pool.filter(function (x) { return seen.indexOf(x.id) < 0; });
+    var out = shuffle(fresh).concat(shuffle(pool.filter(function (x) { return seen.indexOf(x.id) >= 0; }))).slice(0, ROUND2);
+    return out.map(function (b) { return { kind: 'break', d: b, variant: 'break' }; });
+  }
 
   /* ---------- 词卡发放 ---------- */
   function grantCard(word, from) {
@@ -215,6 +225,32 @@
 
   function mount(host, api) {
     var S = null, box = null, timer = null, nextT = null, tab = 'play';
+    var submode = 'park';      /* L2 子模式：park 标点停车 / break 听声断句 / class 小课堂 */
+    var classView = null;      /* 小课堂视图：null=列表，{id,qi} 讲义页 qi=-1 / 小测 0..3 */
+
+    /* ---------- 朗读小老师：Web Speech 中文语音，按标点长短停顿（标点教学的核心通道） ---------- */
+    var Read = {
+      busy: false,
+      seq: function (parts, marks) {
+        var ss = global.speechSynthesis;
+        if (!ss || !global.SpeechSynthesisUtterance) { api.toast('这台设备还不支持朗读，自己大声读出来也一样～'); return; }
+        ss.cancel();
+        function gap(m) { return m === '。' ? 540 : (m === '？' || m === '！') ? 480 : m === '、' ? 200 : 320; }
+        Read.busy = true;
+        var chain = Promise.resolve();
+        parts.forEach(function (seg, i) {
+          chain = chain.then(function () { return new Promise(function (res) {
+            var u = new SpeechSynthesisUtterance(seg + (marks ? marks[i] : ''));
+            u.lang = 'zh-CN'; u.rate = 0.85; u.pitch = 1.05;
+            u.onend = function () { setTimeout(res, marks ? gap(marks[i]) : 320); };
+            u.onerror = function () { res(); };
+            ss.speak(u);
+          }); });
+        });
+        chain.then(function () { Read.busy = false; });
+      },
+      stop: function () { if (global.speechSynthesis) global.speechSynthesis.cancel(); Read.busy = false; }
+    };
 
     function startTimer() {
       stopTimer();
@@ -234,7 +270,7 @@
         qs = review ? pickReview() : pickTypos(tier);
         if (!qs) { api.toast('错字本还空着，先练一轮吧！'); return; }
       } else if (lvl === 't2') {
-        qs = pickPuncts(tier);
+        qs = submode === 'break' ? pickBreaks(tier) : pickPuncts(tier);
         if (!qs || !qs.length) { api.toast('题库正在补充中'); return; }
       } else if (lvl === 't3') {
         qs = pickConjs(tier);
@@ -257,12 +293,14 @@
            filled/pb/tray=填空 rq/trans=改造进度 dragged=拖拽收尾标志 */
         pp: null, place: null, placeFor: '', sel: null, matched: null, matchFor: '',
         done: 0, rorder: null, filled: null, fillFor: '', tray: null, trayFor: '',
-        pb: 0, rq: 0, trans: null, rethenFor: '', dragged: false
+        pb: 0, rq: 0, trans: null, rethenFor: '', dragged: false,
+        /* 听声断句子状态：bflags={位置:符号或true} bpick=待选符号的缝 brkFor=题id bmarkSel=选中的符号车 */
+        submode: submode, bflags: null, bpick: null, brkFor: '', bmarkSel: null
       };
       S.qs.forEach(function (q) {
         if (q.kind === 'typo') markSeen('t1', q.d.id || (q.d.bug + q.d.fix));
         else if (q.kind === 'gold') markSeen('t4', q.d.id);
-        else if (q.kind === 'punct') markSeen('t2', q.d.id);
+        else if (q.kind === 'punct' || q.kind === 'break') markSeen('t2', q.d.id);
         else markSeen('t3', q.d.id);
       });
       tab = 'play';
@@ -287,6 +325,10 @@
         '  <div class="wr-mode"><span class="wr-mode-label"></span>' +
         '  　<button type="button" class="wr-link" data-act="switch"></button>' +
         '  　<button type="button" class="wr-link" data-act="new">换一组</button></div>' +
+        '  <div class="wr-sub" hidden>' +
+        '   <button type="button" data-pm="park">🚦 标点停车</button>' +
+        '   <button type="button" data-pm="break">👂 听声断句</button>' +
+        '   <button type="button" data-pm="class">📖 小课堂</button></div>' +
         '  <div class="wr-prog"></div>' +
         '  <div class="wr-question"></div>' +
         '  <div class="wr-opts"></div>' +
@@ -317,9 +359,13 @@
       /* 选项/文字点击用事件委托：render 只替换 .wr-opts/.wr-question 内部 */
       box.addEventListener('click', function (e) {
         if (S && S.dragged) { S.dragged = false; return; }   /* 拖拽收尾不当作点击 */
-        var t = e.target.closest('[data-opt],[data-ch],[data-card],[data-unit],[data-pcar],[data-slot],[data-pair],[data-bk],[data-cj],[data-robj],[data-next]');
+        var t = e.target.closest('[data-opt],[data-ch],[data-card],[data-unit],[data-pcar],[data-slot],[data-pair],[data-bk],[data-cj],[data-robj],[data-next],[data-br],[data-bm],[data-pm],[data-clk]');
         if (!t || !box.contains(t)) return;
         if (t.hasAttribute('data-next')) goNext();
+        else if (t.hasAttribute('data-pm')) setSubmode(t.getAttribute('data-pm'));
+        else if (t.hasAttribute('data-clk')) classAct(t.getAttribute('data-clk'), t);
+        else if (t.hasAttribute('data-br')) tapBreak(t);
+        else if (t.hasAttribute('data-bm')) tapBMark(t);
         else if (t.hasAttribute('data-opt')) pickOpt(t);
         else if (t.hasAttribute('data-ch')) pickChar(t);
         else if (t.hasAttribute('data-unit')) renderCards(t.getAttribute('data-unit'));
@@ -407,11 +453,32 @@
         prog += '<i class="' + (i < S.idx ? (S.marks[i] ? 'ok' : 'no') : i === S.idx ? 'cur' : '') + '"></i>';
       box.querySelector('.wr-prog').innerHTML = prog;
 
+      /* L2 子模式条：停车 / 听声断句 / 小课堂（仅标点关显示） */
+      var subbar = box.querySelector('.wr-sub');
+      var isPunctLevel = TIERS[S.tier].level === 't2';
+      subbar.hidden = !isPunctLevel;
+      if (isPunctLevel) {
+        Array.prototype.forEach.call(subbar.querySelectorAll('[data-pm]'), function (b) {
+          b.className = b.getAttribute('data-pm') === submode ? 'active' : '';
+        });
+      }
+
       var qEl = box.querySelector('.wr-question');
       var opts = box.querySelector('.wr-opts');
       var result = box.querySelector('.wr-result');
       var q = S.qs[S.idx];
       qEl.className = 'wr-question' + (S.flash ? ' ' + S.flash : '');
+
+      /* 小课堂：全屏讲义/小测，不属于回合，隐藏进度条与结算 */
+      if (classView) {
+        result.hidden = true; opts.hidden = true;
+        box.querySelector('.wr-prog').hidden = true;
+        box.querySelector('.wr-fb').hidden = true;
+        renderClass(qEl);
+        box.querySelector('.wr-hist').innerHTML = histHtml();
+        return;
+      }
+      box.querySelector('.wr-prog').hidden = false;
 
       if (inRound) {
         result.hidden = true; opts.hidden = false;
@@ -440,6 +507,7 @@
           if (q.kind === 'gold') renderGold(qEl, opts, q);
           else if (q.kind === 'abb') renderAbb(qEl, opts, q);
           else if (q.kind === 'punct') renderPunct(qEl, opts, q);
+          else if (q.kind === 'break') renderBreak(qEl, opts, q);
           else if (q.kind === 'match') renderMatch(qEl, opts, q);
           else if (q.kind === 'conjfill') renderConjFill(qEl, opts, q);
           else if (q.kind === 'rethen') renderRethen(qEl, opts, q);
@@ -511,6 +579,223 @@
         tray.map(function (m) {
           return '<button type="button" class="wr-p-car' + (S.pp === m ? ' sel' : '') + '" data-pcar="' + esc(m) + '">' + esc(m) + '</button>';
         }).join('') + '</div>';
+    }
+
+    /* ---------- L2 子模式切换：停车 / 听声断句 / 小课堂 ---------- */
+    function setSubmode(m) {
+      if (!S) return;
+      if (m === submode && m !== 'class') return;
+      Sfx.click();
+      Read.stop();
+      if (m === 'class') { submode = 'class'; classView = { id: null }; stopTimer(); render(); return; }
+      submode = m; classView = null;
+      newRound(S.tier, S.review);
+    }
+
+    /* ---------- L2 听声断句子：无标点长句，在字缝插小旗自己找停顿（痛点1专项） ---------- */
+    function breakPos(d) {
+      var pos = [], acc = 0;
+      d.parts.forEach(function (p) { acc += p.length; pos.push(acc); });
+      return pos;
+    }
+    function markWhy(seg, m) {
+      if (m === '。') return '一件事说完了，声音平平地落下来，用句号';
+      if (m === '？') return '在问问题、等着回答，声音扬起来，用问号';
+      if (m === '！') return '心里的感情特别强，要大声说出来，用感叹号';
+      if (m === '、') return '并列词语排排坐，中间停得最短，用顿号';
+      return '话说到一半要换口气，轻轻停一下，用逗号';
+    }
+    function breakFull(d) {
+      return d.parts.map(function (p, i) { return p + d.marks[i]; }).join('');
+    }
+    function renderBreak(qEl, opts, q) {
+      var d = q.d;
+      if (S.brkFor !== d.id) { S.brkFor = d.id; S.bflags = {}; S.bpick = null; S.bmarkSel = null; }
+      var tip = d.t === 1 ? '🚩 句子们挤在一起啦！在每句话【说完】的字缝里插一面小旗'
+        : d.t === 2 ? '👂 先点🔊听朗读——在哪里换气，就在哪里的字缝插小旗'
+        : '👂 听一听、读一读：找出所有该停的字缝，再给小旗选对标点';
+      var text = d.parts.join(''), html = '', at;
+      html += '<div class="wr-tip">' + tip + '</div>' +
+        '<div class="wr-btns"><button type="button" class="wr-say" data-clk="say">🔊 听我读一遍</button>' +
+        '<button type="button" class="btn primary" data-clk="gobreak">🚩 找齐啦，检查</button></div><div class="wr-para wr-bline">';
+      for (var i = 0; i < text.length; i++) {
+        html += '<span class="wr-bz">' + esc(text[i]) + '</span>';
+        at = i + 1;
+        var v = S.bflags[at];
+        html += '<button type="button" class="wr-br' + (v ? ' fill' : '') + (S.bpick === at ? ' sel' : '') + '" data-br="' + at + '">' +
+          (v === true ? '🚩' : v ? esc(v) : '　') + '</button>';
+      }
+      qEl.innerHTML = html + '</div>';
+      opts.innerHTML = d.t === 3
+        ? '<div class="wr-tip">先点字缝插旗，再点下面的标点安到旗上；点旗子可以取回重安</div><div class="wr-row wr-tray">' +
+          ['，', '。', '？', '！', '、'].map(function (m) {
+            return '<button type="button" class="wr-p-car' + (S.bmarkSel === m ? ' sel' : '') + '" data-bm="' + m + '">' + m + '</button>';
+          }).join('') + '</div>'
+        : '<div class="wr-tip small muted">点字和字中间的小缝就能插旗，再点一下小旗可以收回；拿不准就多听两遍朗读</div>';
+    }
+    function tapBreak(btn) {
+      var q = inPlay('break');
+      if (!q) return;
+      var at = Number(btn.getAttribute('data-br'));
+      if (S.bflags[at]) { delete S.bflags[at]; S.bpick = null; Sfx.click(); render(); return; }  /* 取回 */
+      if (q.d.t === 3) { S.bpick = at; Sfx.click(); render(); return; }                    /* t3 先选中缝再选符号 */
+      S.bflags[at] = true;                                                                 /* t1/t2 直接插旗 */
+      Sfx.pop();
+      render();
+    }
+    function tapBMark(btn) {
+      var q = inPlay('break');
+      if (!q || q.d.t !== 3) return;
+      if (!S.bpick) { api.toast('先点一个该停顿的字缝，再给它安标点～'); return; }
+      var m = btn.getAttribute('data-bm');
+      S.bflags[S.bpick] = m;
+      S.bpick = null; S.bmarkSel = m;
+      Sfx.pop();
+      render();
+    }
+    function checkBreak(q) {
+      var d = q.d, pos = breakPos(d), want = {};
+      pos.forEach(function (p, i) { want[p] = d.marks[i]; });
+      var bad = [], keys = Object.keys(S.bflags).map(Number);
+      keys.forEach(function (k) {
+        if (!want[k]) bad.push(k);                                              /* 多插了 */
+        else if (d.t === 3 && S.bflags[k] !== want[k]) bad.push(k);             /* t3 符号安错 */
+      });
+      pos.forEach(function (p) { if (!S.bflags[p]) bad.push(p); });             /* 漏掉了 */
+      if (!bad.length) {
+        Read.seq(d.parts, d.marks);                                            /* 全对：朗读正确读法 */
+        resolve(true, q, null);
+        return;
+      }
+      S.tried++;
+      var uniq = {}; bad.forEach(function (k) {
+        uniq[k] = 1;
+        if (S.bflags[k] && !want[k]) delete S.bflags[k];                        /* 多插的直接拔旗 */
+        else if (want[k] && d.t === 3 && S.bflags[k] !== want[k]) S.bflags[k] = true;  /* 符号错退回待选 */
+      });
+      if (S.tried >= 3) {
+        var why = d.parts.map(function (p, i) {
+          return '<div class="wr-why"><b>' + esc(p + d.marks[i]) + '</b> ' + esc(markWhy(p, d.marks[i])) + '</div>';
+        }).join('');
+        failQ('正确的断句是：<b>' + esc(breakFull(d)) + '</b>' + why);
+        return;
+      }
+      Sfx.lose();
+      if (global.Fx) global.Fx.vibrate(12);
+      render();
+      api.toast('🚩 有的小旗插错地方啦，再听一遍朗读找找感觉（还剩 ' + (3 - S.tried) + ' 次）');
+    }
+
+    /* ---------- 标点小课堂：5 课讲义 + 4 题小测，顺序解锁 ---------- */
+    function getPclass() { return global.Store.get(PCLASS_KEY, { done: {} }); }
+    function splitForRead(s) {
+      var parts = [], marks = [], buf = '';
+      for (var i = 0; i < s.length; i++) {
+        if ('，。？！、'.indexOf(s[i]) >= 0) { parts.push(buf); marks.push(s[i]); buf = ''; }
+        else buf += s[i];
+      }
+      if (buf) { parts.push(buf); marks.push('。'); }
+      return { parts: parts, marks: marks };
+    }
+    function renderClass(qEl) {
+      var pc = getPclass(), list = D.pclass || [];
+      if (!classView.id) {
+        qEl.innerHTML = '<div class="wr-tip">📖 先认识 5 个标点小伙伴，学会了再去停车、断句子！</div><div class="wr-cls-list">' +
+          list.map(function (c, i) {
+            var locked = i > 0 && !pc.done[list[i - 1].id];
+            var got = pc.done[c.id];
+            return '<button type="button" class="wr-cls-card' + (locked ? ' lock' : '') + (got ? ' done' : '') + '" data-clk="open.' + c.id + '">' +
+              '<span class="wr-cls-emoji">' + c.emoji + '</span><span class="wr-cls-mk">' + esc(c.mark) + '</span>' +
+              '<b>' + esc(c.name) + '</b><i>' + (locked ? '🔒 先完成上一课' : got ? '★ 已经学会啦' : '点我上课') + '</i></button>';
+          }).join('') + '</div>';
+        return;
+      }
+      var c = list.filter(function (x) { return x.id === classView.id; })[0];
+      if (!c) { classView = { id: null }; renderClass(qEl); return; }
+      if (classView.qi < 0) {
+        qEl.innerHTML =
+          '<div class="wr-cls-lesson"><button type="button" class="wr-link wr-cls-back" data-clk="list">← 返回课堂列表</button>' +
+          '<div class="wr-cls-hero"><span class="wr-cls-bigemoji">' + c.emoji + '</span><span class="wr-cls-bigmk">' + esc(c.mark) + '</span></div>' +
+          '<b class="wr-cls-name">' + esc(c.name) + '</b>' +
+          '<div class="wr-cls-rhyme">' + c.rhyme.map(function (r) { return '<div>' + esc(r) + '</div>'; }).join('') + '</div>' +
+          '<div class="wr-cls-talk">' + esc(c.talk) + '</div>' +
+          '<div class="wr-cls-sec">🔊 听老师读 5 个句子，注意' + esc(c.name) + '站岗的地方：</div>' +
+          '<div class="wr-cls-says">' + c.listens.map(function (s, i) {
+            return '<button type="button" class="wr-cls-say" data-clk="say.' + i + '"><span class="wr-say-ic">🔊</span>' + esc(s) + '</button>';
+          }).join('') + '</div>' +
+          '<div class="wr-row center"><button type="button" class="btn primary" data-clk="start">我学会啦，做 4 道小测 →</button></div></div>';
+        return;
+      }
+      var quiz = c.quiz[classView.qi], picked = classView.picked || {};
+      qEl.innerHTML =
+        '<div class="wr-cls-lesson"><button type="button" class="wr-link wr-cls-back" data-clk="list">← 先学到这里</button>' +
+        '<div class="wr-cls-qhead"><span class="wr-cls-qmk">' + esc(c.mark) + '</span>' + esc(c.name) + ' · 小测 ' + (classView.qi + 1) + '/4</div>' +
+        '<div class="wr-cls-q">' + esc(quiz.q) + '</div><div class="wr-col">' +
+        quiz.opts.map(function (o, i) {
+          var st = picked[i] === 'bad' ? ' miss' : picked[i] === 'good' ? ' hit' : '';
+          return '<button type="button" class="wr-opt' + st + '" data-clk="q.' + i + '">' + esc(o) + '</button>';
+        }).join('') + '</div>' +
+        (picked.why ? '<div class="wr-fix">' + esc(picked.why) + '</div>' : '') +
+        '</div>';
+    }
+    function classAct(act) {
+      var list = D.pclass || [], pc = getPclass();
+      if (act === 'list') { Read.stop(); classView = { id: null }; Sfx.click(); render(); return; }
+      if (act.indexOf('open.') === 0) {
+        var id = act.slice(5), c = list.filter(function (x) { return x.id === id; })[0];
+        if (!c) return;
+        var idx = list.indexOf(c);
+        if (idx > 0 && !pc.done[list[idx - 1].id]) { api.toast('🔒 先完成上一课，再来找它玩～'); return; }
+        Read.stop();
+        classView = { id: id, qi: -1, picked: {} };
+        Sfx.click(); render();
+        return;
+      }
+      if (!classView || !classView.id) return;
+      var cur = list.filter(function (x) { return x.id === classView.id; })[0];
+      if (!cur) return;
+      if (act === 'say') {
+        var q0 = S && S.qs[S.idx];
+        if (q0 && q0.kind === 'break') Read.seq(q0.d.parts, q0.d.marks);
+        return;
+      }
+      if (act === 'gobreak') {
+        var qb = S && S.qs[S.idx];
+        if (qb && qb.kind === 'break' && !S.lock && !S.fix && S.idx < S.qs.length) checkBreak(qb);
+        return;
+      }
+      if (act.indexOf('say.') === 0) {
+        var sr = splitForRead(cur.listens[Number(act.slice(4))]);
+        Read.seq(sr.parts, sr.marks);
+        return;
+      }
+      if (act === 'start') { classView.qi = 0; classView.picked = {}; Sfx.click(); render(); return; }
+      if (act.indexOf('q.') === 0) {
+        var qi = classView.qi, quiz = cur.quiz[qi], pick = Number(act.slice(2));
+        if (classView.picked.done) return;
+        if (pick === quiz.a) {
+          classView.picked[pick] = 'good';
+          classView.picked.done = true;
+          Sfx.pop();
+          render();
+          setTimeout(function () {
+            if (qi + 1 >= cur.quiz.length) {
+              var pc2 = getPclass();
+              pc2.done[cur.id] = true;
+              global.Store.set(PCLASS_KEY, pc2);
+              Read.stop();
+              classView = { id: null };
+              api.toast('🌟「' + cur.name + '」学会啦！' + (cur.id === 'pc5' ? '5 课全部毕业，快去断句大显身手吧！' : '下一课解锁咯～'));
+              render();
+            } else { classView.qi = qi + 1; classView.picked = {}; Sfx.click(); render(); }
+          }, 900);
+        } else {
+          classView.picked[pick] = 'bad';
+          classView.picked.why = quiz.why;
+          Sfx.lose();
+          render();
+        }
+      }
     }
 
     /* ---------- L3 玩法A 配对（PRD §6.4）：点左半句 → 点右半句，咔哒合体 ---------- */
@@ -667,7 +952,11 @@
       S.tried++;
       bad.forEach(function (i) { S.place[i] = null; });
       if (S.tried >= 3) {
-        failQ('正确停站：' + esc(q.d.segs.map(function (s, i2) { return s + q.d.marks[i2]; }).join('')));
+        var fullS = q.d.segs.map(function (s, i2) { return s + q.d.marks[i2]; }).join('');
+        var pwhy = q.d.segs.map(function (sg, i2) {
+          return '<div class="wr-why"><b>' + esc(sg + q.d.marks[i2]) + '</b> ' + esc(markWhy(sg, q.d.marks[i2])) + '</div>';
+        }).join('');
+        failQ('正确停站：<b>' + esc(fullS) + '</b>' + pwhy);
         return;
       }
       Sfx.lose();
@@ -846,6 +1135,7 @@
         else if (q.kind === 'gold' && goldOpt) cheer = esc(goldOpt[0]) + '！' + esc(goldOpt[2]);
         else if (q.kind === 'abb') cheer = '「' + esc(q.d.ans) + '」，句子亮起来啦！';
         else if (q.kind === 'punct') cheer = '滴滴——标点全对，句子开走啦！🚦';
+        else if (q.kind === 'break') cheer = '🚩 断句全对！听一听，句子这样读才好听～';
         else if (q.kind === 'match') cheer = '咔哒！全部配对成功！🔗';
         else if (q.kind === 'conjfill') cheer = '关联词各就各位，句子通顺啦！';
         else if (q.kind === 'rethen') cheer = '「然后」怪兽改造完毕，段落大变身！';
@@ -902,6 +1192,7 @@
       else if (q.kind === 'gold') kp = q.d.w;
       else if (q.kind === 'abb') kp = q.d.full || q.d.ans;
       else if (q.kind === 'punct') kp = ['标点·句末', '标点·切分', '标点·顿号'][Math.max(0, (TIERS[S.tier].t || 1) - 1)];
+      else if (q.kind === 'break') kp = ['标点·句末', '标点·换气', '标点·顿号'][Math.max(0, (q.d.t || 1) - 1)];
       else kp = q.d.kp || '';   /* match/conjfill/rethen 用题包 kp */
       if (!kp) return;
       var m = getKp();
@@ -1051,11 +1342,14 @@
       restart: function (o) {
         var tier = String(o && o.side) || (S ? S.tier : '1');
         if (!TIERS[tier]) tier = '1';
+        submode = 'park'; classView = null; Read.stop();
         newRound(tier, false);
       },
       restore: function (data) {
         try {
           if (!data || !TIERS[String(data.tier)] || !data.qs || !data.qs.length) return false;
+          submode = data.submode === 'break' ? 'break' : 'park';   /* 课堂不持久化，回练习模式 */
+          classView = null; Read.stop();
           S = {
             tier: String(data.tier), tierLabel: TIERS[String(data.tier)].label,
             level: data.level || TIERS[String(data.tier)].level, review: !!data.review,
@@ -1071,7 +1365,10 @@
             filled: data.filled || null, fillFor: data.fillFor || '',
             tray: data.tray || null, trayFor: data.trayFor || '',
             pb: data.pb || 0, rq: data.rq || 0, trans: data.trans || null, rethenFor: data.rethenFor || '',
-            dragged: false
+            dragged: false,
+            submode: submode,
+            bflags: data.bflags || null, bpick: data.bpick || null,
+            brkFor: data.brkFor || '', bmarkSel: data.bmarkSel || null
           };
           build();
           if (S.over) { update(); return true; }
@@ -1089,6 +1386,8 @@
           matched: S.matched, matchFor: S.matchFor, done: S.done, rorder: S.rorder,
           filled: S.filled, fillFor: S.fillFor, tray: S.tray, trayFor: S.trayFor,
           pb: S.pb, rq: S.rq, trans: S.trans, rethenFor: S.rethenFor,
+          bflags: S.bflags, bpick: S.bpick, brkFor: S.brkFor, bmarkSel: S.bmarkSel,
+          submode: submode,
           fix: S.fix || null,
           sec: S.over ? S.sec : Math.floor((Date.now() - S.t0) / 1000),
           over: S.over, ts: Date.now()
@@ -1101,13 +1400,14 @@
         else if (q.kind === 'clean') api.toast('💡 逐字读一读，每个字都讲得通吗？');
         else if (q.kind === 'abb') api.toast('💡 想想完整叠词怎么念：' + q.d.full);
         else if (q.kind === 'punct') api.toast('💡 读出语气：问事情用「？」，真惊讶用「！」，平常说完用「。」；句中停顿用「，」，并列词之间用「、」');
+        else if (q.kind === 'break') api.toast('💡 先点喇叭听朗读，记住：句末听语气（。？！），换气停逗号，并列词语排排坐停顿号');
         else if (q.kind === 'match') api.toast('💡 先读前半句，想想后半句说什么才连得上');
         else if (q.kind === 'conjfill') api.toast('💡 把词放进空里读一读，通顺的那个就对');
         else if (q.kind === 'rethen') api.toast('💡 「然后」太多啦——接着、最后、过了一会儿都能替它，有些直接删掉更顺');
         else api.toast('💡 选画面感最强、最具体的那个词');
       },
       redraw: function () { if (S) render(); },
-      destroy: function () { stopTimer(); clearTimeout(nextT); }
+      destroy: function () { stopTimer(); clearTimeout(nextT); Read.stop(); }
     };
   }
 
@@ -1117,10 +1417,10 @@
     cat: 'brain',
     emoji: '✏️',
     name: '写作乐园',
-    desc: '捉错字虫 · 断句子 · 接句子 · 炼金升级词！四关小练习 + 错字本重练 + 词卡图鉴，每天几分钟把句子写得又对又美。',
-    tags: ['错别字', '标点', '连词', '词语升级', '错字本', '图鉴收集'],
-    rules: '① 捉虫关：点出句子里的错字虫，没有虫就点「这句没虫」，错 3 次自动亮答案；② 炼金关：把平淡的词换成最有画面感的升级词；③ 标点关：把标点小汽车拖进句子空位，全对句子就开走；④ 连词关：半句配对、关联词填空、改造「然后」口水话；⑤ 捉虫/炼金正确率 ≥80% 判胜，标点/连词全对即胜，判胜随机解锁一张词卡；⑥ 答错的虫子自动收进错字本，重练答对 2 次就放走它。',
-    guide: '① 捉虫先读整句，找「讲不通」的字，再看偏旁：玩耍用「玩」，做完才用「完」；② 断句读语气：问事情用「？」，真惊讶用「！」，一般说完用「。」，句中停一停用「，」，并列词之间用「、」；③ 连词给句子牵手：同时做用「一边…一边」，讲原因结果用「因为…所以」，「然后」一段最多用一次，其余换成「接着」「最后」；④ 炼金时闭眼想画面——「金灿灿的稻田」比「黄色的稻田」亮；⑤ 每天一轮，错字本清零最有成就感。',
+    desc: '捉错字虫 · 听朗读断句子 · 接句子 · 炼金升级词！四关小练习 + 标点小课堂 + 错字本重练 + 词卡图鉴，每天几分钟把句子写得又对又美。',
+    tags: ['错别字', '标点', '断句', '连词', '词语升级', '错字本', '图鉴收集'],
+    rules: '① 捉虫关：点出句子里的错字虫，没有虫就点「这句没虫」，错 3 次自动亮答案；② 炼金关：把平淡的词换成最有画面感的升级词；③ 标点关：先上「标点小课堂」认识句号、问号、感叹号、逗号、顿号 5 个小伙伴，再玩「听声断句」（听朗读找换气，在字缝插小旗）和「标点停车」（把标点小汽车拖进空位），全对即胜；④ 连词关：半句配对、关联词填空、改造「然后」口水话；⑤ 捉虫/炼金正确率 ≥80% 判胜，标点/连词全对即胜，判胜随机解锁一张词卡；⑥ 答错的虫子自动收进错字本，重练答对 2 次就放走它。',
+    guide: '① 捉虫先读整句，找「讲不通」的字，再看偏旁：玩耍用「玩」，做完才用「完」；② 断句先听朗读：一句话说完声音落下用「。」，问问题声音扬起用「？」，心里激动喊出来用「！」，换气轻轻停用「，」，并列词语排队用「、」；③ 连词给句子牵手：同时做用「一边…一边」，讲原因结果用「因为…所以」，「然后」一段最多用一次，其余换成「接着」「最后」；④ 炼金时闭眼想画面——「金灿灿的稻田」比「黄色的稻田」亮；⑤ 每天一轮，错字本清零最有成就感。',
     tip: '错字是写作文的小虫子——当天捉、当天放，下次作文里它就不敢来了。',
     single: true,
     noLevel: true,
